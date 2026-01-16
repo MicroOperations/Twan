@@ -83,7 +83,7 @@ void vinfo_root_info(struct vregs *vregs)
             vcpuid_root_info0_d_t root_info0_d = {
                 .fields = {
                     .physical_nmis_disabled = 1,
-                    .route_nmis_as_external = 1
+                    .route_nmis_as_normal = 1
                 }
             };
             

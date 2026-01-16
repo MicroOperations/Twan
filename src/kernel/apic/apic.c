@@ -157,9 +157,11 @@ int __ioapic_config_irq(bool mask, u32 dest, u32 irq, u8 vector,
     if (ret < 0)
         return ret;
 
+    bool normal = this_cpu_data()->flags.fields.nmis_as_normal != 0;
+
     ioapic_redirection_entry_low_t entry_low = {
         .fields = {
-            .delivery_mode = vector == NMI ? DM_NMI : DM_NORMAL,
+            .delivery_mode = vector == NMI && !normal ? DM_NMI : DM_NORMAL,
             .destination_mode = IOAPIC_DEST_MODE_PHYSICAL,
             .interrupt_mask = mask,
             .polarity = line.active_low,

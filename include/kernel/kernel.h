@@ -41,7 +41,8 @@ typedef union
         u64 bsp : 1;
         u64 sched_init : 1;
         u64 vmx : 1;
-        u64 reserved0 : 26;
+        u64 nmis_as_normal : 1;
+        u64 reserved0 : 25;
         u64 mxcsr_mask : 32;
     } fields;
 } cpu_flags_t;

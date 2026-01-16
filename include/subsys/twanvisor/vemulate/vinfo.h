@@ -128,7 +128,7 @@ typedef union
     struct 
     {
         u32 physical_nmis_disabled : 1;
-        u32 route_nmis_as_external : 1;
+        u32 route_nmis_as_normal : 1;
         u32 reserved0 : 30;
     } fields;
 } vcpuid_root_info0_d_t;
