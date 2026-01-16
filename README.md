@@ -42,9 +42,10 @@ Twan is **not currently ARINC 653 or SKPP compliant** out of the box. Certificat
 - [Composite](https://github.com/gwsystems/composite)
 - [Nova](https://github.com/udosteinberg/NOVA)
 - [Xen](https://github.com/xen-project/xen)
+- [POK](https://github.com/pok-kernel/pok)
 - [XtratuM](https://www.fentiss.com/xtratum/)
 - [Deos](https://isss-tvc.org/200122_Gilliland_Deos_RTOS.pdf)
-- [EURO-MILS](https://euromils-project.technikon.com/downloads/2014-EURO-MILS-MILS-Architecture-white-paper.pdf)
+- [EURO-MILS MILS Architecture Whitepaper](https://euromils-project.technikon.com/downloads/2014-EURO-MILS-MILS-Architecture-white-paper.pdf)
 - [Seperation Kernel Protection Profile](https://www.commoncriteriaportal.org/files/ppfiles/pp_skpp_hr_v1.03.pdf)
 
 ## License
