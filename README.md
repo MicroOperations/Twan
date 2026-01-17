@@ -33,6 +33,7 @@ Twan is **not currently ARINC 653 or SKPP compliant** out of the box. Certificat
 ## Acknowledgements
 
 - [uACPI](https://github.com/uACPI/uACPI)
+- [nanoprintf](https://github.com/charlesnicholson/nanoprintf)
 - [Concurrency Kit](https://github.com/concurrencykit/ck)
 
 ## References 
