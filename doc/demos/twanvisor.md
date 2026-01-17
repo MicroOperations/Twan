@@ -6,8 +6,11 @@ vim .config
 ```
 
 change:
+
 ```# CONFIG_DEMO_PV_TWANVISOR is not set``` 
+
 to:
+
 ```CONFIG_DEMO_PV_TWANVISOR=y```
 
 ```

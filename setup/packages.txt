@@ -7,3 +7,4 @@ python3-kconfiglib
 xorriso
 grub-common
 mtools
+vim

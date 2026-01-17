@@ -77,11 +77,11 @@ $(ISO_NAME): $(KERNEL_ELF) $(GRUB_DIR)/grub.cfg
 # utilities
 
 qemu: $(AUTOCONF_H) $(ISO_NAME)
-	qemu-system-x86_64 -cdrom $(ISO_NAME) -serial stdio -m 512M -smp 3
+	qemu-system-x86_64 -cdrom $(ISO_NAME) -serial stdio -m 512M -smp 4
 	
 kvm: $(AUTOCONF_H) $(ISO_NAME)
 	sudo qemu-system-x86_64 -enable-kvm -cpu host \
-		-cdrom $(ISO_NAME) -serial stdio -m 512M -smp 3
+		-cdrom $(ISO_NAME) -serial stdio -m 512M -smp 4
 
 # cleanup
 
