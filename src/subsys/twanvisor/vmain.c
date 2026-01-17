@@ -317,12 +317,10 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
         if (caps.fields.pbopt_supported != 0)
             __wrmsrl(IA32_PBOPT_CTRL, 1);
 
-        vthis_cpu->sec_flags.fields.virtual_enum = 1;
-
         vthis_cpu->vcache.trap_cache.fields.ia32_arch_capabilities_r = 1;
-        vthis_cpu->vcache.trap_cache.fields.ia32_virtual_enumeration_r = 1;
-        vthis_cpu->vcache.trap_cache.fields.ia32_virtual_mitigation_enum_r = 1;
-        vthis_cpu->vcache.trap_cache.fields.ia32_virtual_mitigation_ctrl_rw = 1;
+        
+        vthis_cpu->vcache.trap_cache.fields.xapic_disable_status =
+            caps.fields.xapic_disable_status;
     }
 
     if (mcu_opt_ctrl.val != 0)

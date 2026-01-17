@@ -14,15 +14,6 @@ void vsetup_traps(struct vper_cpu *vthis_cpu, struct vcpu *vcpu)
     if (trap_cache.fields.ia32_arch_capabilities_r != 0)
         trap_msr_read(vcpu, IA32_ARCH_CAPABILITIES);
 
-    if (trap_cache.fields.ia32_virtual_enumeration_r != 0)
-        trap_msr_read(vcpu, IA32_VIRTUAL_ENUMERATION);
-
-    if (trap_cache.fields.ia32_virtual_mitigation_enum_r != 0)
-        trap_msr_read(vcpu, IA32_VIRTUAL_MITIGATION_ENUM);
-
-    if (trap_cache.fields.ia32_virtual_mitigation_ctrl_rw != 0)
-        trap_msr(vcpu, IA32_VIRTUAL_MITIGATION_CTRL);
-
     if (trap_cache.fields.ia32_feature_control_rw != 0)
         trap_msr(vcpu, IA32_FEATURE_CONTROL);
 
@@ -62,6 +53,9 @@ void vsetup_traps(struct vper_cpu *vthis_cpu, struct vcpu *vcpu)
 
     if (trap_cache.fields.waitpkg != 0)
         trap_msr(vcpu, IA32_UMWAIT_CONTROL);
+
+    if (trap_cache.fields.xapic_disable_status != 0)
+        trap_msr(vcpu, IA32_XAPIC_DISABLE_STATUS);
 
     trap_msr(vcpu, IA32_VMX_BASIC);
     trap_msr(vcpu, IA32_VMX_PINBASED_CTLS);

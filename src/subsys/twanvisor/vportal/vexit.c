@@ -45,6 +45,9 @@ static u32 msr_blocklist[] = {
     /* disallowing umonitor/umwait */
     IA32_UMWAIT_CONTROL,
 
+    /* not emulating an apic (guests should use our vintc) */
+    IA32_XAPIC_DISABLE_STATUS,
+
     /* hide vmx msr's since we currently dont support nested virt */
     IA32_VMX_BASIC,
     IA32_VMX_PINBASED_CTLS,
@@ -196,6 +199,7 @@ static void vexit_cpuid(struct vregs *vregs)
             feature_bits_c.fields.smx = 0;
             feature_bits_c.fields.xsave = 0;
             feature_bits_c.fields.osxsave = 0;
+            feature_bits_c.fields.x2apic = 0;
             feature_bits_c.fields.hypervisor = 1;
 
             ebx = feature_bits_b.val;
@@ -398,6 +402,8 @@ static void vexit_rdmsr(struct vregs *vregs)
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
     bool is_root = vcurrent_vcpu()->root;
 
+    struct vper_cpu_cache *vcache = &vthis_cpu->vcache;
+
     switch (msr) {
 
         case IA32_ARCH_CAPABILITIES:
@@ -406,7 +412,9 @@ static void vexit_rdmsr(struct vregs *vregs)
                 .val = __rdmsrl(IA32_ARCH_CAPABILITIES)
             };
 
+            arch_cap.fields.xapic_disable_status = 0;
             arch_cap.fields.its_no = vthis_cpu->sec_flags.fields.its_no;
+            arch_cap.fields.msr_virtual_enumeration_supported = 1;
 
             vregs->regs.rax = arch_cap.val & 0xffffffff;
             vregs->regs.rdx = arch_cap.val >> 32;
@@ -414,11 +422,21 @@ static void vexit_rdmsr(struct vregs *vregs)
 
         case IA32_VIRTUAL_ENUMERATION:
 
+            if (vcache->trap_cache.fields.ia32_arch_capabilities_r == 0) {
+                queue_inject_gp0();
+                return;
+            }
+
             vregs->regs.rax = 1;
             vregs->regs.rdx = 0;
             break;
 
         case IA32_VIRTUAL_MITIGATION_ENUM:
+
+            if (vcache->trap_cache.fields.ia32_arch_capabilities_r == 0) {
+                queue_inject_gp0();
+                return;
+            }
 
             vregs->regs.rax = 0;
             vregs->regs.rdx = 0;
@@ -426,14 +444,19 @@ static void vexit_rdmsr(struct vregs *vregs)
 
         case IA32_VIRTUAL_MITIGATION_CTRL:
 
+            if (vcache->trap_cache.fields.ia32_arch_capabilities_r == 0) {
+                queue_inject_gp0();
+                return;
+            }
+
             vregs->regs.rax = 0;
             vregs->regs.rdx = 0;
             break;
 
         case IA32_FEATURE_CONTROL:
 
-            vregs->regs.rax = vthis_cpu->vcache.via32_feature_ctrl_low;
-            vregs->regs.rdx = vthis_cpu->vcache.via32_feature_ctrl_high;
+            vregs->regs.rax = vcache->via32_feature_ctrl_low;
+            vregs->regs.rdx = vcache->via32_feature_ctrl_high;
             break;
 
         default:
@@ -470,6 +493,7 @@ static void vexit_wrmsr(struct vregs *vregs)
     u32 edx = vregs->regs.rdx & 0xffffffff;
 
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
+    struct vper_cpu_cache *vcache = &vthis_cpu->vcache;
 
     bool is_root = vcurrent_vcpu()->root;
     
@@ -477,7 +501,9 @@ static void vexit_wrmsr(struct vregs *vregs)
 
         case IA32_VIRTUAL_MITIGATION_CTRL:
 
-            if (eax != 0 || edx != 0) {
+            if (vcache->trap_cache.fields.ia32_arch_capabilities_r == 0 || 
+                eax != 0 || edx != 0) {
+
                 queue_inject_gp0();
                 return;
             }
@@ -486,8 +512,8 @@ static void vexit_wrmsr(struct vregs *vregs)
 
         case IA32_FEATURE_CONTROL:
 
-            if (eax != vthis_cpu->vcache.via32_feature_ctrl_low || 
-                edx != vthis_cpu->vcache.via32_feature_ctrl_high) {
+            if (eax != vcache->via32_feature_ctrl_low || 
+                edx != vcache->via32_feature_ctrl_high) {
 
                 queue_inject_gp0();
                 return;
