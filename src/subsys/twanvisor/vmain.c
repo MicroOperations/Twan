@@ -1011,7 +1011,10 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
 
     /* reconfiguring here is kinda dirty, if vmlaunch fails, then any interrupts
        set to fire from the reconfigured lvt entries will stay pending in the 
-       irr rather than fire straight away as nmi's */
+       irr rather than fire straight away as nmi's 
+       
+       - this is fine aslong as we are not routing any nmi's before twanvisor
+         initializes, which we should not be doing anyway */
     lapic_reconfig(vthis_cpu);
 
     if (!__vmlaunch()) {

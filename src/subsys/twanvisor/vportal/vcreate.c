@@ -1,3 +1,4 @@
+#include "include/lib/x86_index.h"
 #include <include/subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
@@ -479,17 +480,28 @@ void vcpu_entry(void)
     __vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, default_ar_tr.val);
     __vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, default_ar_ldtr.val);
 
+    /* architectural state */
+
+    rflags_t rflags = {
+        .fields = {
+            .reserved0 = 1,
+            ._if = 1
+        }  
+    };
+
     __vmwrite(VMCS_GUEST_RIP, current->vlaunch.rip);
-    __vmwrite(VMCS_GUEST_RFLAGS, 2);
+    __vmwrite(VMCS_GUEST_RFLAGS, rflags.val);
 
-    __vmwrite(VMCS_GUEST_ACTIVITY_STATE, active);
-    __vmwrite(VMCS_GUEST_VMCS_LINK_POINTER, ~0ULL);
-
-    /* bitmaps */
+    /* access control bitmaps */
 
     __vmwrite(VMCS_CTRL_IO_BITMAP_A, current->arch.io_bitmap_a_phys);
     __vmwrite(VMCS_CTRL_IO_BITMAP_B, current->arch.io_bitmap_b_phys);
     __vmwrite(VMCS_CTRL_MSR_BITMAPS, current->arch.msr_bitmap_phys);
+
+    /* misc */
+
+    __vmwrite(VMCS_GUEST_ACTIVITY_STATE, active);
+    __vmwrite(VMCS_GUEST_VMCS_LINK_POINTER, ~0ULL);
 
     /* epts */
 
