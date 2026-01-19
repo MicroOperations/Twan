@@ -24,7 +24,7 @@ int vcpu_precheck(struct vcpu *vcpu)
     struct vper_cpu *vtarget_cpu = vper_cpu_data(vprocessor_id);
     vper_cpu_arch_support_t support = vtarget_cpu->arch_flags.support;
 
-    if (support.fields.unrestricted_guest == 0)
+    if (support.fields.unrestricted_guest == 0 || support.fields.ept == 0)
         return -EOPNOTSUPP;
 
     if (vcpu->vpid.fields.enabled != 0) {
@@ -334,7 +334,7 @@ void vcpu_entry(void)
                 .conceal_vmx_from_pt = 1,
 
                 .enable_vpid = vpid.fields.enabled,
-                .wbinvd_exiting = support.fields.wbinvd_exiting, 
+                .wbinvd_exiting = 1, 
                 .enable_ept = 1,
                 .ept_violation_ve = 1,
                 .unrestricted_guest = 1,

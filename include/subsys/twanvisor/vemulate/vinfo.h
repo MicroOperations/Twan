@@ -289,8 +289,8 @@ typedef union
         u32 disallowed_io_emulation : 1;
         u32 ept_violations_cause_ve : 1;
         u32 suppress_ve_supported : 1;
-        u32 wbinv_nop : 1;
-        u32 reserved0 : 26;
+        u32 wbinvd_nop : 1;
+        u32 reserved0 : 25;
     } fields;
 } vcpuid_emulation_features0_b_t;
 
@@ -310,6 +310,7 @@ typedef union
     struct 
     {
         u32 ept_optional : 1;
+        u32 unrestricted_guest_optional : 1;
         u32 ept : 1;
         u32 ept_pml4 : 1;
         u32 ept_pml5 : 1;
@@ -320,7 +321,7 @@ typedef union
         u32 ept_accessed_dirty : 1;
         u32 vpid : 1;
         u32 unrestricted_guest : 1;
-        u32 reserved0 : 21;
+        u32 reserved0 : 20;
     } fields;
 } vcpuid_emulation_features0_d_t;
 

@@ -148,7 +148,7 @@ void vinfo_emulation_features(struct vregs *vregs)
 
                     .ept_violations_cause_ve = support.fields.ept_ve,
                     
-                    .wbinv_nop = support.fields.wbinvd_exiting
+                    .wbinvd_nop = support.fields.wbinvd_exiting
                 }
             };
 
