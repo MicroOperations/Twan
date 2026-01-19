@@ -2,6 +2,7 @@ CC = gcc
 LD = ld
 PY = python3
 KCONFIG_CONFIG = .config
+KCONFIG_CONFIG_OLD = .config.old
 
 export KCONFIG_CONFIG
 
@@ -51,6 +52,7 @@ defconfig: $(KCONFIG_CONFIG)
 
 menuconfig:
 	$(PY) -m menuconfig
+	@mkdir -p $(GEN_DIR)
 	$(PY) $(GENCONFIG_SRC) > $(AUTOCONF_H)
 
 genconfig: $(AUTOCONF_H)
@@ -89,6 +91,6 @@ clean:
 	rm -rf $(BUILD_DIR) $(ISO_DIR) $(ISO_NAME)
 
 distclean:
-	rm -rf $(BUILD_DIR) $(ISO_DIR) $(ISO_NAME) $(KCONFIG_CONFIG) $(GEN_DIR)
+	rm -rf $(BUILD_DIR) $(ISO_DIR) $(ISO_NAME) $(KCONFIG_CONFIG) $(KCONFIG_CONFIG_OLD) $(GEN_DIR)
 
 .PHONY: all defconfig menuconfig genconfig clean distclean qemu kvm

@@ -1,11 +1,15 @@
 # Late Initcalls demo
 
+To run the late initcalls demo follow these steps
+
+1. Initialize the configuration file
+
 ```
 make defconfig
 vim .config
 ```
 
-change:
+2. change:
 
 ```# CONFIG_DEMO_LATE_INITCALLS is not set``` 
 
@@ -13,9 +17,13 @@ to:
 
 ```CONFIG_DEMO_LATE_INITCALLS=y```
 
+3. Build and run
+
 ```
 make kvm
 ```
+
+## Expected output
 
 you should see:
 
