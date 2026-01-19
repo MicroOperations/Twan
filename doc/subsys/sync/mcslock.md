@@ -9,7 +9,7 @@ mcs locks are used frequently throughout Twan for synchronisation, mcs locks sho
 TWANVISOR_PV_LOCKS
 ```
 
-Enables paravirtualised mcs locks, when this is enabled, vcpus within TwanRTOS will block if their predecessor in the mcs locks waiting queue is not active, and will be unblocked once the lock has been handed to them. This is designed to battle the lock holder/waiter preemption problem, by being aware of vcpu scheduling states.
+Enables paravirtualised mcs locks, when this is enabled, vcpus within TwanRTOS will block if their predecessor in the mcs locks waiting queue is not active, and will be unblocked once the lock has been handed to them. This is designed to battle the lock holder/waiter preemption problem.
 
 ## API's
 
