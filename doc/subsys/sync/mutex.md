@@ -11,7 +11,8 @@ Mutexes can be leveraged to synchronise threads in a manner where waiters can bl
 INITIALIZE_MUTEX_IPCP(_priority_ceiling, _criticality_ceiling)
 ```
 
-Macro used to initialize ipcp mutexes
+Macro used to initialize ipcp mutexes, returns 0 on success, otherwise an
+errcode below 0
 
 ---
 ```
