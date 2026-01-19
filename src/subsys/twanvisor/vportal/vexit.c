@@ -609,6 +609,9 @@ static void vexit_vmx_preempt(__unused struct vregs *vregs)
 
 static void vexit_wbinvd(__unused struct vregs *vregs)
 {
+    /* doesn't emulate exceptions, purely nops wbinvd's to stay consistent with
+       vinfo */
+
     vcurrent_vcpu_enable_preemption();
     queue_advance_guest();
 }
