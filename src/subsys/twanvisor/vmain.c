@@ -1,4 +1,3 @@
-#include "include/lib/x86_index.h"
 #include <include/subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
@@ -354,7 +353,7 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
     vthis_cpu->vcache.via32_feature_ctrl_low = 
         ia32_feature_control.val & 0xffffffff;
 
-    vthis_cpu->vcache.via32_feature_ctrl_high = ia32_feature_control.val >> 32;
+    vthis_cpu->vcache.via32_feature_ctrl_high = ia32_feature_control.val >> 32;    
 
     vthis_cpu->vcache.trap_cache.fields.ia32_feature_control_rw = 
         (ia32_feature_control.fields.senter_global_enable != 0 || 
@@ -566,6 +565,8 @@ int vper_cpu_data_init(struct vper_cpu *vthis_cpu, u32 vprocessor_id)
     u64 tsc_period_fs = FEMTOSECOND / tsc_frequency_hz;
     u64 vmx_preempt_period_fs = FEMTOSECOND / vmx_preempt_frequency_hz;
     u64 lapic_period_fs = FEMTOSECOND / lapic_frequency_hz;
+
+    vthis_cpu->vcache.msr_area_max = 512;
 
     vthis_cpu->arch_flags.tsc_period_fs = tsc_period_fs;
     vthis_cpu->arch_flags.tsc_frequency_hz = tsc_frequency_hz;

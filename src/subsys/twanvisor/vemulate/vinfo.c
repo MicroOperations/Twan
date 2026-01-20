@@ -1,3 +1,4 @@
+#include "include/subsys/twanvisor/vsched/vcpu.h"
 #include <include/subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
@@ -152,6 +153,13 @@ void vinfo_emulation_features(struct vregs *vregs)
                 }
             };
 
+            vcpuid_emulation_features0_c_t emulation_features0_c = {
+                .fields = {
+                    .num_vtimers = VNUM_VTIMERS,
+                    .msr_area_max = vthis_cpu->vcache.msr_area_max
+                }
+            };
+
             vcpuid_emulation_features0_d_t emulation_features0_d = {
                 .fields = {
                     .ept = support.fields.ept,
@@ -168,7 +176,7 @@ void vinfo_emulation_features(struct vregs *vregs)
             };
 
             vregs->regs.rbx = emulation_features0_b.val;
-            vregs->regs.rcx = VNUM_VTIMERS;
+            vregs->regs.rcx = emulation_features0_c.val;
             vregs->regs.rdx = emulation_features0_d.val;
             break;
 

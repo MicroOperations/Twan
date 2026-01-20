@@ -300,7 +300,7 @@ typedef union
     struct 
     {
         u32 num_vtimers : 8;
-        u32 reserved0 : 24;
+        u32 msr_area_max : 24;
     } fields;
 } vcpuid_emulation_features0_c_t;
 

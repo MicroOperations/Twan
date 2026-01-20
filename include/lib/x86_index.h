@@ -3862,6 +3862,14 @@ struct vmcs_region
 } __packed;
 SIZE_ASSERT(struct vmcs_region, VMCS_REGION_SIZE);
 
+struct msr_entry
+{
+    u32 msr_index;
+    u32 reserved0;
+    u64 msr_data;
+} __packed;
+SIZE_ASSERT(struct msr_entry, 16);
+
 struct ve_info_area
 {
     

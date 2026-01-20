@@ -24,6 +24,8 @@ int vcpu_precheck(struct vcpu *vcpu)
     struct vper_cpu *vtarget_cpu = vper_cpu_data(vprocessor_id);
     vper_cpu_arch_support_t support = vtarget_cpu->arch_flags.support;
 
+    u32 msr_area_max = vtarget_cpu->vcache.msr_area_max;
+
     if (support.fields.unrestricted_guest == 0 || support.fields.ept == 0)
         return -EOPNOTSUPP;
 
@@ -65,6 +67,20 @@ int vcpu_precheck(struct vcpu *vcpu)
 
     if ((vcpu->arch.ve_info_area_phys & 0xfff) != 0)
         return -EINVAL;
+
+    if (vcpu->arch.vexit_load_count != 0 && 
+        ((vcpu->arch.vexit_msr_load_area_phys & 0xf) != 0 || 
+        vcpu->arch.vexit_load_count > msr_area_max)) {
+        
+        return -EINVAL;
+    }
+
+    if (vcpu->arch.msr_load_save_count != 0 && 
+        ((vcpu->arch.msr_load_save_area_phys & 0xf) != 0 || 
+        vcpu->arch.msr_load_save_count > msr_area_max)) {
+        
+        return -EINVAL;
+    }
 
     if (bmp256_ffs(&vcpu->visr_metadata.subscribed_vectors) != -1)
         return -EINVAL;
@@ -505,6 +521,32 @@ void vcpu_entry(void)
 
     __vmwrite(VMCS_GUEST_ACTIVITY_STATE, active);
     __vmwrite(VMCS_GUEST_VMCS_LINK_POINTER, ~0ULL);
+
+    /* msr load save areas */
+
+    if (current->arch.vexit_load_count != 0) {
+
+        __vmwrite(VMCS_CTRL_VMEXIT_MSR_LOAD_ADDRESS, 
+                current->arch.vexit_msr_load_area_phys);       
+
+        __vmwrite(VMCS_CTRL_VMEXIT_MSR_LOAD_COUNT, 
+                 current->arch.vexit_load_count);
+    }
+
+    if (current->arch.msr_load_save_count != 0) {
+
+        __vmwrite(VMCS_CTRL_VMEXIT_MSR_STORE_ADDRESS, 
+                  current->arch.msr_load_save_area_phys);
+
+        __vmwrite(VMCS_CTRL_VMEXIT_MSR_STORE_COUNT, 
+                  current->arch.msr_load_save_count);
+
+        __vmwrite(VMCS_CTRL_VMENTRY_MSR_LOAD_ADDRESS, 
+                  current->arch.msr_load_save_area_phys);
+
+        __vmwrite(VMCS_CTRL_VMENTRY_MSR_LOAD_COUNT, 
+                  current->arch.msr_load_save_count);
+    }
 
     /* epts */
 

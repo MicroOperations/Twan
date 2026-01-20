@@ -195,6 +195,8 @@ struct vper_cpu_cache
 
     u32 via32_feature_ctrl_low;
     u32 via32_feature_ctrl_high;
+
+    u32 msr_area_max;
 };
 
 struct vper_cpu 

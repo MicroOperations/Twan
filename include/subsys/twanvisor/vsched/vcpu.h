@@ -1,6 +1,8 @@
 #ifndef _VCPU_H_
 #define _VCPU_H_
 
+#include "include/compiler.h"
+#include "include/lib/x86_index.h"
 #include <include/subsys/twanvisor/vsched/vsched_conf.h>
 #include <include/subsys/twanvisor/vsched/vsync.h>
 #include <include/subsys/twanvisor/varch.h>
@@ -52,6 +54,16 @@ typedef union
 typedef void (*vput_callback_func_t)(void);
 typedef void (*vset_callback_func_t)(void);
 
+/* worth noting that root currently doesnt use msr load save area, devs should
+   disallow access to msr's used by root */
+
+struct msr_area
+{
+    struct msr_entry entry[512];
+} __packed;
+
+SIZE_ASSERT(struct msr_area, 512 * sizeof(struct msr_entry));
+
 struct vcpu_regions_arch
 {
     char io_bitmap_a[4096];
@@ -60,16 +72,27 @@ struct vcpu_regions_arch
     struct ve_info_area ve_info_area;
     struct vmcs_region vmcs;
 
+    struct msr_area vexit_msr_load_area;
+    struct msr_area msr_load_save_area;
+
     u64 io_bitmap_a_phys;
     u64 io_bitmap_b_phys;
     u64 msr_bitmap_phys;
     u64 vmcs_phys;
     u64 ve_info_area_phys;
+    
+    u64 vexit_msr_load_area_phys;
+    u64 msr_load_save_area_phys;
+
+    u32 vexit_load_count;
+    u32 msr_load_save_count;
+
 } __packed;
 
 SIZE_ASSERT(struct vcpu_regions_arch, 
             sizeof(struct vmcs_region) + sizeof(struct ve_info_area) + 
-            (sizeof(u64) * 5) + (4096 * 3));
+            (sizeof(struct msr_area) * 2) +
+            (sizeof(u64) * 7) + (sizeof(u32) * 2) + (4096 * 3));
 
 struct vtimer
 {
