@@ -119,8 +119,7 @@ static void vexit_invalid_opcode(__unused struct vregs *vregs)
 
 static void vexit_exception(__unused struct vregs *vregs)
 {
-    /* if nmi's are routed as external, this shouldn't happen, unless someone
-       decided to be a bastard and send an nmi-ipi */
+    /* nmis should currently be routed as normal */
 
     vectored_events_info_t info = {
         .val = vmread32(VMCS_RO_VMEXIT_INTERRUPT_INFO)
