@@ -31,10 +31,10 @@ static struct counter_interface counter_interface = {
 
 static inline bool is_invariant_tsc_supported(void)
 {
-    u32 regs[4] = {CPUID_POWER_RAS, 0, 0, 0};
+    u32 regs[4] = {CPUID_EXTENDED_FUNCTION1, 0, 0, 0};
     __cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
 
-    power_ras_d_t edx = {.val = regs[3]};
+    extended_function1_d_t edx = {.val = regs[3]};
 
     return edx.fields.tsc_invariant != 0;
 }

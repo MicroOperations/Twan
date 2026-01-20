@@ -1,3 +1,4 @@
+#include "include/lib/x86_index.h"
 #include <include/subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
@@ -56,6 +57,9 @@ void vsetup_traps(struct vper_cpu *vthis_cpu, struct vcpu *vcpu)
 
     if (trap_cache.fields.xapic_disable_status != 0)
         trap_msr(vcpu, IA32_XAPIC_DISABLE_STATUS);
+
+    if (trap_cache.fields.tsc_aux != 0)
+        trap_msr(vcpu, IA32_TSC_AUX);
 
     trap_msr(vcpu, IA32_VMX_BASIC);
     trap_msr(vcpu, IA32_VMX_PINBASED_CTLS);

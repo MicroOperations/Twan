@@ -329,10 +329,8 @@ void vcpu_entry(void)
 
         vmx_procbased_ctls2_t proc2 = {
             .fields = {
-                .enable_rdtscp = 1,
                 .enable_invpcid = 1,
                 .conceal_vmx_from_pt = 1,
-
                 .enable_vpid = vpid.fields.enabled,
                 .wbinvd_exiting = 1, 
                 .enable_ept = 1,

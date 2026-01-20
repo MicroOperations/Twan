@@ -15,6 +15,9 @@
 
 static u32 msr_blocklist[] = {
 
+    /* not emulating rdtscp/rdpid */
+    IA32_TSC_AUX,
+
     /* not emulating xsave */
     IA32_XSS,
 
@@ -225,6 +228,7 @@ static void vexit_cpuid(struct vregs *vregs)
                     extended_features0_d_t extended_features0_d = {.val = edx};
 
                     extended_features0_c.fields.waitpkg = 0;
+                    extended_features0_c.fields.rdpid = 0;
                     
                     extended_features0_d.fields.uintr = 0;
                     extended_features0_d.fields.pconfig = 0;
@@ -266,6 +270,14 @@ static void vexit_cpuid(struct vregs *vregs)
             edx = 0;
             break;
 
+        case CPUID_EXTENDED_SIG:
+        
+            extended_sig_d_t extended_sig_d = {.val = edx};
+            
+            extended_sig_d.fields.rdtscp = 0;
+            edx = extended_sig_d.val;
+            break;
+            
         default:
             break;
     }

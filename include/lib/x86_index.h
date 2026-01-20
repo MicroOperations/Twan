@@ -1948,7 +1948,27 @@ typedef union
     } fields;
 } core_frequency_c_t;
 
-#define CPUID_POWER_RAS 0x80000007
+#define CPUID_EXTENDED_SIG 0x80000001
+
+typedef union
+{
+    u32 val;
+    struct 
+    {
+        u32 reserved0 : 11;
+        u32 syscall_sysret64 : 1;
+        u32 reserved1 : 8;
+        u32 nx : 1;
+        u32 reserved2 : 5;
+        u32 page_1gb : 1;
+        u32 rdtscp : 1;
+        u32 reserved3 : 1;
+        u32 intel64 : 1;
+        u32 reserved4 : 2;
+    } fields;
+} extended_sig_d_t;
+
+#define CPUID_EXTENDED_FUNCTION1 0x80000007
 
 typedef union
 {
@@ -1959,7 +1979,21 @@ typedef union
         u32 tsc_invariant : 1;
         u32 reserved1 : 23;
     } fields;
-} power_ras_d_t;
+} extended_function1_d_t;
+
+#define CPUID_EXTENDED_FUNCTION2 0x80000008
+
+typedef union
+{
+    u32 val;
+    struct 
+    {
+        u32 phys_addr_size : 8;
+        u32 lin_addr_size : 8;
+        u32 guest_phys_addr_size : 8;
+        u32 reserved0 : 8;
+    } fields;
+} extended_function2_a_t;
 
 /* msr's */
 
@@ -1984,6 +2018,17 @@ typedef union
 #define IA32_FRED_SSP3 0x1d3
 
 #define IA32_UMWAIT_CONTROL 0xe1
+
+#define IA32_TSC_AUX 0xC0000103
+typedef union 
+{
+    u64 val;
+    struct 
+    {
+        u32 sig : 32;
+        u32 reserved0 : 32;
+    } fields;
+} ia32_tsc_aux_t;
 
 #define IA32_MCG_CAP 0x179
 typedef union

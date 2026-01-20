@@ -174,12 +174,13 @@ typedef union
     struct 
     {
         u64 ia32_arch_capabilities_r : 1;
-        u64 xapic_disable_status : 1;
         u64 ia32_feature_control_rw : 1;
         u64 user_msr : 1;
         u64 uintr_timer : 1;
         u64 waitpkg : 1;
-        u64 reserved0 : 53;
+        u64 xapic_disable_status : 1;
+        u32 tsc_aux : 1;
+        u64 reserved0 : 52;
         u64 lint0 : 1;
         u64 lint1 : 1;
         u64 cmci : 1;

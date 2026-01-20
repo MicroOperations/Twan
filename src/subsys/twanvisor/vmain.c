@@ -1,3 +1,4 @@
+#include "include/lib/x86_index.h"
 #include <include/subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
@@ -367,6 +368,18 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
 
     vthis_cpu->vcache.trap_cache.fields.waitpkg = 
         ext_features0_c.fields.waitpkg;
+
+    if (ext_features0_c.fields.rdpid == 0) {
+
+        u32 ext_sig_regs[4] = {CPUID_EXTENDED_SIG, 0, 0, 0};
+        extended_sig_d_t extended_sig_d = {.val = ext_sig_regs[3]};
+
+        vthis_cpu->vcache.trap_cache.fields.tsc_aux = 
+            extended_sig_d.fields.rdtscp;
+
+    } else {
+        vthis_cpu->vcache.trap_cache.fields.tsc_aux = 1;
+    }
 
     bool proc2_present = ((__rdmsrl(IA32_VMX_PROCBASED_CTLS) >> 63) & 1) != 0;
     vthis_cpu->arch_flags.support.fields.procbased_ctls2 = proc2_present;
@@ -789,10 +802,8 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
 
     vmx_procbased_ctls2_t proc2 = {
         .fields = {
-            .enable_rdtscp = 1,
             .enable_invpcid = 1,
             .conceal_vmx_from_pt = 1,
-
             .wbinvd_exiting = 1
         }
     };
