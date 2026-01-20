@@ -1,3 +1,4 @@
+#include "include/compiler.h"
 #include "include/lib/x86_index.h"
 #include "include/subsys/twanvisor/twanvisor.h"
 #include "include/subsys/twanvisor/vdbg/vdbg.h"
@@ -54,6 +55,9 @@ static u32 msr_blocklist[] = {
     /* not emulating an apic (guests should use our vintc) */
     IA32_XAPIC_DISABLE_STATUS,
 
+    /* hiding monitor/mwait as it can be easily abused */
+    IA32_MONITOR_FILTER_SIZE,
+
     /* hide vmx msr's since we currently dont support nested virt */
     IA32_VMX_BASIC,
     IA32_VMX_PINBASED_CTLS,
@@ -93,6 +97,12 @@ static __unroll_loops bool vis_msr_blocked(u32 msr)
 static void vexit_nop(__unused struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
+}
+
+static void vexit_ud(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    queue_inject_ud();
 }
 
 static void vexit_failure_recover(__unused struct vregs *vregs)
@@ -201,6 +211,7 @@ static void vexit_cpuid(struct vregs *vregs)
             feature_bits_d.fields.apic = 0;
             feature_bits_d.fields.htt = 0;
 
+            feature_bits_c.fields.monitor_mwait = 0;
             feature_bits_c.fields.vmx = 0;
             feature_bits_c.fields.smx = 0;
             feature_bits_c.fields.xsave = 0;
@@ -232,6 +243,7 @@ static void vexit_cpuid(struct vregs *vregs)
                     
                     extended_features0_d.fields.uintr = 0;
                     extended_features0_d.fields.pconfig = 0;
+                    extended_features0_d.fields.hybrid = 0;
 
                     ecx = extended_features0_c.val;
                     edx = extended_features0_d.val;
@@ -249,9 +261,19 @@ static void vexit_cpuid(struct vregs *vregs)
                     extended_features1_d.fields.uintr_timer = 0;
                     extended_features1_d.fields.user_msr = 0;
                     extended_features1_d.fields.uiret_uif_from_flags = 0;
+                    extended_features1_d.fields.mwait = 0;
 
                     eax = extended_features1_a.val;
                     edx = extended_features1_d.val;
+                    break;
+
+                case 2:
+
+                    extended_features2_d_t extended_features2_d = {.val = edx};
+                    
+                    extended_features2_d.fields.monitor_mitigation_no = 0;
+
+                    edx = extended_features2_d.val;
                     break;
 
                 default:
@@ -260,6 +282,15 @@ static void vexit_cpuid(struct vregs *vregs)
 
             break;
 
+        case CPUID_EXTENDED_SIG:
+        
+            extended_sig_d_t extended_sig_d = {.val = edx};
+            
+            extended_sig_d.fields.rdtscp = 0;
+            edx = extended_sig_d.val;
+            break;
+
+        case 5:
         case 0x0b:
         case 0x0d:
         case 0x1f:
@@ -268,14 +299,6 @@ static void vexit_cpuid(struct vregs *vregs)
             ebx = 0;
             ecx = 0;
             edx = 0;
-            break;
-
-        case CPUID_EXTENDED_SIG:
-        
-            extended_sig_d_t extended_sig_d = {.val = edx};
-            
-            extended_sig_d.fields.rdtscp = 0;
-            edx = extended_sig_d.val;
             break;
             
         default:
@@ -654,6 +677,8 @@ static vexit_func_t vexit_table[] = {
     [EXIT_REASON_INOUT] = vexit_inout,
     [EXIT_REASON_RDMSR] = vexit_rdmsr,
     [EXIT_REASON_WRMSR] = vexit_wrmsr,
+    [EXIT_REASON_MWAIT] = vexit_ud,
+    [EXIT_REASON_MONITOR] = vexit_ud,
     [EXIT_REASON_MCE_DURING_ENTRY] = vexit_mce_during_entry,
     [EXIT_REASON_EPT_FAULT] = vexit_failure_recover,
     [EXIT_REASON_EPT_MISCONFIG] = vexit_failure_recover,

@@ -268,6 +268,8 @@ void vcpu_entry(void)
 
     vmx_procbased_ctls_t proc = {
         .fields = {
+            .mwait_exiting = 1,
+            .monitor_exiting = 1,
             .cr8_store_exiting = 1,
             .use_io_bitmaps = 1,
             .use_msr_bitmaps = 1,

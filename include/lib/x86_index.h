@@ -1465,7 +1465,7 @@ typedef union
         u32 sse3 : 1;
         u32 pclmulqdq : 1;
         u32 dtes64 : 1;
-        u32 monitor : 1;
+        u32 monitor_mwait : 1;
         u32 ds_cpl : 1;
         u32 vmx : 1;
         u32 smx : 1;
@@ -1998,6 +1998,8 @@ typedef union
 /* msr's */
 
 #define IA32_XSS 0xda0
+
+#define IA32_MONITOR_FILTER_SIZE 0x06
 
 #define IA32_UINTR_RR 0x985
 #define IA32_UINTR_HANDLER 0x986

@@ -793,6 +793,8 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
 
     vmx_procbased_ctls_t proc = {
         .fields = {
+            .mwait_exiting = 1,
+            .monitor_exiting = 1,
             .use_io_bitmaps = 1,
             .use_msr_bitmaps = 1,
             .activate_secondary_controls = 1,
