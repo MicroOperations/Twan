@@ -62,10 +62,16 @@ void mutex_ipcp_lock(struct mutex_ipcp *mutex_ipcp)
 {
     current_task_disable_preemption();
                             
+    u8 priority = __current_task_priority();
+    u8 criticality = __current_task_criticality();
+
     current_task_write(mutex_ipcp->priority_ceiling, 
                          mutex_ipcp->criticality_ceiling);
 
     wait_until_insert_real(&mutex_ipcp->waitq, mutex_ipcp_trylock(mutex_ipcp));
+
+    mutex_ipcp->last_priority = priority;
+    mutex_ipcp->last_criticality = criticality;
 
     current_task_enable_preemption();
 }
@@ -84,8 +90,14 @@ bool mutex_ipcp_lock_timeout(struct mutex_ipcp *mutex_ipcp, u32 ticks)
                                               mutex_ipcp_trylock(mutex_ipcp), 
                                               ticks);
                                     
-    if (!ret)
+    if (ret) {
+
+        mutex_ipcp->last_priority = priority;
+        mutex_ipcp->last_criticality = criticality;
+
+    } else {
         current_task_write(priority, criticality);
+    }
 
     current_task_enable_preemption();
 
