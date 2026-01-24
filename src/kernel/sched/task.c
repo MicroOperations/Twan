@@ -1,3 +1,5 @@
+#include "include/kernel/sched/sched_dsa.h"
+#include "include/subsys/debug/kdbg/kdbg.h"
 #include <include/kernel/sched/task.h>
 #include <include/kernel/sched/sched.h>
 #include <include/kernel/kapi.h>
@@ -137,40 +139,33 @@ void current_task_destroy(void)
     emulate_self_ipi(current_task_destroy_ipi, 0);
 }
 
-int current_task_ipcp_boost(u8 priority, u8 criticality)
+u8 __current_task_priority(void)
 {
     struct task *current = current_task();
-    if (KBUG_ON(!current) || KBUG_ON(this_cpu_data()->handling_isr))
-        return -EINVAL;    
+    KBUG_ON(!current);
+    KBUG_ON(current_task_is_preemption_enabled());
 
-    current_task_disable_preemption();
+    return current->metadata.priority;
+}
 
-    u8 old_priority = current->metadata.priority;
-    u32 old_criticality = current->metadata.criticality;
+u8 __current_task_criticality(void)
+{
+    struct task *current = current_task();
+    KBUG_ON(!current);
+    KBUG_ON(current_task_is_preemption_enabled());
 
-    KBUG_ON(old_priority > priority);
-    KBUG_ON(old_criticality > criticality);
+    return current->metadata.criticality;
+}
+
+void __current_task_write(u8 priority, u8 criticality)
+{
+    struct task *current = current_task();
+    KBUG_ON(!current);
+    KBUG_ON(current_task_is_preemption_enabled());
+    KBUG_ON(criticality > SCHED_MAX_CRITICALITY);
 
     current->metadata.priority = priority;
     current->metadata.criticality = criticality;
-
-    current_task_enable_preemption();
-    return 0;
-}
-
-int current_task_ipcp_sync(void)
-{
-    struct task *current = current_task();
-    if (KBUG_ON(!current) || KBUG_ON(this_cpu_data()->handling_isr))
-        return -EINVAL;
-
-    current_task_disable_preemption();
-
-    current->metadata.priority = current->metadata.real_priority;
-    current->metadata.criticality = current->metadata.real_criticality;
-
-    current_task_enable_preemption();  
-    return 0;
 }
 
 int current_task_info(u8 *real_priority, u8 *priority, u8 *real_criticality, 

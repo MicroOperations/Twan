@@ -6,7 +6,10 @@
 struct mutex_ipcp
 {
     u8 priority_ceiling;
-    u32 criticality_ceiling;
+    u8 criticality_ceiling;
+
+    u8 last_priority;
+    u8 last_criticality;
 
     atomic_ptr_t holder;
     u64 count;
@@ -17,6 +20,8 @@ struct mutex_ipcp
 {                                                                           \
     .priority_ceiling = (_priority_ceiling),                                \
     .criticality_ceiling = (_criticality_ceiling),                          \
+    .last_priority = 0,                                                     \
+    .last_criticality = 0,                                                  \
     .holder = INITIALIZE_ATOMIC_PTR(NULL),                                  \
     .count = 0,                                                             \
     .waitq = INITIALIZE_WAITQ()                                             \
@@ -24,7 +29,7 @@ struct mutex_ipcp
 STATIC_ASSERT((_criticality_ceiling) < SCHED_NUM_CRITICALITIES)
 
 int mutex_ipcp_init(struct mutex_ipcp *mutex_ipcp, u8 priority_ceiling, 
-                    u32 criticality_ceiling);
+                    u8 criticality_ceiling);
 
 void mutex_ipcp_lock(struct mutex_ipcp *mutex_ipcp);
 bool mutex_ipcp_lock_timeout(struct mutex_ipcp *mutex_ipcp, u32 ticks);

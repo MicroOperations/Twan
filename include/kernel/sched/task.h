@@ -186,8 +186,10 @@ void current_task_destroy_ipi(__unused struct interrupt_info *info,
                               
 void current_task_destroy(void);
 
-int current_task_ipcp_boost(u8 priority, u8 criticality);
-int current_task_ipcp_sync(void);
+u8 __current_task_priority(void);
+u8 __current_task_criticality(void);
+
+void __current_task_write(u8 priority, u8 criticality);
 
 int current_task_info(u8 *real_priority, u8 *priority, u8 *real_criticality, 
                       u8 *criticality);
