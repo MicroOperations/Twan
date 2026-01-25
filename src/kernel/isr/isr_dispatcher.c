@@ -135,8 +135,10 @@ void __isr_dispatcher(struct interrupt_info *stack_trace)
         this_cpu->task_ctx = stack_trace;
     }
 
+    bool emulated = stack_trace->emulated == 1;
+    
     int intl = vector_to_intl(vector);
-    bool external = __in_service(vector) && intl > old_intl;
+    bool external = !emulated && intl > old_intl && __in_service(vector);
 
     if (external)
         this_cpu->intl = intl;
@@ -157,7 +159,7 @@ void __isr_dispatcher(struct interrupt_info *stack_trace)
         if (is_critical_exception(vector) && ret != EXCEPTION_HANDLED)
             kpanic_exec_local(log_exception(stack_trace));            
 
-    } else if (stack_trace->emulated == 0) {
+    } else {
         __acknowledge_interrupt();
     }
     
