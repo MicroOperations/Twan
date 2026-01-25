@@ -51,6 +51,9 @@ static u32 msr_blocklist[] = {
     /* not emulating an apic (guests should use our vintc) */
     IA32_XAPIC_DISABLE_STATUS,
 
+    /* hide sr bios done */
+    IA32_SR_BIOS_DONE,
+
     /* hiding monitor/mwait as it can be easily abused */
     IA32_MONITOR_FILTER_SIZE,
 
@@ -93,6 +96,12 @@ static __unroll_loops bool vis_msr_blocked(u32 msr)
 static void vexit_nop(__unused struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
+}
+
+static void vexit_nop_advance(__unused struct vregs *vregs)
+{   
+    vcurrent_vcpu_enable_preemption();
+    queue_advance_guest();
 }
 
 static void vexit_failure_recover(__unused struct vregs *vregs)
@@ -246,6 +255,7 @@ static void vexit_cpuid(struct vregs *vregs)
                     extended_features1_a.fields.msrlist = 0;
                     extended_features1_a.fields.fred = 0;
                     extended_features1_a.fields.nmi_src = 0;
+                    extended_features1_a.fields.cachewarp_mitigation = 0;
 
                     extended_features1_d.fields.uintr_timer = 0;
                     extended_features1_d.fields.user_msr = 0;
@@ -298,22 +308,6 @@ static void vexit_cpuid(struct vregs *vregs)
     vregs->regs.rbx = ebx;
     vregs->regs.rcx = ecx;
     vregs->regs.rdx = edx;
-
-    queue_advance_guest();
-}
-
-static void vexit_invd(__unused struct vregs *vregs)
-{
-    vcurrent_vcpu_enable_preemption();
-
-    struct vper_cpu *vthis_cpu = vthis_cpu_data();
-
-    if (vthis_cpu->sec_flags.fields.prmrr_activated != 0 ||
-        (vthis_cpu->sec_flags.fields.sr_bios_done != 0 && sr_bios_done())) {
-
-        queue_inject_gp0();
-        return;
-    }
 
     queue_advance_guest();
 }
@@ -613,12 +607,6 @@ static void vexit_vmx_preempt(__unused struct vregs *vregs)
     vemu_set_interrupt_pending(current, vector, nmi);
 }
 
-static void vexit_wbinvd(__unused struct vregs *vregs)
-{   
-    vcurrent_vcpu_enable_preemption();
-    queue_advance_guest();
-}
-
 static vexit_func_t vexit_table[] = {
     [EXIT_REASON_EXCEPTION] = vexit_exception,
     [EXIT_REASON_EXT_INTR] = vexit_ext_intr,
@@ -630,7 +618,7 @@ static vexit_func_t vexit_table[] = {
     [EXIT_REASON_TASK_SWITCH] = vexit_gp0,
     [EXIT_REASON_CPUID] = vexit_cpuid,
     [EXIT_REASON_GETSEC] = vexit_ud,
-    [EXIT_REASON_INVD] = vexit_invd,
+    [EXIT_REASON_INVD] = vexit_nop_advance,
     [EXIT_REASON_VMCALL] = vexit_vmcall,
     [EXIT_REASON_VMCLEAR] = vexit_ud,
     [EXIT_REASON_VMLAUNCH] = vexit_ud,
@@ -653,7 +641,7 @@ static vexit_func_t vexit_table[] = {
     [EXIT_REASON_INVEPT] = vexit_ud,
     [EXIT_REASON_VMX_PREEMPT] = vexit_vmx_preempt,
     [EXIT_REASON_INVVPID] = vexit_ud,
-    [EXIT_REASON_WBINVD] = vexit_wbinvd,
+    [EXIT_REASON_WBINVD] = vexit_nop_advance,
     [EXIT_REASON_XSETBV] = vexit_ud
 };
 

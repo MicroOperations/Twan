@@ -61,6 +61,9 @@ void vsetup_traps(struct vper_cpu *vthis_cpu, struct vcpu *vcpu)
     if (trap_cache.fields.tsc_aux != 0)
         trap_msr(vcpu, IA32_TSC_AUX);
 
+    if (vthis_cpu->sec_flags.fields.sr_bios_done != 0)
+        trap_msr(vcpu, IA32_SR_BIOS_DONE);
+
     trap_msr(vcpu, IA32_MONITOR_FILTER_SIZE);
 
     trap_msr(vcpu, IA32_VMX_BASIC);
