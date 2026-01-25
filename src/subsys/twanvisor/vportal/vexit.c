@@ -101,7 +101,13 @@ static void vexit_failure_recover(__unused struct vregs *vregs)
     vfailure_recover();
 }
 
-static void vexit_invalid_opcode(__unused struct vregs *vregs)
+static void vexit_gp0(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    queue_inject_gp0();
+}
+
+static void vexit_ud(__unused struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
     queue_inject_ud();
@@ -157,12 +163,6 @@ static void vexit_nmi_window(__unused struct vregs *vregs)
 
     struct vcpu *current = vcurrent_vcpu();
     out_nmi(current);
-}
-
-static void vexit_task_switch(__unused struct vregs *vregs)
-{
-    vcurrent_vcpu_enable_preemption();
-    queue_inject_gp0();
 }
 
 static void vexit_cpuid(struct vregs *vregs)
@@ -402,12 +402,6 @@ static void vexit_cr_access(struct vregs *vregs)
     queue_advance_guest();
 }
 
-static void vexit_inout(__unused struct vregs *vregs)
-{
-    vcurrent_vcpu_enable_preemption();
-    queue_inject_gp0();
-}
-
 static void vexit_rdmsr(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
@@ -633,34 +627,34 @@ static vexit_func_t vexit_table[] = {
     [EXIT_REASON_SIPI] = vexit_failure_recover,
     [EXIT_REASON_INTR_WINDOW] = vexit_nop,
     [EXIT_REASON_NMI_WINDOW] = vexit_nmi_window,
-    [EXIT_REASON_TASK_SWITCH] = vexit_task_switch,
+    [EXIT_REASON_TASK_SWITCH] = vexit_gp0,
     [EXIT_REASON_CPUID] = vexit_cpuid,
-    [EXIT_REASON_GETSEC] = vexit_invalid_opcode,
+    [EXIT_REASON_GETSEC] = vexit_ud,
     [EXIT_REASON_INVD] = vexit_invd,
     [EXIT_REASON_VMCALL] = vexit_vmcall,
-    [EXIT_REASON_VMCLEAR] = vexit_invalid_opcode,
-    [EXIT_REASON_VMLAUNCH] = vexit_invalid_opcode,
-    [EXIT_REASON_VMPTRLD] = vexit_invalid_opcode,
-    [EXIT_REASON_VMPTRST] = vexit_invalid_opcode,
-    [EXIT_REASON_VMREAD] = vexit_invalid_opcode,
-    [EXIT_REASON_VMRESUME] = vexit_invalid_opcode,
-    [EXIT_REASON_VMWRITE] = vexit_invalid_opcode,
-    [EXIT_REASON_VMXOFF] = vexit_invalid_opcode,
-    [EXIT_REASON_VMXON] = vexit_invalid_opcode,
+    [EXIT_REASON_VMCLEAR] = vexit_ud,
+    [EXIT_REASON_VMLAUNCH] = vexit_ud,
+    [EXIT_REASON_VMPTRLD] = vexit_ud,
+    [EXIT_REASON_VMPTRST] = vexit_ud,
+    [EXIT_REASON_VMREAD] = vexit_ud,
+    [EXIT_REASON_VMRESUME] = vexit_ud,
+    [EXIT_REASON_VMWRITE] = vexit_ud,
+    [EXIT_REASON_VMXOFF] = vexit_ud,
+    [EXIT_REASON_VMXON] = vexit_ud,
     [EXIT_REASON_CR_ACCESS] = vexit_cr_access,
-    [EXIT_REASON_INOUT] = vexit_inout,
+    [EXIT_REASON_INOUT] = vexit_gp0,
     [EXIT_REASON_RDMSR] = vexit_rdmsr,
     [EXIT_REASON_WRMSR] = vexit_wrmsr,
-    [EXIT_REASON_MWAIT] = vexit_invalid_opcode,
-    [EXIT_REASON_MONITOR] = vexit_invalid_opcode,
+    [EXIT_REASON_MWAIT] = vexit_ud,
+    [EXIT_REASON_MONITOR] = vexit_ud,
     [EXIT_REASON_MCE_DURING_ENTRY] = vexit_mce_during_entry,
     [EXIT_REASON_EPT_FAULT] = vexit_failure_recover,
     [EXIT_REASON_EPT_MISCONFIG] = vexit_failure_recover,
-    [EXIT_REASON_INVEPT] = vexit_invalid_opcode,
+    [EXIT_REASON_INVEPT] = vexit_ud,
     [EXIT_REASON_VMX_PREEMPT] = vexit_vmx_preempt,
-    [EXIT_REASON_INVVPID] = vexit_invalid_opcode,
+    [EXIT_REASON_INVVPID] = vexit_ud,
     [EXIT_REASON_WBINVD] = vexit_wbinvd,
-    [EXIT_REASON_XSETBV] = vexit_invalid_opcode
+    [EXIT_REASON_XSETBV] = vexit_ud
 };
 
 void vexit_dispatcher(struct vregs *vregs)
