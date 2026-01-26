@@ -444,8 +444,20 @@ inline bool is_guest_v8086(void)
 
 inline bool is_guest_cpl0(void)
 {
+    cr0_t cr0 = {.val = vmread(VMCS_GUEST_CR0)};
+    if (cr0.fields.pe == 0)
+        return true;
+
     access_rights_t ar = {.val = vmread32(VMCS_GUEST_CS_ACCESS_RIGHTS)};
-    return ar.fields.dpl == 0;
+    if (ar.fields.dpl != 0)
+        return false;
+
+    ia32_efer_t efer = {.val = vmread(VMCS_GUEST_IA32_EFER)};
+    if (efer.fields.lma != 0)
+        return true;
+
+    rflags_t flags = {.val = vmread(VMCS_GUEST_RFLAGS)};
+    return flags.fields.vm == 0;
 }
 
 inline void queue_inject_gp0(void)
