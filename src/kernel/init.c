@@ -203,14 +203,6 @@ int parse_madt(struct acpi_rsdt *rsdt_ptr, u32 lapic_id, u32 thread_id,
                 cpu->task_ctx = NULL;
 
                 cpu->this = cpu;
-
-                cpu->ipi_data.func = NULL;
-                cpu->ipi_data.arg = 0;
-                atomic32_set(&cpu->ipi_data.signal, 0);
-                mcslock_init(&cpu->ipi_data.lock);
-
-                cpu->self_ipi_func = NULL;
-                cpu->self_ipi_arg = 0;
                 
                 cpu->processor_id = num_cpus;
                 cpu->lapic_id = lapic_entry->id;
@@ -347,6 +339,12 @@ int parse_madt(struct acpi_rsdt *rsdt_ptr, u32 lapic_id, u32 thread_id,
     kernel->cpu.num_capable_cpus = num_capable_cpus;
     kernel->cpu.num_enabled_cpus = num_enabled_cpus;
     kernel->cpu.bsp = bsp_index;
+
+    for (u32 i = 0; i < ARRAY_LEN(kernel->ipi_table); i++) {
+
+        for (u32 j = 0; j < ARRAY_LEN(kernel->ipi_table[j]); j++)
+            atomic32_set(&kernel->ipi_table[i][j].signal, IPI_UNLOCKED);
+    }
 
 done:
     __early_put_acpi_table(madt);

@@ -54,24 +54,30 @@ int __ipi_run_func(u32 processor_id, ipi_func_t func, u64 arg, bool wait)
     if (!cpu_valid(processor_id))
         return -EINVAL;
 
-    if (processor_id == this_processor_id())
+    u32 this_id = this_processor_id();
+
+    if (processor_id == this_id)
         return -EINVAL;
 
     struct per_cpu *cpu = cpu_data(processor_id);
     if (!cpu_active(cpu->flags))
         return -EINVAL;
 
-    spin_until(atomic32_read(&cpu->ipi_data.signal) == 0);
+    __ipi_wait(processor_id);
 
-    cpu->ipi_data.func = func;
-    cpu->ipi_data.arg = arg;
-    cpu->ipi_data.wait = wait;
+    struct twan_kernel *kernel = twan();
 
-    atomic32_set(&cpu->ipi_data.signal, 1);
+    struct ipi_data *data = &kernel->ipi_table[processor_id][this_id];
+
+    data->func = func;
+    data->arg = arg;
+    data->wait = wait;
+
+    __ipi_assert(data);
 
 #if TWANVISOR_ON
 
-    if (twan()->flags.fields.twanvisor_on != 0) {
+    if (kernel->flags.fields.twanvisor_on != 0) {
 
         tv_vipi(processor_id, VIPI_DM_EXTERNAL, IPI_CMD_VECTOR, false);
 
@@ -88,7 +94,7 @@ int __ipi_run_func(u32 processor_id, ipi_func_t func, u64 arg, bool wait)
 #endif
 
     if (wait)
-        spin_until(atomic32_read(&cpu->ipi_data.signal) == 0);
+        __ipi_wait(processor_id);
 
     return 0;
 }
@@ -110,20 +116,12 @@ int ipi_run_func(u32 processor_id, ipi_func_t func, u64 arg, bool wait)
     if (!cpu_active(cpu->flags))
         return -EINVAL;
 
-    struct mcsnode node = INITIALIZE_MCSNODE();
-
-    if (this_cpu->flags.fields.sched_init == 0) {
-
-        __pv_mcs_lock(&cpu->ipi_data.lock, &node);
-        int ret = __ipi_run_func(processor_id, func, arg, wait);
-        __pv_mcs_unlock(&cpu->ipi_data.lock, &node);
-        
-        return ret;
-    }
-
-    mcs_lock(&cpu->ipi_data.lock, &node);
+    if (this_cpu->flags.fields.sched_init == 0)
+        return __ipi_run_func(processor_id, func, arg, wait);
+    
+    current_task_disable_preemption();
     int ret = __ipi_run_func(processor_id, func, arg, wait);
-    mcs_unlock(&cpu->ipi_data.lock, &node);
+    current_task_enable_preemption();
 
     return ret;
 }
@@ -148,9 +146,13 @@ void emulate_self_ipi(ipi_func_t func, u64 arg)
 
     struct per_cpu *this_cpu = this_cpu_data();
 
-    this_cpu->self_ipi_func = func;
-    this_cpu->self_ipi_arg = arg;
-    
+    u32 processor_id = this_processor_id();
+    struct ipi_data *data = &twan()->ipi_table[processor_id][processor_id];
+
+    data->func = func;
+    data->arg = arg;
+    atomic32_set(&data->signal, IPI_LOCKED);
+
     u64 rsp = (u64)&this_cpu->int_stack_stub[sizeof(this_cpu->int_stack_stub)];
     
     __emulate_interrupt(rsp, SELF_IPI_CMD_VECTOR, 0);

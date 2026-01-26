@@ -11,6 +11,68 @@
 #include <include/lib/libtwanvisor/libvcalls.h>
 #include <include/lib/libtwanvisor/libvc.h>
 
+void __ipi_assert(struct ipi_data *data)
+{
+    atomic32_set(&data->signal, IPI_LOCKED);
+}
+
+void __ipi_ack(u32 sender_processor_id)
+{
+    struct twan_kernel *kernel = twan();
+    u32 processor_id = this_processor_id();
+
+    struct ipi_data *data = 
+        &kernel->ipi_table[processor_id][sender_processor_id];
+
+#if TWANVISOR_PV_IPIS
+
+    if (kernel->flags.fields.twanvisor_on != 0) {
+        
+        int expected = IPI_LOCKED;
+        if (!atomic32_cmpxchg(&data->signal, &expected, IPI_UNLOCKED)) {
+
+            atomic32_set(&data->signal, IPI_UNLOCKED);
+            tv_vpv_spin_kick(sender_processor_id);
+        }
+
+        return;
+    }
+
+#endif
+
+    atomic32_set(&data->signal, IPI_UNLOCKED);
+}
+
+void __ipi_wait(u32 target_processor_id)
+{
+    struct twan_kernel *kernel = twan();
+    u32 processor_id = this_processor_id();
+
+    struct ipi_data *data = 
+        &kernel->ipi_table[target_processor_id][processor_id];
+
+#if TWANVISOR_PV_IPIS
+
+    if (kernel->flags.fields.twanvisor_on != 0) {
+
+        while (atomic32_read(&data->signal) != IPI_UNLOCKED) {
+
+            if (!tv_vis_vcpu_active(target_processor_id)) {
+
+                int expected = IPI_LOCKED;
+                if (atomic32_cmpxchg(&data->signal, &expected, IPI_PAUSED))
+                    tv_vpv_spin_pause();
+            }
+        }
+
+        return;
+    }
+
+#endif
+
+    spin_until(atomic32_read(&data->signal) == IPI_UNLOCKED);
+}
+
 void __acknowledge_interrupt(void)
 {
 #if TWANVISOR_ON
@@ -93,33 +155,49 @@ void log_exception(struct interrupt_info *stack_trace)
 
 void ipi_handler(struct interrupt_info *info)
 {
-    struct per_cpu *cpu = this_cpu_data();
-    if (atomic32_read(&cpu->ipi_data.signal) == 0)
-        return;
-    
-    ipi_func_t func = cpu->ipi_data.func;
-    u64 arg = cpu->ipi_data.arg;
-    bool wait = cpu->ipi_data.wait;
+    struct twan_kernel *kernel = twan();
+    u32 processor_id = this_processor_id();
 
-    if (wait) {
-        
-        func(info, arg);
-        atomic32_set(&cpu->ipi_data.signal, 0);
+    for (u32 i = 0; i < ARRAY_LEN(kernel->ipi_table[processor_id]); i++) {
 
-    } else {
+        if (i == processor_id)
+            continue;
 
-        atomic32_set(&cpu->ipi_data.signal, 0);
-        func(info, arg);
+        struct ipi_data *data = &kernel->ipi_table[processor_id][i];
+        if (atomic32_read(&data->signal) == IPI_UNLOCKED)
+            continue;
+
+        ipi_func_t func = data->func;
+        u64 arg = data->arg;
+        bool wait = data->wait;
+
+        if (wait) {
+
+            func(info, arg);
+            __ipi_ack(i);
+
+        } else {
+
+            __ipi_ack(i);
+            func(info, arg);
+        }
     }
 }
 
 void self_ipi_handler(struct interrupt_info *info)
 {
-    struct per_cpu *this_cpu = this_cpu_data();
-    u64 arg = this_cpu->self_ipi_arg;
-    ipi_func_t func = this_cpu->self_ipi_func;
+    u32 processor_id = this_processor_id();
+
+    struct ipi_data *data = &twan()->ipi_table[processor_id][processor_id];
+
+    if (atomic32_read(&data->signal) == IPI_UNLOCKED)
+        return;
+
+    u64 arg = data->arg;
+    ipi_func_t func = data->func;
 
     func(info, arg);
+    atomic32_set(&data->signal, IPI_UNLOCKED);
 }
 
 void __isr_dispatcher(struct interrupt_info *stack_trace)

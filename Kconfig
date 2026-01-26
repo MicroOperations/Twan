@@ -50,6 +50,10 @@ config TWANVISOR_PV_LOCKS
     bool "Enable kernel paravirtualised locking"
     default y
 
+config TWANVISOR_PV_IPIS
+    bool "Enable kernel paravirtualised ipis"
+    default y
+
 config TWANVISOR_VIPI_DRAIN_STRICT
     bool "Enable strict IPI draining"
     default y

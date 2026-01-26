@@ -15,8 +15,20 @@
 
 #define ISR_DONE 0
 
+#define IPI_UNLOCKED 0
+#define IPI_LOCKED 1
+#define IPI_PAUSED 2
+
 typedef int (*isr_func_t)(struct interrupt_info *stack_trace);
 typedef void (*ipi_func_t)(struct interrupt_info *stack_trace, u64 arg);
+
+struct ipi_data
+{
+    ipi_func_t func;
+    u64 arg;
+    bool wait;
+    atomic32_t signal;
+};
 
 extern bool critical_exceptions[];
 extern bool has_error_code[NUM_RESERVED_VECTORS];

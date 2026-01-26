@@ -65,16 +65,6 @@ typedef union
 #define mxcsr_mask() \
     (this_cpu_data()->flags.fields.mxcsr_mask)
 
-struct ipi_data
-{
-    ipi_func_t func;
-    u64 arg;
-    bool wait;
-    atomic32_t signal;
-
-    struct mcslock lock;
-};
-
 struct per_cpu
 {
     bool handling_isr;
@@ -86,11 +76,6 @@ struct per_cpu
     struct interrupt_info *task_ctx;
 
     struct per_cpu *this;
-
-    struct ipi_data ipi_data;
-
-    ipi_func_t self_ipi_func;
-    u64 self_ipi_arg;
 
     u32 processor_id;
     u32 lapic_id;
@@ -196,7 +181,9 @@ struct twan_kernel
         u32 num_capable_cpus;
         u32 num_enabled_cpus;
         u32 bsp;
-    } cpu;    
+    } cpu;
+
+    struct ipi_data ipi_table[NUM_CPUS][NUM_CPUS];
 
     struct scheduler scheduler;
 };
