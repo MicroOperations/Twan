@@ -17,8 +17,7 @@ bool try_steal_task(u32 criticality_level);
 
 void sched_worker(__unused void *unused);
 
-void sched_trampoline_ipi(__unused struct interrupt_info *info,
-                          __unused u64 unused);
+void sched_trampoline_ipi(__unused u64 unused);
 
 void scheduler_init(void);
 

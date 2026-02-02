@@ -189,8 +189,7 @@ static void sleep_wakeup_task(struct delta_node *node)
 static struct delta_chain hpet_sleep_chain = INITIALIZE_DELTA_CHAIN();
 static struct mcslock_isr hpet_sleep_chain_lock = INITIALIZE_MCSLOCK_ISR();
 
-static void hpet_sleep_ticks_ipi(__unused struct interrupt_info *info, 
-                                 u64 ticks)
+static void hpet_sleep_ticks_ipi(u64 ticks)
 {
     if (ticks == 0)
         return;
@@ -298,7 +297,7 @@ static struct timeout_interface timeout_interface = {
 
 /* isr */
 
-static int hpet_isr(__unused struct interrupt_info *info)
+static int hpet_isr(void)
 {
     enable_interrupts();
 

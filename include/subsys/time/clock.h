@@ -13,7 +13,7 @@ struct clock_time
     u32 year;
 };
 
-typedef void (*clock_alarm_callback_func_t)(struct interrupt_info *info);
+typedef void (*clock_alarm_callback_func_t)(void);
 
 typedef void (*clock_read_t)(struct clock_time *clock_time);
 

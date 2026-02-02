@@ -236,7 +236,7 @@ static struct clock_interface clock_interface = {
 
 /* isr */
 
-static int cmos_isr(struct interrupt_info *info)
+static int cmos_isr(void)
 {
     cmos_c_t cmos_c = {.val = cmos_read(CMOS_C)};
 
@@ -244,7 +244,7 @@ static int cmos_isr(struct interrupt_info *info)
     mcs_lock_isr_save(&alarm_lock, &node);
 
     if (cmos_c.fields.af != 0 && alarm_callback)
-        alarm_callback(info);
+        alarm_callback();
 
     mcs_unlock_isr_restore(&alarm_lock, &node);
     return ISR_DONE;

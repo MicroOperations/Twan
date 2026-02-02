@@ -19,8 +19,8 @@
 #define IPI_LOCKED 1
 #define IPI_PAUSED 2
 
-typedef int (*isr_func_t)(struct interrupt_info *stack_trace);
-typedef void (*ipi_func_t)(struct interrupt_info *stack_trace, u64 arg);
+typedef int (*isr_func_t)(void);
+typedef void (*ipi_func_t)(u64 arg);
 
 struct ipi_data
 {

@@ -3,7 +3,6 @@
 
 #include <include/generated/autoconf.h>
 
-#define KDBG_KBUG_ON CONFIG_KDBG_KBUG_ON
 #define KDBG_PANIC_ON_BUG CONFIG_KDBG_PANIC_ON_BUG
 
 #endif

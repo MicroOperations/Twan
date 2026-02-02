@@ -18,19 +18,19 @@ void flush_tlb_range_local(u64 first, u64 last)
     flush_this_tlb_range(first, last);
 }
 
-void flush_tlb_ipi(__unused struct interrupt_info *unused, __unused u64 arg)
+void flush_tlb_ipi(__unused u64 arg)
 {
     enable_interrupts();
     flush_tlb_local();
 }
 
-void flush_tlb_page_ipi(__unused struct interrupt_info *unused, u64 addr)
+void flush_tlb_page_ipi(u64 addr)
 {
     enable_interrupts();
     flush_this_tlb_page(addr);
 }
 
-void flush_tlb_range_ipi(__unused struct interrupt_info *unused, u64 arg)
+void flush_tlb_range_ipi(u64 arg)
 {
     enable_interrupts();
     

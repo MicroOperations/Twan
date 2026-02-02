@@ -8,16 +8,14 @@
 
 int task_init(struct task *task, __unused u32 processor_id, void *mempool, 
                u64 stack_top, task_func_t func, void *arg, u8 priority, 
-               u8 criticality, __unused bool stealable,
-               sched_put_callback_func_t put_callback_func, 
+               u8 criticality, sched_put_callback_func_t put_callback_func, 
                sched_set_callback_func_t set_callback_func)
 
 #else
 
 int task_init(struct task *task, u32 processor_id, void *mempool, 
               u64 stack_top, task_func_t func, void *arg, u8 priority, 
-              u8 criticality, bool stealable,
-              sched_put_callback_func_t put_callback_func, 
+              u8 criticality,sched_put_callback_func_t put_callback_func, 
               sched_set_callback_func_t set_callback_func)
 
 #endif
@@ -29,10 +27,6 @@ int task_init(struct task *task, u32 processor_id, void *mempool,
     memset(task, 0, sizeof(struct task));
 
     task->mempool = mempool;
-
-#if !SCHED_GLOBAL_QUEUE
-    task->stealable = stealable;
-#endif
 
     task->context.rip = (u64)func;
     task->context.rsp = (u64)stack_top;
@@ -63,7 +57,6 @@ int task_init(struct task *task, u32 processor_id, void *mempool,
 
 struct task *__task_create(__unused u32 processor_id, task_func_t func, 
                            void *arg, u8 priority, u8 criticality, 
-                           __unused bool stealable,
                            sched_put_callback_func_t put_callback_func, 
                            sched_set_callback_func_t set_callback_func)
 
@@ -71,7 +64,7 @@ struct task *__task_create(__unused u32 processor_id, task_func_t func,
 
 
 struct task *__task_create(u32 processor_id, task_func_t func, void *arg, 
-                           u8 priority, u8 criticality, bool stealable,
+                           u8 priority, u8 criticality,
                            sched_put_callback_func_t put_callback_func, 
                            sched_set_callback_func_t set_callback_func)
 
@@ -97,15 +90,14 @@ struct task *__task_create(u32 processor_id, task_func_t func, void *arg,
     *stack_ptr = (u64)current_task_destroy;
 
     task_init(task, processor_id, mempool, (u64)stack_ptr, func, arg, priority, 
-              criticality, stealable, put_callback_func, set_callback_func);
+              criticality, put_callback_func, set_callback_func);
 
     sched_push_on_cpu(task, processor_id);
 
     return task;
 }
 
-void current_task_destroy_ipi(__unused struct interrupt_info *info, 
-                              __unused u64 unused)
+void current_task_destroy_ipi( __unused u64 unused)
 {
     sched_timer_disable();
 
@@ -182,23 +174,6 @@ int current_task_info(u8 *real_priority, u8 *priority, u8 *real_criticality,
     *criticality = current->metadata.criticality;
 
     current_task_enable_preemption();
-    return 0;
-}
-
-int current_task_migrate(u32 processor_id)
-{
-    struct task *current = current_task();
-    if (KBUG_ON(!current) || KBUG_ON(this_cpu_data()->handling_isr))
-        return -EINVAL;
-
-    struct per_cpu *cpu = cpu_data(processor_id);
-    if (!cpu || !cpu_active(cpu->flags))
-        return -EINVAL;
-
-    current_task_disable_preemption();
-    current->metadata.queue_id = cpu_to_queue_id(processor_id);
-    current_task_enable_preemption();
-
     return 0;
 }
 

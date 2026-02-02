@@ -15,8 +15,7 @@
 #include <include/kernel/extern.h>
 #include <include/kernel/apic/apic.h>
 
-extern void __virtualise_core(struct interrupt_info *info, 
-                              u64 vprocessor_id);
+extern void __virtualise_core(u64 vprocessor_id);
 
 extern void __vexit(void);
 
@@ -395,6 +394,7 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
         bool ept = ((proc2 >> 33) & 1) != 0;
         bool vpid = ((proc2 >> 37) & 1) != 0;
         bool ve = ((proc2 >> 50) & 1) != 0;
+        bool pt_use_gpa = ((proc2 >> 56) & 1) != 0;
 
         vthis_cpu->arch_flags.support.fields.wbinvd_exiting = wbinvd_exiting;        
         vthis_cpu->arch_flags.support.fields.unrestricted_guest = ug;
@@ -431,6 +431,8 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
 
             vthis_cpu->arch_flags.support.fields.invvpid_single =
                 ept_cap.fields.single_ctx_invvpid_supported;
+
+            vthis_cpu->arch_flags.support.fields.pt_use_gpa = pt_use_gpa;
         }
     }
 }
@@ -784,6 +786,13 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
 
     /* ctrls */
 
+    vmx_exception_bitmap_t exception_bmp = {
+        .fields = {
+            .debug = 1,
+            .alignment_check = 1
+        }
+    };
+
     vmx_pinbased_ctls_t pin = {
         .fields = {
             .external_interrupt_exiting = 1,
@@ -853,6 +862,8 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
             .load_fred = 1,
         }
     };
+
+    __vmwrite(VMCS_CTRL_EXCEPTION_BITMAP, exception_bmp.val);
 
     vmwrite_adjusted(ia32_vmx_pinbased_ctls,
                      VMCS_CTRL_PINBASED_CONTROLS,
@@ -1071,7 +1082,7 @@ int __start_twanvisor(void)
         ipi_run_func(vper_cpu->processor_id, __virtualise_core, i, true);
     }
 
-    __virtualise_core(NULL, bsp);
+    __virtualise_core(bsp);
 
     struct twan_kernel *kernel = twan();
 

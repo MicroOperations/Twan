@@ -100,7 +100,7 @@ static void guest_init(void)
     memcpy(guest_mem, pv_twanvisor_demo_guest_start, size);
 }
 
-static int terminate_isr(__unused struct interrupt_info *info)
+static int terminate_isr(void)
 {
     kdbg("guest terminated!\n");
     return ISR_DONE;

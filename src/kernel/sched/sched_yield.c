@@ -64,7 +64,7 @@ bool sched_should_request_yield(struct task *task)
     return ret;
 }
 
-void sched_yield_ipi(__unused struct interrupt_info *info, __unused u64 unused)
+void sched_yield_ipi(__unused u64 unused)
 {   
     struct task *current = current_task();
     struct interrupt_info *ctx = task_ctx();
@@ -76,48 +76,11 @@ void sched_yield_ipi(__unused struct interrupt_info *info, __unused u64 unused)
 
     struct task *old_current = current;
 
-#if SCHED_GLOBAL_QUEUE
-
     struct task *task = sched_pop(current);
     if (task) {
         sched_switch_ctx(ctx, task, true);
         current = task;
     }
-
-#else
-
-    u32 this_queue = this_queue_id();
-    if (current->metadata.queue_id != this_queue) {
-
-        /* see if its better that we steal the task */
-        if (current->stealable) {
-
-            struct task *task = sched_pop(current);
-            if (task) {
-                sched_switch_ctx(ctx, task, true);
-                current = task;
-
-            }  else {
-                current->metadata.queue_id = this_queue;
-            }
-
-        /* cant steal the task */
-        } else { 
-            struct task *task = sched_pop_clean_spin();
-            sched_switch_ctx(ctx, task, true);
-            current = task;
-        }
-
-    } else {
-        
-        struct task *task = sched_pop(current);
-        if (task) {
-            sched_switch_ctx(ctx, task, true);
-            current = task;
-        }
-    }
-
-#endif
 
     if (current != old_current) {
 
@@ -137,7 +100,7 @@ void sched_yield(void)
     emulate_self_ipi(sched_yield_ipi, 0);
 }
 
-void sched_yield_wait_ipi(__unused struct interrupt_info *info, u64 _arg)
+void sched_yield_wait_ipi(u64 _arg)
 {
     struct yield_wait_arg *arg = (void *)_arg;
 

@@ -10,11 +10,6 @@
 struct sched_priorityq_bin
 {
     struct priorityq priorityq;
-
-#if !SCHED_GLOBAL_QUEUE
-    struct priorityq stealable_priorityq;
-#endif
-
 };
 
 struct sched_priorityq
@@ -70,16 +65,6 @@ struct task *__sched_priorityq_pop_age(struct sched_priorityq *sched_priorityq);
 
 int __sched_priorityq_highest_priority(
     struct sched_priorityq *sched_priorityq);
-
-#if !SCHED_GLOBAL_QUEUE
-
-int __sched_stealable_priorityq_highest_priority(
-    struct sched_priorityq *sched_priorityq, u8 criticality);
-
-struct task *__sched_stealable_priorityq_peek(
-    struct sched_priorityq *sched_priorityq, u8 criticality);
-
-#endif
 
 bool __sched_priorityq_is_queued(struct task *task);
 

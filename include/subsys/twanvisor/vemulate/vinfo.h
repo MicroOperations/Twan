@@ -322,7 +322,8 @@ typedef union
         u32 ept_accessed_dirty : 1;
         u32 vpid : 1;
         u32 unrestricted_guest : 1;
-        u32 reserved0 : 20;
+        u32 pt_use_gpa : 1;
+        u32 reserved0 : 19;
     } fields;
 } vcpuid_emulation_features0_d_t;
 

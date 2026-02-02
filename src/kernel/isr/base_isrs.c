@@ -2,24 +2,24 @@
 #include <include/kernel/isr/isr_dispatcher.h>
 #include <include/kernel/kapi.h>
 
-int ipi_cmd_isr(struct interrupt_info *info)
+int ipi_cmd_isr(void)
 {
-    ipi_handler(info);
+    ipi_handler();
     return ISR_DONE;
 }
 
-int self_ipi_cmd_isr(struct interrupt_info *info)
+int self_ipi_cmd_isr(void)
 {
-    self_ipi_handler(info);
+    self_ipi_handler();
     return ISR_DONE;
 }
 
-int spurious_int_isr(__unused struct interrupt_info *info)
+int spurious_int_isr(void)
 {
     return ISR_DONE;
 }
 
-int sched_timer_isr(__unused struct interrupt_info *info)
+int sched_timer_isr(void)
 {
     struct interrupt_info *ctx = task_ctx();
     sched_preempt(ctx);

@@ -23,8 +23,7 @@
 // void vfailure_recover_running(void)
 .extern vfailure_recover_running
 
-// void __virtualise_core(__unused struct interrupt_info *info, 
-//                        u64 processor_id)
+// void __virtualise_core(u64 processor_id)
 .globl __virtualise_core
 .type __virtualise_core, @function
 
@@ -48,7 +47,6 @@ __virtualise_core:
     pushq %r14
     pushq %r15
 
-    movl %esi, %edi
     leaq .ret_addr(%rip), %rsi
     movq %rsp, %rdx
 

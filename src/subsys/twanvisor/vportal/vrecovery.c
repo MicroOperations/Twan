@@ -142,7 +142,7 @@ void vdo_finalize_teardown(u8 vid)
     vpartition_put(root_vid, &root_node);
 }
 
-void vfinalize_teardown_ipi(__unused struct interrupt_info *info, u64 vid)
+void vfinalize_teardown_ipi(u64 vid)
 {
     struct interrupt_info *ctx = vthis_cpu_data()->vcpu_ctx;
     vdo_finalize_teardown(vid);
@@ -380,8 +380,7 @@ void vdo_transitioning_recover(struct vcpu *vcpu)
         vdo_finalize_teardown(vcpu->vid);
 }
 
-void vtransitioning_recover_ipi(__unused struct interrupt_info *info, 
-                                __unused u64 arg)
+void vtransitioning_recover_ipi(__unused u64 arg)
 {
     struct interrupt_info *ctx = vthis_cpu_data()->vcpu_ctx;
     vdo_transitioning_recover(vcurrent_vcpu());

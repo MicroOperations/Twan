@@ -3,7 +3,6 @@
 
 #include <include/generated/autoconf.h>
 
-#define VDBG_VBUG_ON CONFIG_VDBG_VBUG_ON
 #define VDBG_PANIC_ON_BUG CONFIG_VDBG_PANIC_ON_BUG
 
 #endif

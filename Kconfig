@@ -32,10 +32,6 @@ config KERNEL_MAX_HEAP_SIZE
     range 0 1073741824
     default 1073741824
 
-config KDBG_KBUG_ON
-    bool "Enable KBUG checks"
-    default y
-
 config KDBG_PANIC_ON_BUG
     bool "Kpanic when KBUG checks flag a bug"
     default n
@@ -45,6 +41,8 @@ config KDBG_PANIC_ON_BUG
 config TWANVISOR_ON
     bool "Enable twanvisor"
     default y
+
+if TWANVISOR_ON
 
 config TWANVISOR_PV_LOCKS
     bool "Enable kernel paravirtualised locking"
@@ -67,10 +65,6 @@ config TWANVISOR_NUM_VTIMERS
     int "Virtual timer count"
     range 3 255
     default 3
-
-config VDBG_VBUG_ON
-    bool "Enable VBUG checks"
-    default y
 
 config VDBG_PANIC_ON_BUG
     bool "Vpanic when VBUG checks flag a bug"
@@ -128,6 +122,8 @@ config DISABLE_BRANCH_PREDICTION_U
     bool "Disable branch prediction in user modes"
     default n
 
+endif
+
 # Demos
 
 config DEMO_EARLY_INITCALLS
@@ -143,5 +139,6 @@ config DEMO_DRIVERS
     default n
 
 config DEMO_PV_TWANVISOR
+    depends on TWANVISOR_ON
     bool "Enable demo for twanvisor"
     default n

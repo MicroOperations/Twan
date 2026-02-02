@@ -208,6 +208,18 @@ inline bool inject_ud(void)
                             false, 0, false, 0);
 }
 
+inline bool inject_ac(u64 errcode)
+{
+    return inject_interrupt(ALIGNMENT_CHECK, INTERRUPT_TYPE_HARDWARE_EXCEPTION,
+                            true, errcode, false, 0);
+}
+
+inline bool inject_db(interrupt_type_t int_type, bool deliver_len, u32 len)
+{
+    return inject_interrupt(DEBUG_EXCEPTION, int_type,
+                            false, 0, deliver_len, len);
+}
+
 inline void advance_guest_rip(void)
 {
     __vmwrite(VMCS_GUEST_RIP, vmread(VMCS_GUEST_RIP) + 
@@ -477,6 +489,29 @@ inline void queue_inject_ud(void)
     struct mcsnode node = INITIALIZE_MCSNODE();
     vmcs_lock_isr_save(&current->visr_pending.lock, &node);
     current->visr_pending.delivery.fields.ud_pending = 1;
+    vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
+}
+
+inline void queue_inject_db(interrupt_type_t int_type)
+{
+    struct vcpu *current = vcurrent_vcpu();
+    
+    struct mcsnode node = INITIALIZE_MCSNODE();
+    vmcs_lock_isr_save(&current->visr_pending.lock, &node);
+
+    current->visr_pending.delivery.fields.db_pending = 1;
+    current->visr_pending.delivery.fields.int_type = int_type;
+
+    vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
+}
+
+inline void queue_inject_ac0(void)
+{
+    struct vcpu *current = vcurrent_vcpu();
+    
+    struct mcsnode node = INITIALIZE_MCSNODE();
+    vmcs_lock_isr_save(&current->visr_pending.lock, &node);
+    current->visr_pending.delivery.fields.ac0_pending = 1;
     vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
 }
 

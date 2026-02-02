@@ -4026,8 +4026,8 @@ typedef enum
 	INTERRUPT_TYPE_RESERVED = 1,
 	INTERRUPT_TYPE_NMI = 2,
 	INTERRUPT_TYPE_HARDWARE_EXCEPTION = 3,
-	INTERRUPT_TYPE_SOFTWARE = 4,
-	INTERRUPT_TYPE_PRIVILEGED_SOFTWARE = 5,
+	INTERRUPT_TYPE_SOFTWARE_INT = 4,
+	INTERRUPT_TYPE_PRIVILEGED_SOFTWARE_EXCEPTION = 5,
 	INTERRUPT_TYPE_SOFTWARE_EXCEPTION = 6,
 	INTERRUPT_TYPE_OTHER_EVENT = 7
 } interrupt_type_t;
@@ -4432,12 +4432,6 @@ typedef union
     } fields;
 } vectored_events_info_t;
 
-#define VECTORED_EVENT_TYPE_EXTERNAL 0
-#define VECTORED_EVENT_TYPE_NMI 2
-#define VECTORED_EVENT_TYPE_HARDWARE_EXCEPTION 3
-#define VECTORED_EVENT_TYPE_PRIVILEGED_SOFTWARE_EXCEPTION 5
-#define VECTORED_EVENT_TYPE_SOFTWARE_EXCEPTION 6
-
 typedef union
 {
     u32 val;
@@ -4451,5 +4445,22 @@ typedef union
         u32 reserved0 : 27;
     } fields;
 } guest_interruptibility_state_t;
+
+typedef union 
+{
+    u64 val;
+    struct 
+    {
+        u64 drx : 4;
+        u64 undefined0 : 7;
+        u64 bus_lock_detected : 1;
+        u64 undefined1 : 1;
+        u64 debug_reg_access_detected : 1;
+        u64 single_step : 1;
+        u64 undefined2 : 1;
+        u64 rtm : 1;
+        u64 reserved0 : 47;
+    } fields;
+} debug_exception_qualification_t;
 
 #endif

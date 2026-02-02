@@ -76,8 +76,15 @@ void __venter(void)
 
     vinterrupt_delivery_data_t data = current->visr_pending.delivery;
 
-    bool gp_pending = data.fields.gp0_pending != 0;
+    int exception_count = data.fields.gp0_pending + data.fields.ud_pending +
+                          data.fields.db_pending + data.fields.ac0_pending;
+
+    VBUG_ON(exception_count > 1);
+
+    bool gp0_pending = data.fields.gp0_pending != 0;
     bool ud_pending = data.fields.ud_pending != 0;
+    bool db_pending = data.fields.db_pending != 0;
+    bool ac0_pending = data.fields.ac0_pending != 0;
     bool nmi_pending = data.fields.nmi_pending != 0;
 
     bool in_nmi = data.fields.in_nmi != 0;
@@ -88,12 +95,8 @@ void __venter(void)
     int current_intl = current->visr_pending.delivery.fields.intl;
     u32 in_intl = current->visr_pending.delivery.fields.in_intl;
 
-    int vector = bmp256_fls(pending);
-
-    VBUG_ON(gp_pending && ud_pending);
-
     bool injected = false;
-    if (gp_pending) {
+    if (gp0_pending) {
 
         inject_gp(0);
         current->visr_pending.delivery.fields.gp0_pending = 0;
@@ -103,6 +106,39 @@ void __venter(void)
 
         inject_ud();
         current->visr_pending.delivery.fields.ud_pending = 0;
+        injected = true;
+
+    } else if (db_pending) {
+
+        u32 int_type = data.fields.int_type;
+
+        switch (int_type) {
+        
+            case INTERRUPT_TYPE_HARDWARE_EXCEPTION:
+
+                inject_db(int_type, false, 0);
+                break;
+
+            case INTERRUPT_TYPE_SOFTWARE_INT:
+            case INTERRUPT_TYPE_PRIVILEGED_SOFTWARE_EXCEPTION:
+            case INTERRUPT_TYPE_SOFTWARE_EXCEPTION:
+
+                u32 len = vmread(VMCS_RO_VMEXIT_INSTRUCTION_LENGTH);
+                inject_db(int_type, true, len);
+                break;
+
+            default:
+                VBUG_ON(true);
+                break;
+        }
+
+        current->visr_pending.delivery.fields.db_pending = 0;
+        injected = true;
+
+    } else if (ac0_pending) {
+
+        inject_ac(0);
+        current->visr_pending.delivery.fields.ac0_pending = 0;
         injected = true;
 
     } else if (nmi_pending) {
@@ -142,6 +178,8 @@ void __venter(void)
         }
         
     } 
+    
+    int vector = bmp256_fls(pending);
     
     if (vector >= 0 && !injected) {
 

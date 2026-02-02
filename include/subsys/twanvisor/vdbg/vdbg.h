@@ -28,8 +28,6 @@
 
 #endif
 
-#if VDBG_VBUG_ON
-
 #define VBUG_ON_RAW(cond, fmt, ...)             \
 ({                                              \
     bool bug = false;                           \
@@ -41,17 +39,6 @@
                                                 \
     bug;                                        \
 })                                              \
-
-#else
-
-#define VBUG_ON_RAW(cond, fmt, ...) \
-({                                  \
-    (void)(cond);                   \
-    (void)(fmt);                    \
-    (cond);                         \
-})
-
-#endif
 
 #define VBUG_ON(cond)                                           \
     VBUG_ON_RAW((cond), "condition: %s, file: %s, line: %d\n",  \

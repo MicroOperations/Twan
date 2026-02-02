@@ -133,7 +133,7 @@ void log_exception(struct interrupt_info *stack_trace)
     kdbgf("[CR4]: 0x%lx\n", __read_cr4().val);
 }
 
-void ipi_handler(struct interrupt_info *info)
+void ipi_handler(void)
 {
     struct twan_kernel *kernel = twan();
     u32 processor_id = this_processor_id();
@@ -153,18 +153,18 @@ void ipi_handler(struct interrupt_info *info)
 
         if (wait) {
 
-            func(info, arg);
+            func(arg);
             __ipi_ack(i);
 
         } else {
 
             __ipi_ack(i);
-            func(info, arg);
+            func(arg);
         }
     }
 }
 
-void self_ipi_handler(struct interrupt_info *info)
+void self_ipi_handler(void)
 {
     u32 processor_id = this_processor_id();
 
@@ -176,7 +176,7 @@ void self_ipi_handler(struct interrupt_info *info)
     u64 arg = data->arg;
     ipi_func_t func = data->func;
 
-    func(info, arg);
+    func(arg);
     atomic32_set(&data->signal, IPI_UNLOCKED);
 }
 
@@ -187,6 +187,9 @@ void __isr_dispatcher(struct interrupt_info *stack_trace)
     u8 vector = stack_trace->vector;
     bool was_in_isr = this_cpu->handling_isr;
     int old_intl = this_cpu->intl;
+    struct interrupt_info *old_int_ctx = this_cpu->int_ctx;
+
+    this_cpu->int_ctx = stack_trace;
 
     if (!was_in_isr) {
         this_cpu->handling_isr = true;
@@ -205,7 +208,7 @@ void __isr_dispatcher(struct interrupt_info *stack_trace)
 
     isr_func_t func = atomic_ptr_read(&this_cpu->isr_table[vector]);
     if (func)
-        ret = INDIRECT_BRANCH_SAFE(func(stack_trace));
+        ret = INDIRECT_BRANCH_SAFE(func());
 
     /* interrupts must be disabled here to prevent our stack being reused
        by same priority interrupt when we acknowledge */
@@ -227,4 +230,5 @@ void __isr_dispatcher(struct interrupt_info *stack_trace)
     }
 
     this_cpu->intl = old_intl;
+    this_cpu->int_ctx = old_int_ctx;
 }

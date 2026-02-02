@@ -39,10 +39,10 @@ do {                                                                        \
 bool sched_try_answer_yield_request(void);
 bool sched_should_request_yield(struct task *task);
 
-void sched_yield_ipi(__unused struct interrupt_info *info, __unused u64 unused);
+void sched_yield_ipi(__unused u64 unused);
 void sched_yield(void);
 
-void sched_yield_wait_ipi(__unused struct interrupt_info *info, u64 _arg);
+void sched_yield_wait_ipi(u64 _arg);
 
 void sched_yield_wait_and_unlock(struct waitq *waitq, bool insert_real, 
                                  struct mcsnode *waitq_node, bool timeout, 

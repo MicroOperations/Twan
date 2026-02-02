@@ -54,8 +54,6 @@ struct kdbg
 
 #endif
 
-#if KDBG_KBUG_ON
-
 #define KBUG_ON_RAW(cond, fmt, ...)             \
 ({                                              \
     bool bug = false;                           \
@@ -67,17 +65,6 @@ struct kdbg
                                                 \
     bug;                                        \
 })                                              \
-
-#else
-
-#define KBUG_ON_RAW(cond, fmt, ...) \
-({                                  \
-    (void)(cond);                   \
-    (void)(fmt);                    \
-    (cond);                         \
-})
-
-#endif
 
 #define KBUG_ON(cond)                                           \
     KBUG_ON_RAW((cond), "condition: %s, file: %s, line: %d\n",  \

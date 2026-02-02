@@ -14,8 +14,8 @@ bool __in_service(u8 vector);
 bool is_critical_exception(u8 vector);
 void log_exception(struct interrupt_info *stack_trace);
 
-void ipi_handler(struct interrupt_info *info);
-void self_ipi_handler(struct interrupt_info *info);
+void ipi_handler(void);
+void self_ipi_handler(void);
 
 void __isr_dispatcher(struct interrupt_info *stack_trace);
 

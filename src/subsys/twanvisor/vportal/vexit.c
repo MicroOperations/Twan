@@ -140,7 +140,28 @@ static void vexit_exception(__unused struct vregs *vregs)
         __vmwrite(VMCS_GUEST_INTERRUPTIBILITY_STATE, state.val);
     }
 
-    VBUG_ON(info.fields.vectored_event_type == VECTORED_EVENT_TYPE_NMI);    
+    interrupt_type_t int_type = info.fields.vectored_event_type;
+    u8 vector = info.fields.vector;
+
+    switch (vector) {
+        
+        case DEBUG_EXCEPTION:
+            queue_inject_db(int_type);
+            break;
+
+        case ALIGNMENT_CHECK:
+            
+            VBUG_ON(info.fields.errcode_delivered == 0);
+            VBUG_ON(vmread(VMCS_RO_IDT_VECTORING_ERROR_CODE) != 0);
+
+            queue_inject_ac0();
+            break;
+
+        default:
+            VBUG_ON(true);
+            break;
+    }
+    
     vcurrent_vcpu_enable_preemption();
 }
 
@@ -160,8 +181,9 @@ static void vexit_ext_intr(__unused struct vregs *vregs)
         __vmwrite(VMCS_GUEST_INTERRUPTIBILITY_STATE, state.val);
     }
     
-    if (info.fields.vectored_event_type == VECTORED_EVENT_TYPE_EXTERNAL)
-        vexit_ext_dispatcher(info.fields.vector);
+    VBUG_ON(info.fields.vectored_event_type != INTERRUPT_TYPE_EXTERNAL);
+    
+    vexit_ext_dispatcher(info.fields.vector);
     
     vcurrent_vcpu_enable_preemption();
 }

@@ -39,11 +39,6 @@ struct task
     struct list_double nodes[SCHED_NUM_CRITICALITIES];
     struct flat_priorityq_node waiting_node;
 
-#if !SCHED_GLOBAL_QUEUE
-    bool stealable;
-    struct list_double stealable_nodes[SCHED_NUM_CRITICALITIES];
-#endif
-
     struct delta_node sleep_node;
 
     atomic32_t preemption_count;
@@ -69,13 +64,6 @@ struct task
 
 #define waiting_node_to_task(ptr) \
     container_of((ptr), struct task, waiting_node)
-
-#if !SCHED_GLOBAL_QUEUE
-
-#define stealable_node_to_task(ptr, criticality) \
-    container_of((ptr), struct task, stealable_nodes[criticality])
-
-#endif
 
 #define sleep_node_to_task(ptr) \
     container_of((ptr), struct task, sleep_node)
@@ -132,37 +120,34 @@ struct task
 } while (0)
 
 #define task_create_on_cpu_callbacks(processor_id, func, arg, priority,     \
-                                     criticality,  stealable,               \
-                                     put_callback_func, set_callback_func)  \
+                                     criticality, put_callback_func,        \
+                                     set_callback_func)                     \
     __task_create((processor_id), (func), (arg), (priority), (criticality), \
-                  (stealable), (put_callback_func), (set_callback_func))
+                  (put_callback_func), (set_callback_func))
 
-#define task_create_callbacks(func, arg, priority, criticality, stealable,  \
+#define task_create_callbacks(func, arg, priority, criticality,             \
                               put_callback_func, set_callback_func)         \
     task_create_on_cpu_callbacks(this_processor_id(), (func), (arg),        \
-                                 (priority), (criticality), (stealable),    \
+                                 (priority), (criticality),    \
                                  (put_callback_func), (set_callback_func))
 
-#define task_create_on_cpu(processor_id, func, arg, priority, criticality,  \
-                          stealable)                                        \
+#define task_create_on_cpu(processor_id, func, arg, priority, criticality)  \
     task_create_on_cpu_callbacks((processor_id), (func), (arg), (priority), \
-                                 (criticality), (stealable), NULL, NULL)
+                                 (criticality), NULL, NULL)
 
-#define task_create(func, arg, priority, criticality, stealable)        \
+#define task_create(func, arg, priority, criticality)        \
     task_create_on_cpu(this_processor_id(), (func), (arg), (priority),  \
-                       (criticality), (stealable)) 
+                       (criticality)) 
 
 #if SCHED_GLOBAL_QUEUE 
 
 int task_init(struct task *task, __unused u32 processor_id, void *mempool,
               u64 stack_top, task_func_t func, void *arg, u8 priority, 
-              u8 criticality, __unused bool stealable, 
-              sched_put_callback_func_t put_callback_func, 
+              u8 criticality, sched_put_callback_func_t put_callback_func, 
               sched_set_callback_func_t set_callback_func);
 
 struct task *__task_create(__unused u32 processor_id, task_func_t func, 
                            void *arg, u8 priority, u8 criticality, 
-                           __unused bool stealable, 
                            sched_put_callback_func_t put_callback_func, 
                            sched_set_callback_func_t set_callback_func);
 
@@ -170,19 +155,17 @@ struct task *__task_create(__unused u32 processor_id, task_func_t func,
 
 int task_init(struct task *task, u32 processor_id, void *mempool,
               u64 stack_top, task_func_t func, void *arg, u8 priority, 
-              u8 criticality, bool stealable, 
-              sched_put_callback_func_t put_callback_func, 
+              u8 criticality, sched_put_callback_func_t put_callback_func, 
               sched_set_callback_func_t set_callback_func);
 
 struct task *__task_create(u32 processor_id, task_func_t func, void *arg, 
-                           u8 priority, u8 criticality, bool stealable,
+                           u8 priority, u8 criticality,
                            sched_put_callback_func_t put_callback_func, 
                            sched_set_callback_func_t set_callback_func);
 
 #endif
 
-void current_task_destroy_ipi(__unused struct interrupt_info *info, 
-                              __unused u64 unused);
+void current_task_destroy_ipi(__unused u64 unused);
                               
 void current_task_destroy(void);
 
@@ -193,8 +176,6 @@ void current_task_write(u8 priority, u8 criticality);
 
 int current_task_info(u8 *real_priority, u8 *priority, u8 *real_criticality, 
                       u8 *criticality);
-
-int current_task_migrate(u32 processor_id);
 
 u32 current_task_preemption_count(void);
 bool current_task_is_preemption_enabled(void);

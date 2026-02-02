@@ -11,10 +11,10 @@
 /* x86 isr priority level 15 */
 #define SCHED_TIMER_VECTOR 255
 
-int ipi_cmd_isr(struct interrupt_info *info);
-int self_ipi_cmd_isr(struct interrupt_info *info);
-int spurious_int_isr(__unused struct interrupt_info *info);
-int sched_timer_isr(__unused struct interrupt_info *info);
+int ipi_cmd_isr(void);
+int self_ipi_cmd_isr(void);
+int spurious_int_isr(void);
+int sched_timer_isr(void);
 
 void register_base_isrs_local(void);
 

@@ -1,8 +1,6 @@
 #ifndef _VCPU_H_
 #define _VCPU_H_
 
-#include "include/compiler.h"
-#include "include/lib/x86_index.h"
 #include <include/subsys/twanvisor/vsched/vsched_conf.h>
 #include <include/subsys/twanvisor/vsched/vsync.h>
 #include <include/subsys/twanvisor/varch.h>
@@ -11,7 +9,16 @@
 #include <include/lib/dsa/delta_chain.h>
 #include <include/kernel/isr/isr_index.h>
 
+#if CONFIG_TWANVISOR_ON
+
 #define VNUM_VTIMERS CONFIG_TWANVISOR_NUM_VTIMERS
+
+#else
+
+#define VNUM_VTIMERS 1
+
+#endif
+
 STATIC_ASSERT(VNUM_VTIMERS <= UINT8_MAX);
 
 typedef enum
@@ -129,10 +136,13 @@ typedef union
         u32 nmi_pending : 1;
         u32 gp0_pending : 1;
         u32 ud_pending : 1;
+        u32 db_pending : 1;
+        u32 ac0_pending : 1;
         u32 intl : 4;
         u32 int_window_exit : 1;
         u32 nmi_window_exit : 1;
-        u32 reserved0 : 6;
+        u32 int_type : 3;
+        u32 reserved0 : 1;
     } fields;
 } vinterrupt_delivery_data_t;
 

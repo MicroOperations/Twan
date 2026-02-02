@@ -50,16 +50,6 @@ void __sched_priorityq_push(struct sched_priorityq *sched_priorityq,
 
         priorityq_push(&sched_priorityq->bins[i].priorityq, &task->nodes[i], 
                        priority, PUSHBACK);
-
-#if !SCHED_GLOBAL_QUEUE
-
-        if (task->stealable) {
-
-            priorityq_push(&sched_priorityq->bins[i].stealable_priorityq,
-                           &task->stealable_nodes[i], priority, PUSHBACK);
-        }
-
-#endif
     }
 }
 
@@ -76,19 +66,6 @@ void __sched_priorityq_dequeue(struct task *task)
 
         struct priorityq *priorityq = &sched_priorityq->bins[i].priorityq;
         priorityq_dequeue(priorityq, &task->nodes[i], priority);
-
-#if !SCHED_GLOBAL_QUEUE
-
-        struct priorityq *stealable_priorityq = 
-            &sched_priorityq->bins[i].stealable_priorityq;
-
-        if (task->stealable) {
-
-            priorityq_dequeue(stealable_priorityq, &task->stealable_nodes[i], 
-                              priority);
-        }
-        
-#endif
     }
 }
 
@@ -197,31 +174,6 @@ int __sched_priorityq_highest_priority(struct sched_priorityq *sched_priorityq)
 
     return ret;
 }
-
-#if !SCHED_GLOBAL_QUEUE
-
-int __sched_stealable_priorityq_highest_priority(
-    struct sched_priorityq *sched_priorityq, u8 criticality)
-{
-    struct sched_priorityq_bin *bin = &sched_priorityq->bins[criticality];
-    return priorityq_awaiting_priority(&bin->stealable_priorityq);
-}
-
-struct task *__sched_stealable_priorityq_peek(
-    struct sched_priorityq *sched_priorityq, u8 criticality)
-{
-    struct sched_priorityq_bin *bin = &sched_priorityq->bins[criticality];
-
-    struct list_double *stealable_node = 
-        priorityq_peekfront(&bin->stealable_priorityq);
-
-    if (!stealable_node)
-        return NULL;
-
-    return stealable_node_to_task(stealable_node, criticality);
-}
-
-#endif
 
 bool __sched_priorityq_is_queued(struct task *task)
 {

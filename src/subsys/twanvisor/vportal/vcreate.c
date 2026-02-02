@@ -273,6 +273,13 @@ void vcpu_entry(void)
 
     current->arch.vmcs.header.fields.revision_id = rev_id;
 
+    vmx_exception_bitmap_t exception_bmp = {
+        .fields = {
+            .debug = 1,
+            .alignment_check = 1
+        }
+    };
+
     vmx_pinbased_ctls_t pin = {
         .fields = {
             .external_interrupt_exiting = 1,
@@ -329,6 +336,8 @@ void vcpu_entry(void)
 
     if (!__vmclear(vmcs_phys) || !__vmptrld(vmcs_phys))
         vfailure_recover();
+
+    __vmwrite(VMCS_CTRL_EXCEPTION_BITMAP, exception_bmp.val);
 
     vmwrite_adjusted(ia32_vmx_pinbased_ctls, VMCS_CTRL_PINBASED_CONTROLS, 
                     pin.val);

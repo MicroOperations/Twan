@@ -30,8 +30,7 @@ bool vsched_should_request_yield(struct vcpu *current)
     return ret;
 }
 
-void vsched_yield_ipi(__unused struct interrupt_info *unused0, 
-                      __unused u64 unused1)
+void vsched_yield_ipi(__unused u64 unused1)
 {
     struct vcpu *current = vcurrent_vcpu();
     struct interrupt_info *ctx = vthis_cpu_data()->vcpu_ctx;
@@ -45,8 +44,7 @@ void vsched_yield(void)
     vemulate_self_ipi(vsched_yield_ipi, 0);
 }
 
-void vsched_pause_ipi(__unused struct interrupt_info *unused0, 
-                      u64 pv_spin)
+void vsched_pause_ipi(u64 pv_spin)
 {
     struct vcpu *current = vcurrent_vcpu();
     struct interrupt_info *ctx = vthis_cpu_data()->vcpu_ctx;
@@ -65,8 +63,7 @@ void vsched_pause(bool pv_spin)
     vemulate_self_ipi(vsched_pause_ipi, pv_spin);
 }
 
-void vsched_recover_ipi(__unused struct interrupt_info *unused0, 
-                        __unused u64 unused1)
+void vsched_recover_ipi(__unused u64 unused1)
 {
     struct interrupt_info *ctx = vthis_cpu_data()->vcpu_ctx;
     vsched_get_spin(ctx);

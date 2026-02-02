@@ -74,6 +74,7 @@ struct per_cpu
 
     struct task *current_task;
     struct interrupt_info *task_ctx;
+    struct interrupt_info *int_ctx;
 
     struct per_cpu *this;
 
@@ -222,6 +223,9 @@ struct twan_kernel
 
 #define task_ctx() \
     ((struct interrupt_info *)__readgs64(offsetof(struct per_cpu, task_ctx)))
+
+#define int_ctx() \
+    ((struct interrupt_info *)__readgs64(offsetof(struct per_cpu, int_ctx)))
 
 #define set_current_task(task) \
     (__writegs64(offsetof(struct per_cpu, current_task), (u64)(task)))

@@ -46,8 +46,7 @@ static void sleep_wakeup_task(struct delta_node *node)
     sched_push(task);
 }
 
-static void gp_sleep_ticks_ipi(__unused struct interrupt_info *info, 
-                                 u64 ticks)
+static void gp_sleep_ticks_ipi(u64 ticks)
 {
     if (ticks == 0)
         return;
@@ -152,7 +151,7 @@ static struct timeout_interface timeout_interface = {
 
 /* isrs */
 
-static int gp_isr(__unused struct interrupt_info *info)
+static int gp_isr(void)
 {
     enable_interrupts();
 

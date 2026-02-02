@@ -172,6 +172,7 @@ void vinfo_emulation_features(struct vregs *vregs)
                     .ept_accessed_dirty = support.fields.ept_accessed_dirty,
                     .vpid = support.fields.vpid & support.fields.invvpid_single,
                     .unrestricted_guest = support.fields.unrestricted_guest,
+                    .pt_use_gpa = support.fields.pt_use_gpa
                 }
             };
 

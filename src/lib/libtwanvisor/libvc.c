@@ -1,13 +1,13 @@
 #include <include/lib/libtwanvisor/libvc.h>
 #include <include/kernel/kapi.h>
 
-void vsubscribe_ipi(__unused struct interrupt_info *info, u64 arg)
+void vsubscribe_ipi(u64 arg)
 {
     struct vsub_ipi_arg *data = (void *)arg;
     data->ret = tv_vsubscribe_external_interrupt_vector(data->vector);
 }
 
-void vunsubscribe_ipi(__unused struct interrupt_info *info, u64 arg)
+void vunsubscribe_ipi(u64 arg)
 {
     struct vsub_ipi_arg *data = (void *)arg;
     data->ret = tv_vsubscribe_external_interrupt_vector(data->vector);
@@ -61,14 +61,14 @@ long tv_vunsubscribe_on_cpu(u32 processor_id, u8 vector)
     return ret;
 }
 
-void varm_timer_ipi(__unused struct interrupt_info *info, u64 arg)
+void varm_timer_ipi(u64 arg)
 {
     struct varm_timer_ipi_arg *data = (void *)arg;
     data->ret = tv_varm_timern(data->vector, data->timer_n, data->nmi, 
                                data->ticks, data->periodic);
 }
 
-void vdisarm_timer_ipi(__unused struct interrupt_info *info, u64 arg)
+void vdisarm_timer_ipi(u64 arg)
 {
     struct vdisarm_timer_ipi_arg *data = (void *)arg;
     data->ret = tv_vdisarm_timern(data->timer_n);

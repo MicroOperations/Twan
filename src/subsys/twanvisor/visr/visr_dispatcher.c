@@ -131,7 +131,7 @@ void __visr_dispatcher(struct interrupt_info *stack_trace)
                 u64 self_ipi_arg = vthis_cpu->vipi_data.self_ipi.arg;
                
                 if (self_ipi_func)
-                    self_ipi_func(stack_trace, self_ipi_arg);
+                    self_ipi_func(self_ipi_arg);
 
                 vthis_cpu->vipi_data.is_self_ipi = false;
             } else {
