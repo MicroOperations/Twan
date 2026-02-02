@@ -1,0 +1,10 @@
+gcc
+make
+python3
+python-pipx
+qemu-system-x86
+python-kconfiglib
+libisoburn
+grub
+mtools
+vim

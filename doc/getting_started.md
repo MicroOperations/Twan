@@ -7,7 +7,10 @@ Clone the repository and install dependancies
 ```
 git clone --recursive https://github.com/MicroOperations/Twan
 cd Twan
-sudo bash setup.sh
+# Debian and Debian-based distributions (using apt):
+sudo bash setup/debian.sh
+# Arch Linux (using pacman):
+sudo bash setup/arch_linux.sh
 ```
 
 ## Building Twan
