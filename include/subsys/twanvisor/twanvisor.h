@@ -132,8 +132,7 @@ typedef union
         u64 verw_clears_fb: 1;
         u64 sr_bios_done : 1;
         u64 virtual_enum : 1;
-        u64 prmrr_activated : 1;
-        u64 reserved0 : 56;
+        u64 reserved0 : 57;
 
         /* sticky bit set when the sched timer is armed, unset when the sched
            timer fires, should be touched only with interrupts disabled to 

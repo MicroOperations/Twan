@@ -211,18 +211,6 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
     extended_features1_d_t ext_features1_d = {.val = ext_regs1[3]};
     extended_features2_d_t extended_features2_d = {.val = ext_regs2[3]};
 
-    if (ext_features0_b.fields.sgx != 0) {
-
-        ia32_prmrr_phys_mask_t mask = {.val = __rdmsrl(IA32_PRMRR_PHYS_MASK)};
-        vthis_cpu->sec_flags.fields.prmrr_activated = mask.fields.valid;   
-
-        if (!mask.fields.lock) {
-            
-            mask.fields.lock = 1;
-            __wrmsrl(IA32_PRMRR_PHYS_MASK, mask.val);
-        }
-    }
-
     /* setup ia32_spec_ctrl */
     ia32_spec_ctrl_t spec_ctrl = {0};
 
