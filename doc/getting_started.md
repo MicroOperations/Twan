@@ -4,7 +4,7 @@
 
 Clone the repository and install dependancies
 
-```
+```sh
 git clone --recursive https://github.com/MicroOperations/Twan
 cd Twan
 # Debian and Debian-based distributions (using apt):
@@ -17,7 +17,7 @@ sudo bash setup/arch_linux.sh
 
 Twan can be built using make
 
-```
+```sh
 make
 ```
 
@@ -25,7 +25,7 @@ make
 
 Twan can be tested in QEMU/KVM using nested virtualisation
 
-```
+```sh
 make kvm
 ```
 
