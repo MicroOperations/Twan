@@ -1,5 +1,4 @@
 #include <include/subsys/time/sleep.h>
-
 #if CONFIG_SUBSYS_SLEEP
 
 #include <include/kernel/kernel.h>

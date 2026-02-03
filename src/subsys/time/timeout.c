@@ -1,5 +1,4 @@
 #include <include/subsys/time/timeout.h>
-
 #if CONFIG_SUBSYS_TIMEOUT
 
 static struct timeout timeout_global;

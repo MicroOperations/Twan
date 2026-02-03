@@ -1,5 +1,4 @@
 #include <include/subsys/time/clock.h>
-
 #if CONFIG_SUBSYS_CLOCK
 
 #include <include/subsys/debug/kdbg/kdbg.h>

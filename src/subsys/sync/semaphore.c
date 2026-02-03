@@ -1,4 +1,6 @@
 #include <include/subsys/sync/semaphore.h>
+#if CONFIG_SUBSYS_SEMAPHORE
+
 #include <include/kernel/kapi.h>
 #include <include/kernel/sched/sched.h>
 #include <include/subsys/debug/kdbg/kdbg.h>
@@ -63,3 +65,5 @@ void semaphore_up(struct semaphore *sem)
     atomic64_inc(&sem->count);
     waitq_wakeup_front(&sem->waitq, NULL);
 }
+
+#endif

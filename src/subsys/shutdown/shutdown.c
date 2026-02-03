@@ -1,5 +1,4 @@
 #include <include/subsys/shutdown/shutdown.h>
-
 #if CONFIG_SUBSYS_SHUTDOWN
 
 #include <include/subsys/debug/kdbg/kdbg.h>

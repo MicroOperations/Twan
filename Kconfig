@@ -47,7 +47,11 @@ config SUBSYS_WATCHDOG
     default n
 
 config SUBSYS_MUTEX
-    bool "Enable mutex subsystem"
+    bool "Enable mutexes"
+    default y
+
+config SUBSYS_SEMAPHORE
+    bool "Enable semaphores"
     default y
 
 config SUBSYS_TWANVISOR

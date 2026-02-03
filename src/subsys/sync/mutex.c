@@ -1,5 +1,4 @@
 #include <include/subsys/sync/mutex.h>
-
 #if CONFIG_SUBSYS_MUTEX
 
 #include <include/kernel/kapi.h>
