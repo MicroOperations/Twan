@@ -480,6 +480,11 @@ static void vexit_rdmsr(struct vregs *vregs)
 
         case IA32_FEATURE_CONTROL:
 
+            if (vcache->trap_cache.fields.ia32_feature_control_rw == 0) {
+                queue_inject_gp0();
+                return;
+            }
+
             vregs->regs.rax = vcache->via32_feature_ctrl_low;
             vregs->regs.rdx = vcache->via32_feature_ctrl_high;
             break;
@@ -536,6 +541,11 @@ static void vexit_wrmsr(struct vregs *vregs)
             break;
 
         case IA32_FEATURE_CONTROL:
+
+            if (vcache->trap_cache.fields.ia32_feature_control_rw == 0) {
+                queue_inject_gp0();
+                return;
+            }
 
             if (eax != vcache->via32_feature_ctrl_low || 
                 edx != vcache->via32_feature_ctrl_high) {

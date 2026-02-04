@@ -9,13 +9,10 @@ void vsetup_traps(struct vper_cpu *vthis_cpu, struct vcpu *vcpu)
     vper_cpu_trap_cache_t trap_cache = vthis_cpu->vcache.trap_cache;
     vper_cpu_feature_flags_t feature_flags = vthis_cpu->feature_flags;
 
-    /* intercept whatever msr's we must */
+    trap_msr(vcpu, IA32_FEATURE_CONTROL);
 
     if (trap_cache.fields.ia32_arch_capabilities_r != 0)
         trap_msr_read(vcpu, IA32_ARCH_CAPABILITIES);
-
-    if (trap_cache.fields.ia32_feature_control_rw != 0)
-        trap_msr(vcpu, IA32_FEATURE_CONTROL);
 
     /* trap supported msr's that we do not emulate */
 

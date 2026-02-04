@@ -81,6 +81,9 @@ void lapic_reconfig(struct vper_cpu *vthis_cpu)
 
         ia32_mcg_cap_t mcg_cap = {.val = __rdmsrl(IA32_MCG_CAP)};
 
+        vthis_cpu->vcache.trap_cache.fields.lmce = 
+            mcg_cap.fields.mcg_lmce_present;
+
         if (mcg_cap.fields.mcp_cmci_present != 0) {
             
             lapic_cmci_t cmci = {
@@ -334,6 +337,12 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
         .val = __rdmsrl(IA32_FEATURE_CONTROL)
     };
 
+    if (ia32_feature_control.fields.locked == 0)
+        __wrmsrl(IA32_FEATURE_CONTROL, ia32_feature_control.val);
+
+    ia32_feature_control.fields.locked = 1;
+    ia32_feature_control.fields.vmx_inside_smx = 0;
+    ia32_feature_control.fields.vmx_outside_smx = 0;
     ia32_feature_control.fields.senter_global_enable = 0;
     ia32_feature_control.fields.senter_local_enables = 0;
 
@@ -343,8 +352,9 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
     vthis_cpu->vcache.via32_feature_ctrl_high = ia32_feature_control.val >> 32;    
 
     vthis_cpu->vcache.trap_cache.fields.ia32_feature_control_rw = 
-        (ia32_feature_control.fields.senter_global_enable != 0 || 
-         ia32_feature_control.fields.senter_local_enables != 0);
+        ext_features0_c.fields.sgx_lc != 0 || 
+        ext_features0_b.fields.sgx != 0 ||
+        vthis_cpu->vcache.trap_cache.fields.lmce != 0;
 
     vthis_cpu->vcache.trap_cache.fields.user_msr = 
         ext_features1_d.fields.user_msr;
