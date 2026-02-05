@@ -34,8 +34,8 @@ long tv_vunsubscribe_on_cpu(u32 processor_id, u8 vector);
 void varm_timer_ipi(u64 arg);
 void vdisarm_timer_ipi(u64 arg);
 
-long tv_varm_timer_on_cpu(u32 processor_id, u8 vector, u8 timer_n, bool nmi, 
-                          u32 ticks, bool periodic);
+long tv_varm_timer_on_cpu(u32 processor_id, u8 vector, u8 timer_n, u32 ticks, 
+                          bool periodic, bool nmi);
 
 long tv_vdisarm_timer_on_cpu(u32 processor_id, u8 timer_n);
 

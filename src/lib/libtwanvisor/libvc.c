@@ -64,8 +64,8 @@ long tv_vunsubscribe_on_cpu(u32 processor_id, u8 vector)
 void varm_timer_ipi(u64 arg)
 {
     struct varm_timer_ipi_arg *data = (void *)arg;
-    data->ret = tv_varm_timern(data->vector, data->timer_n, data->nmi, 
-                               data->ticks, data->periodic);
+    data->ret = tv_varm_timern(data->vector, data->timer_n, data->ticks,
+                               data->periodic, data->nmi);
 }
 
 void vdisarm_timer_ipi(u64 arg)
@@ -74,8 +74,8 @@ void vdisarm_timer_ipi(u64 arg)
     data->ret = tv_vdisarm_timern(data->timer_n);
 }
 
-long tv_varm_timer_on_cpu(u32 processor_id, u8 vector, u8 timer_n, bool nmi, 
-                          u32 ticks, bool periodic)
+long tv_varm_timer_on_cpu(u32 processor_id, u8 vector, u8 timer_n, u32 ticks,
+                          bool periodic, bool nmi)
 {
     u32 this_processor_id = this_processor_id();
 
@@ -97,7 +97,7 @@ long tv_varm_timer_on_cpu(u32 processor_id, u8 vector, u8 timer_n, bool nmi,
             ret = arg.ret;
 
     } else {
-        ret = tv_varm_timern(vector, timer_n, nmi, ticks, periodic);
+        ret = tv_varm_timern(vector, timer_n, ticks, periodic, nmi);
     }
 
     return ret;

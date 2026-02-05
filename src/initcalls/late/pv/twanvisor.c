@@ -219,7 +219,7 @@ static __late_initcall void pv_twanvisor_init(void)
     if (register_isr(PV_GP_DEST_PROCESSOR_ID, PV_GP_VECTOR, gp_isr) == 0) {
 
         KBUG_ON(tv_varm_timer_on_cpu(PV_GP_DEST_PROCESSOR_ID, PV_GP_VECTOR, 
-                                     PV_GP_TIMER, false, gp_ticks, true) < 0);
+                                     PV_GP_TIMER, gp_ticks, true, false) < 0);
 
         int ret = 0;
 

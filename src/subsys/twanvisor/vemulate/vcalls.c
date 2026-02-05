@@ -173,15 +173,15 @@ static void vtlb_shootdown(struct vregs *vregs)
     vregs->regs.rax = vemu_tlb_invalidate(vid);
 }
 
-/* long VARM_TIMERN(u8 vector, u8 timer_n, bool nmi, u32 ticks, 
-                    bool periodic) */
+/* long VARM_TIMERN(u8 vector, u8 timer_n, u32 ticks, bool periodic, 
+                    bool nmi) */
 static void varm_timern(struct vregs *vregs)
 {
     u8 vector = vregs->regs.rdi & 0xff;
     u8 timer_n = vregs->regs.rsi & 0xff;
-    bool nmi = vregs->regs.rdx & 0xffffffff;
-    u32 ticks = vregs->regs.rcx & 0xffffffff;
-    bool periodic = vregs->regs.r8 & 0xffffffff;
+    u32 ticks = vregs->regs.rdx & 0xffffffff;
+    bool periodic = vregs->regs.rcx & 0xffffffff;
+    bool nmi = vregs->regs.r8 & 0xffffffff;
     
     if (timer_n >= VNUM_VTIMERS || (nmi && vector != NMI)) {
 

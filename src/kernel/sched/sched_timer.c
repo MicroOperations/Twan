@@ -49,7 +49,7 @@ void sched_timer_enable(void)
     if (twan()->flags.fields.twanvisor_on != 0) {
 
         KBUG_ON(tv_varm_timern(SCHED_TIMER_VECTOR, PV_SCHED_TIMER, 
-                false, ticks, true) < 0);
+                ticks, true, false) < 0);
 
         return;
     }

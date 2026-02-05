@@ -55,10 +55,10 @@ inline long tv_vtlb_shootdown(u8 target_vid)
     return tv_vcall(VTLB_SHOOTDOWN, target_vid, 0, 0, 0, 0, 0);
 }
 
-inline long tv_varm_timern(u8 vector, u8 timer_n, bool nmi, u32 ticks, 
-                           bool periodic)
+inline long tv_varm_timern(u8 vector, u8 timer_n, u32 ticks, bool periodic,
+                           bool nmi)
 {
-    return tv_vcall(VARM_TIMERN, vector, timer_n, nmi, ticks, periodic, 0);
+    return tv_vcall(VARM_TIMERN, vector, timer_n, ticks, periodic, nmi, 0);
 }
 
 inline long tv_vdisarm_timern(u8 timer_n)
