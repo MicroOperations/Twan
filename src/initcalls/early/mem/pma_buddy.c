@@ -44,8 +44,9 @@ static int pma_buddy_init_range(u64 phys, size_t size)
     return ret;
 }
 
-static u64 pma_buddy_alloc_pages(u32 order, int *id)
+static u64 pma_buddy_alloc_pages(u32 num_pages, void **id)
 {
+    u32 order = __buddy_get_order(num_pages);
     u32 num = atomic32_read(&num_arenas_initialized);
 
     for (u32 i = 0; i < num; i++) {
@@ -71,7 +72,7 @@ static u64 pma_buddy_alloc_pages(u32 order, int *id)
         mcs_unlock_isr_restore(&arena->lock, &node);
 
         if (id)
-            *id = i;
+            *id = (void *)(long)i;
 
         return ret;
     }
@@ -79,12 +80,15 @@ static u64 pma_buddy_alloc_pages(u32 order, int *id)
     return PMA_NULL;
 }
 
-static int pma_buddy_free_pages(int id, u64 phys, u32 order)
+static int pma_buddy_free_pages(void *id, u64 phys, u32 num_pages)
 {
-    if (id < 0 || id >= atomic32_read(&num_arenas_initialized))
+    long _id = (long)id;
+    if (_id < 0 || _id >= atomic32_read(&num_arenas_initialized))
         return -EINVAL;
 
-    struct pma_buddy_arena *arena = &arenas[id];
+    u32 order = __buddy_get_order(num_pages);
+
+    struct pma_buddy_arena *arena = &arenas[_id];
 
     struct mcsnode node = INITIALIZE_MCSNODE();
     mcs_lock_isr_save(&arena->lock, &node);

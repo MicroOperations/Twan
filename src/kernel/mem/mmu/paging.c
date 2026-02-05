@@ -197,8 +197,8 @@ void init_heap(void)
     u32 allocated = 0;
     for (u32 i = 0; i < pfn_count; i++) {
 
-        int id;
-        u64 phys = pma_alloc_pages(0, &id);
+        void *id;
+        u64 phys = pma_alloc_pages(1, &id);
         
         if (phys == PMA_NULL)
             break;

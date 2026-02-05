@@ -36,7 +36,7 @@ int pma_init_range(u64 phys, size_t size)
 }
 
 
-u64 pma_alloc_pages(u32 order, int *id)
+u64 pma_alloc_pages(u32 num_pages, void **id)
 {
     if (!pma_global.initialized)
         return 0;
@@ -45,10 +45,10 @@ u64 pma_alloc_pages(u32 order, int *id)
     KBUG_ON(!pma_global.interface->pma_alloc_pages_func);
 
     return INDIRECT_BRANCH_SAFE(
-        pma_global.interface->pma_alloc_pages_func(order, id));
+        pma_global.interface->pma_alloc_pages_func(num_pages, id));
 }
 
-int pma_free_pages(int id, u64 phys, u32 order)
+int pma_free_pages(void *id, u64 phys, u32 num_pages)
 {
     if (!pma_global.initialized)
         return -EINVAL;
@@ -57,5 +57,5 @@ int pma_free_pages(int id, u64 phys, u32 order)
     KBUG_ON(!pma_global.interface->pma_free_pages_func);
 
     return INDIRECT_BRANCH_SAFE(
-        pma_global.interface->pma_free_pages_func(id, phys, order));
+        pma_global.interface->pma_free_pages_func(id, phys, num_pages));
 }

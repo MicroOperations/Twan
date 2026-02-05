@@ -29,6 +29,18 @@ struct buddy_arena
     u8 block_bitmap[BUDDY_BLOCK_BITMAP_SIZE];
 };
 
+inline u32 __buddy_get_order(u32 num_pages)
+{
+    u32 order = 0;
+    size_t size = 1;
+    while (size < num_pages) {
+        size <<= 1;
+        order++;
+    }
+
+    return order;
+}
+
 inline bool __buddy_bitmap_test(u8 *bitmap, u64 bit)
 {
     return (bitmap[bit / 8] & (1ULL << (bit % 8))) != 0;
