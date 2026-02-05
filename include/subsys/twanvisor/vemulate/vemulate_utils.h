@@ -12,6 +12,13 @@ typedef enum
     VNUM_ROUTE_TYPES /* enum guard, not a valid route type */
 } vroute_type_t;
 
+typedef enum 
+{
+    VOP_16_BIT,
+    VOP_32_BIT,
+    VOP_64_BIT
+} vop_mode_t;
+
 #define MSR_READ_LOW 0
 #define MSR_READ_HIGH 1024
 #define MSR_WRITE_LOW 2048
@@ -220,10 +227,55 @@ inline bool inject_db(interrupt_type_t int_type, bool deliver_len, u32 len)
                             false, 0, deliver_len, len);
 }
 
+inline int get_guest_mode(void)
+{
+    cr0_t cr0 = {.val = vmread(VMCS_GUEST_CR0)};
+    if (cr0.fields.pe == 0)
+        return VOP_16_BIT;
+
+    ia32_efer_t efer = {.val = vmread(VMCS_GUEST_IA32_EFER)};
+    if (efer.fields.lma != 0) {
+
+        access_rights_t rights = {.val = vmread32(VMCS_GUEST_CS_ACCESS_RIGHTS)};
+        return rights.fields.longmode != 0 ? VOP_64_BIT : 
+               rights.fields.db != 0 ? VOP_32_BIT : VOP_16_BIT;
+    }
+
+    rflags_t flags = {.val = vmread(VMCS_GUEST_RFLAGS)};
+    if (flags.fields.vm != 0)
+        return VOP_16_BIT;
+
+    access_rights_t rights = {.val = vmread32(VMCS_GUEST_CS_ACCESS_RIGHTS)};
+    return rights.fields.db != 0 ? VOP_32_BIT : VOP_16_BIT;    
+}
+
 inline void advance_guest_rip(void)
 {
-    __vmwrite(VMCS_GUEST_RIP, vmread(VMCS_GUEST_RIP) + 
-                              vmread(VMCS_RO_VMEXIT_INSTRUCTION_LENGTH));
+    int mode = get_guest_mode();
+
+    u64 rip = vmread(VMCS_GUEST_RIP) + 
+              vmread(VMCS_RO_VMEXIT_INSTRUCTION_LENGTH);
+
+    switch (mode) {
+    
+        case VOP_16_BIT:
+            rip &= 0xffff;
+            break;
+
+        case VOP_32_BIT:
+            rip &= 0xffffffff;
+            break;
+
+        case VOP_64_BIT:
+            break;
+
+        default:
+            VBUG_ON(true);
+            break;
+
+    }
+
+    __vmwrite(VMCS_GUEST_RIP, rip);
 }
 
 inline bool vmwrite_adjusted(u32 msr, u64 field, u64 val)
@@ -440,36 +492,37 @@ inline void queue_advance_guest(void)
     current->voperation_queue.pending.fields.should_advance = 1;
 }
 
-inline bool is_guest_v8086(void)
-{
-    rflags_t rflags = {.val = vmread(VMCS_GUEST_RFLAGS)};
-    if (rflags.fields.vm == 0)
-        return false;
-
-    cr0_t cr0 = {.val = vmread(VMCS_GUEST_CR0)};
-    if (cr0.fields.pe == 0)
-        return false;
-
-    ia32_efer_t efer = {.val = vmread(VMCS_GUEST_IA32_EFER)};
-    return efer.fields.lma == 0;
-}
-
-inline bool is_guest_cpl0(void)
+inline bool is_guest_cpl0(int *mode)
 {
     cr0_t cr0 = {.val = vmread(VMCS_GUEST_CR0)};
-    if (cr0.fields.pe == 0)
+    if (cr0.fields.pe == 0) {
+        *mode = VOP_16_BIT;
         return true;
+    }
 
     access_rights_t ar = {.val = vmread32(VMCS_GUEST_CS_ACCESS_RIGHTS)};
     if (ar.fields.dpl != 0)
         return false;
 
     ia32_efer_t efer = {.val = vmread(VMCS_GUEST_IA32_EFER)};
-    if (efer.fields.lma != 0)
+    if (efer.fields.lma != 0) {
+
+        access_rights_t rights = {.val = vmread32(VMCS_GUEST_CS_ACCESS_RIGHTS)};
+
+        *mode = rights.fields.longmode != 0 ? VOP_64_BIT :
+                rights.fields.db != 0 ? VOP_32_BIT : VOP_16_BIT;
+
         return true;
+    }
 
     rflags_t flags = {.val = vmread(VMCS_GUEST_RFLAGS)};
-    return flags.fields.vm == 0;
+    if (flags.fields.vm != 0)
+        return false;
+
+    access_rights_t rights = {.val = vmread32(VMCS_GUEST_CS_ACCESS_RIGHTS)};
+
+    *mode = rights.fields.db != 0 ? VOP_32_BIT : VOP_16_BIT;
+    return true;
 }
 
 inline void queue_inject_gp0(void)

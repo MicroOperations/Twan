@@ -50,7 +50,7 @@ typedef enum
     VDESTROY_PARTITION,
 } vcall_t;
 
-typedef void (*vcall_func_t)(struct vregs *vregs);
+typedef long (*vcall_func_t)(struct vregs *vregs);
 
 void vcall_dispatcher(struct vregs *vregs);
 
