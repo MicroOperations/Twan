@@ -357,7 +357,7 @@ void lapic_sync(void)
     u32 regs[4] = {CPUID_FEATURE_BITS, 0, 0, 0};
     feature_bits_c_t feature_bits_c = {.val = regs[2]};
 
-    if (feature_bits_c.fields.x2apic == 0) {
+    if (feature_bits_c.fields.x2apic != 0) {
 
         ia32_apic_base_t base = {.val = __rdmsrl(IA32_APIC_BASE)};
 
