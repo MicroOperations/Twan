@@ -94,17 +94,6 @@ inline void map_msr_read(u32 msr, int *base, int *idx)
     }
 }
 
-inline void trap_msr_write(struct vcpu *vcpu, u32 msr)
-{
-    int base = 0;
-    int idx = 0;
-    map_msr_write(msr, &base, &idx);
-
-    if (base != -1 && idx != -1)
-        vcpu->arch.msr_bitmap[base + (idx / 8)] |= (1 << (idx % 8));
-}
-
-
 inline void untrap_msr_write(struct vcpu *vcpu, u32 msr)
 {
     int base = 0;
@@ -114,7 +103,6 @@ inline void untrap_msr_write(struct vcpu *vcpu, u32 msr)
     if (base != -1 && idx != -1)
         vcpu->arch.msr_bitmap[base + (idx / 8)] &= ~(1 << (idx % 8));   
 }
-
 
 inline bool is_msr_write_trapped(struct vcpu *vcpu, u32 msr)
 {
@@ -127,17 +115,6 @@ inline bool is_msr_write_trapped(struct vcpu *vcpu, u32 msr)
             (idx % 8)) & 1) != 0;
 }
 
-inline void trap_msr_read(struct vcpu *vcpu, u32 msr)
-{
-    int base = 0;
-    int idx = 0;
-    map_msr_read(msr, &base, &idx);
-
-    if (base != -1 && idx != -1)
-        vcpu->arch.msr_bitmap[base + (idx / 8)] |= (1 << (idx % 8));
-}
-
-
 inline void untrap_msr_read(struct vcpu *vcpu, u32 msr)
 {
     int base = 0;
@@ -146,12 +123,6 @@ inline void untrap_msr_read(struct vcpu *vcpu, u32 msr)
 
     if (base != -1 && idx != -1)
         vcpu->arch.msr_bitmap[base + (idx / 8)] &= ~(1 << (idx % 8));   
-}
-
-inline void trap_msr(struct vcpu *vcpu, u32 msr)
-{
-    trap_msr_read(vcpu, msr);
-    trap_msr_write(vcpu, msr);
 }
 
 inline void untrap_msr(struct vcpu *vcpu, u32 msr)
@@ -304,26 +275,11 @@ inline cr4_t adjust_cr4(cr4_t cr4)
     return cr4;
 }
 
-inline u32 vlapic_read(u32 offset)
-{
-    return *(u32 *)((u8 *)vtwan()->lapic_mmio + offset);
-}
-
-inline void vlapic_write(u32 offset, u32 val)
-{
-    *(u32 *)((u8 *)vtwan()->lapic_mmio + offset) = val;
-}
+u64 vlapic_read(u32 offset);
+void vlapic_write(u32 offset, u64 val);
 
 inline void vset_lapic_oneshot(u8 vector, u64 ticks, lapic_dcr_config_t dcr)
 {
-    lapic_timer_t mask_timer = {
-        .fields = {
-            .mask = 1
-        }
-    };
-
-    vlapic_write(LAPIC_TIMER_OFFSET, mask_timer.val);
-
     lapic_timer_t timer = {
         .fields = {
             .vector = vector,
@@ -338,23 +294,25 @@ inline void vset_lapic_oneshot(u8 vector, u64 ticks, lapic_dcr_config_t dcr)
 
 inline bool vis_lapic_irr_set(u8 vector)
 {
-    u32 irr_offset = LAPIC_IRR_OFFSET + ((vector / 32) * 16);
+    u32 idx = vector / 32;
     u32 bit_pos = vector % 32;
     
+    u32 irr_offset = LAPIC_IRR_OFFSET + (idx * 16);
     return ((vlapic_read(irr_offset) >> bit_pos) & 1) != 0;
 }
 
 inline bool vis_lapic_isr_set(u8 vector)
 {
-    u32 isr_offset = LAPIC_ISR_OFFSET + ((vector / 32) * 16);
+    u32 idx = vector / 32;
     u32 bit_pos = vector % 32;
     
+    u32 isr_offset = LAPIC_ISR_OFFSET + (idx * 16);
     return ((vlapic_read(isr_offset) >> bit_pos) & 1) != 0;
 }
 
 inline bool vis_lapic_oneshot_done(void)
 {
-    return vlapic_read(LAPIC_CUR_COUNT_OFFSET) == 0;
+    return (vlapic_read(LAPIC_CUR_COUNT_OFFSET) & 0xffffffff) == 0;
 }
 
 inline void vlapic_eoi(void)
@@ -372,6 +330,9 @@ inline void vinject_interrupt_external(u8 vector, bool nmi)
 
 inline void vlapic_wait_delivery_complete(void)
 {
+    if (vthis_cpu_data()->arch_flags.support.fields.x2apic != 0)
+        return;
+    
     lapic_icr_low_t icr_low;
 
     do {
@@ -396,15 +357,18 @@ inline void vlapic_send_ipi(u32 dest, u32 delivery_mode, u32 dest_mode,
         }
     };
 
+    if (vthis_cpu_data()->arch_flags.support.fields.x2apic == 0)
+        dest <<= 24;
+
     lapic_icr_high_t icr_high = {
         .fields = {
             .destination = dest
         }
     };
 
-    vlapic_write(LAPIC_ICR_HIGH_OFFSET, icr_high.val);
-    vlapic_write(LAPIC_ICR_LOW_OFFSET, icr_low.val);
+    u64 val = ((u64)icr_high.val << 32) | icr_low.val;
 
+    vlapic_write(LAPIC_ICR_HIGH_OFFSET, val);
     vlapic_wait_delivery_complete();
 }
 
@@ -623,6 +587,10 @@ inline bool vis_external_interrupts_blocked(void)
 
     return state.fields.sti_blocking != 0 || state.fields.mov_ss_blocking != 0;
 }
+
+void trap_msr_write(struct vcpu *vcpu, u32 msr);
+void trap_msr_read(struct vcpu *vcpu, u32 msr);
+void trap_msr(struct vcpu *vcpu, u32 msr);
 
 void __vemu_set_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi);
 int vemu_set_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi);

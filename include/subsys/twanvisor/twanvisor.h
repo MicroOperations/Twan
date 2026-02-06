@@ -80,7 +80,8 @@ typedef union
         u32 ept_accessed_dirty : 1;
         u32 invvpid_single : 1;
         u32 pt_use_gpa : 1;
-        u32 reserved0 : 16;
+        u32 x2apic : 1;
+        u32 reserved0 : 15;
     } fields;
 } vper_cpu_arch_support_t;
 

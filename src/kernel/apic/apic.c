@@ -286,14 +286,43 @@ int __ioapic_config(void)
     return 0;
 }
 
-u32 lapic_read(u32 offset)
+u64 lapic_read(u32 offset)
 {
-    return *(u32 *)((u8 *)twan()->acpi.lapic_mmio + offset);
+    if (this_cpu_data()->flags.fields.x2apic == 0) 
+        return *(volatile u32 *)((u8 *)twan()->acpi.lapic_mmio + offset);
+
+    u32 msr = IA32_X2APIC_BASE + (offset / 16);
+    return __rdmsrl(msr);   
 }
 
-void lapic_write(u32 offset, u32 val)
+void lapic_write(u32 offset, u64 val)
 {
-    *(u32 *)((u8 *)twan()->acpi.lapic_mmio + offset) = val;
+    /* treat writes to ICR_HIGH as the entire ICR, and writes to ICR_LOW as
+       writes to the low ICR to allow for deasserts in xapic mode */
+
+    if (this_cpu_data()->flags.fields.x2apic == 0) {
+
+        u32 lower = (u32)val;
+        u32 upper = (u32)(val >> 32);
+
+        u64 base = (u64)twan()->acpi.lapic_mmio;
+
+        if (offset == LAPIC_ICR_HIGH_OFFSET) {
+            *(volatile u32 *)(base + offset) = upper;
+            *(volatile u32 *)(base + LAPIC_ICR_LOW_OFFSET) = lower;
+            return;
+        }
+
+        *(volatile u32 *)(base + offset) = lower;
+        return;
+    }
+
+    if (offset == LAPIC_ICR_HIGH_OFFSET)
+        offset = LAPIC_ICR_LOW_OFFSET;
+
+    u32 msr = IA32_X2APIC_BASE + (offset / 16);
+
+    __wrmsrl(msr, val);
 }
 
 void disable_lapic(void)
@@ -325,11 +354,30 @@ void mask_lapic_lint(void)
 
 void lapic_sync(void)
 {
+    u32 regs[4] = {CPUID_FEATURE_BITS, 0, 0, 0};
+    feature_bits_c_t feature_bits_c = {.val = regs[2]};
+
+    if (feature_bits_c.fields.x2apic == 0) {
+
+        ia32_apic_base_t base = {.val = __rdmsrl(IA32_APIC_BASE)};
+
+        if (base.fields.apic_global_enable != 0 || 
+            base.fields.enable_x2apic_mode == 0) {
+
+            base.fields.apic_global_enable = 1;
+            base.fields.enable_x2apic_mode = 1;
+            __wrmsrl(IA32_APIC_BASE, base.val);
+        }
+        
+        this_cpu_data()->flags.fields.x2apic = 1;
+        return;
+    } 
+
     u32 ext_regs0[4] = {CPUID_EXTENDED_FEATURES, 0, 0, 0};
     __cpuid(&ext_regs0[0], &ext_regs0[1], &ext_regs0[2], &ext_regs0[3]);
     extended_features0_d_t ext_regs0_d = {.val = ext_regs0[3]};
 
-    if (ext_regs0_d.fields.ia32_arch_capabilities != 0) {
+    if (ext_regs0_d.fields.ia32_arch_capabilities == 0) {
 
         ia32_arch_capabilities_t cap = {
             .val = __rdmsrl(IA32_ARCH_CAPABILITIES)
@@ -347,10 +395,18 @@ void lapic_sync(void)
     }
 
     ia32_apic_base_t base = {.val = __rdmsrl(IA32_APIC_BASE)};
-    base.fields.apic_global_enable = 1;
-    base.fields.enable_x2apic_mode = 0;
-    base.fields.apic_base_phys = twan()->acpi.lapic_mmio_phys >> 12;
-    __wrmsrl(IA32_APIC_BASE, base.val);
+
+    u64 phys = twan()->acpi.lapic_mmio_phys >> 12;;
+
+    if (base.fields.apic_global_enable == 0 || 
+        base.fields.enable_x2apic_mode != 0 || 
+        base.fields.apic_base_phys != phys) {
+
+        base.fields.apic_global_enable = 1;
+        base.fields.enable_x2apic_mode = 0;
+        base.fields.apic_base_phys = phys; 
+        __wrmsrl(IA32_APIC_BASE, base.val);
+    }
 }
 
 /* apply this per lapic and when the idt is setup */
@@ -414,6 +470,9 @@ int __config_lapic_nmis(void)
 
 void lapic_wait_delivery_complete(void)
 {
+    if (this_cpu_data()->flags.fields.x2apic != 0)
+        return;
+
     lapic_icr_low_t icr_low;
 
     do {
@@ -439,14 +498,17 @@ void lapic_send_ipi(u32 dest, u32 delivery_mode, u32 dest_mode,
         }
     };
 
+    if (this_cpu_data()->flags.fields.x2apic == 0)
+        dest <<= 24;
+
     lapic_icr_high_t icr_high = {
         .fields = {
             .destination = dest
         }
     };
 
-    lapic_write(LAPIC_ICR_HIGH_OFFSET, icr_high.val);
-    lapic_write(LAPIC_ICR_LOW_OFFSET, icr_low.val);
+    u64 val = ((u64)icr_high.val << 32) | icr_low.val;
+    lapic_write(LAPIC_ICR_HIGH_OFFSET, val);
 
     lapic_wait_delivery_complete();
 }
@@ -469,20 +531,29 @@ void lapic_wakeup_ap(u32 lapic_id, u32 vector)
         }
     };
 
+    u32 dest = lapic_id;
+
+    if (this_cpu_data()->flags.fields.x2apic == 0)
+        dest <<= 24;
+
     lapic_icr_high_t init_dest = {
         .fields = {
-            .destination = lapic_id
+            .destination = dest
         }
     };
    
-    lapic_write(LAPIC_ICR_HIGH_OFFSET, init_dest.val);
-    lapic_write(LAPIC_ICR_LOW_OFFSET, init_assert.val);
+    u64 val = ((u64)init_dest.val << 32) | init_assert.val;
+    lapic_write(LAPIC_ICR_HIGH_OFFSET, val);
     
     lapic_wait_delivery_complete();
 
-    init_assert.fields.level = LAPIC_DEASSERT;
-    lapic_write(LAPIC_ICR_LOW_OFFSET, init_assert.val);
-    lapic_wait_delivery_complete();
+    if (this_cpu_data()->flags.fields.x2apic == 0) {
+
+        init_assert.fields.level = LAPIC_DEASSERT;
+        lapic_write(LAPIC_ICR_LOW_OFFSET, init_assert.val);
+
+        lapic_wait_delivery_complete();
+    }
 
     lapic_send_ipi_targetted(lapic_id, DM_STARTUP, vector);
     lapic_send_ipi_targetted(lapic_id, DM_STARTUP, vector);
@@ -512,14 +583,14 @@ struct lapic_calibration calibrate_lapic_timer(u8 spurious_vector, u32 ms,
     u64 calibration_time_fs = ms * 1000ULL * 1000ULL * 1000ULL;
     u64 ticks = calibration_time_fs / period_fs;
 
-    lapic_write(LAPIC_INITIAL_COUNT_OFFSET, ~0U);
+    lapic_write(LAPIC_INITIAL_COUNT_OFFSET, UINT32_MAX);
 
     u64 start = read_counter();
     u64 target = start + ticks;
 
     spin_until(read_counter() >= target);
 
-    u64 lapic_cur = lapic_read(LAPIC_CUR_COUNT_OFFSET);
+    u64 lapic_cur = lapic_read(LAPIC_CUR_COUNT_OFFSET) & 0xffffffff;
     u64 lapic_ticks = ~0U - lapic_cur;
     
     u64 divisor = 0;
@@ -615,7 +686,7 @@ void mask_lapic_timer(bool mask)
     lapic_write(LAPIC_TIMER_OFFSET, timer.val);
 }
 
-void lapic_timer_reset()
+void lapic_timer_reset(void)
 {
     u32 initial = lapic_read(LAPIC_INITIAL_COUNT_OFFSET);
     lapic_write(LAPIC_INITIAL_COUNT_OFFSET, initial);
@@ -635,17 +706,19 @@ void lapic_timer_enable(u32 initial)
 
 bool is_lapic_irr_set(u8 vector)
 {
-    u32 irr_offset = LAPIC_IRR_OFFSET + ((vector / 32) * 16);
+    u32 idx = vector / 32;
     u32 bit_pos = vector % 32;
     
+    u32 irr_offset = LAPIC_IRR_OFFSET + (idx * 16);
     return ((lapic_read(irr_offset) >> bit_pos) & 1) != 0;
 }
 
 bool is_lapic_isr_set(u8 vector)
 {
-    u32 isr_offset = LAPIC_ISR_OFFSET + ((vector / 32) * 16);
+    u32 idx = vector / 32;
     u32 bit_pos = vector % 32;
     
+    u32 isr_offset = LAPIC_ISR_OFFSET + (idx * 16);
     return ((lapic_read(isr_offset) >> bit_pos) & 1) != 0;
 }
 

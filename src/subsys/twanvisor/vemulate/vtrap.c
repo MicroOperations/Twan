@@ -60,6 +60,60 @@ void vsetup_traps(struct vper_cpu *vthis_cpu, struct vcpu *vcpu)
     if (vthis_cpu->sec_flags.fields.sr_bios_done != 0)
         trap_msr(vcpu, IA32_SR_BIOS_DONE);
 
+    if (vthis_cpu->arch_flags.support.fields.x2apic != 0) {
+        trap_msr(vcpu, IA32_X2APIC_ID);
+        trap_msr(vcpu, IA32_X2APIC_VERSION);
+        trap_msr(vcpu, IA32_X2APIC_TPR);
+        trap_msr(vcpu, IA32_X2APIC_PPR);
+        trap_msr(vcpu, IA32_X2APIC_EOI);
+        trap_msr(vcpu, IA32_X2APIC_LDR);
+        trap_msr(vcpu, IA32_X2APIC_SIVR);
+
+        trap_msr(vcpu, IA32_X2APIC_ISR0);
+        trap_msr(vcpu, IA32_X2APIC_ISR1);
+        trap_msr(vcpu, IA32_X2APIC_ISR2);
+        trap_msr(vcpu, IA32_X2APIC_ISR3);
+        trap_msr(vcpu, IA32_X2APIC_ISR4);
+        trap_msr(vcpu, IA32_X2APIC_ISR5);
+        trap_msr(vcpu, IA32_X2APIC_ISR6);
+        trap_msr(vcpu, IA32_X2APIC_ISR7);
+
+        trap_msr(vcpu, IA32_X2APIC_TMR0);
+        trap_msr(vcpu, IA32_X2APIC_TMR1);
+        trap_msr(vcpu, IA32_X2APIC_TMR2);
+        trap_msr(vcpu, IA32_X2APIC_TMR3);
+        trap_msr(vcpu, IA32_X2APIC_TMR4);
+        trap_msr(vcpu, IA32_X2APIC_TMR5);
+        trap_msr(vcpu, IA32_X2APIC_TMR6);
+        trap_msr(vcpu, IA32_X2APIC_TMR7);
+
+        trap_msr(vcpu, IA32_X2APIC_IRR0);
+        trap_msr(vcpu, IA32_X2APIC_IRR1);
+        trap_msr(vcpu, IA32_X2APIC_IRR2);
+        trap_msr(vcpu, IA32_X2APIC_IRR3);
+        trap_msr(vcpu, IA32_X2APIC_IRR4);
+        trap_msr(vcpu, IA32_X2APIC_IRR5);
+        trap_msr(vcpu, IA32_X2APIC_IRR6);
+        trap_msr(vcpu, IA32_X2APIC_IRR7);
+
+        trap_msr(vcpu, IA32_X2APIC_ESR);
+
+        trap_msr(vcpu, IA32_X2APIC_LVT_CMCI);
+        trap_msr(vcpu, IA32_X2APIC_ICR);
+
+        trap_msr(vcpu, IA32_X2APIC_LVT_TIMER);
+        trap_msr(vcpu, IA32_X2APIC_LVT_THERMAL);
+        trap_msr(vcpu, IA32_X2APIC_LVT_PMI);
+        trap_msr(vcpu, IA32_X2APIC_LVT_LINT0);
+        trap_msr(vcpu, IA32_X2APIC_LVT_LINT1);
+        trap_msr(vcpu, IA32_X2APIC_LVT_ERROR);
+        trap_msr(vcpu, IA32_X2APIC_LVT_INIT_COUNT);
+        trap_msr(vcpu, IA32_X2APIC_LVT_CUR_COUNT);
+
+        trap_msr(vcpu, IA32_X2APIC_DIV_CONF);
+        trap_msr(vcpu, IA32_X2APIC_SELF_IPI);
+    }
+
     trap_msr(vcpu, IA32_MONITOR_FILTER_SIZE);
 
     trap_msr(vcpu, IA32_VMX_BASIC);

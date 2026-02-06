@@ -1,24 +1,66 @@
 #include <include/lib/x86_index.h>
 
-/* TODO: scalable topology enumeration, with 0x1f */
-//bool __this_topology_0x1f(u32 *lapic_id, u32 *thread_id,
-//                          u32 *core_id, u32 *pkg_id)
-//{
-//    /* check the leaf is supported and doesnt return fuck all */
-//    u32 regs[4] = {0};
-//    __cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
-//    if (regs[0] < 0x1f)
-//        return false;
-//
-//    cpuid(0x1f, 0, &regs[0], &regs[1], &regs[2], &regs[3]);
-//    if (regs[1] == 0)
-//        return false;
-//
-//    /* edx will hold the lapic id */
-//    *lapic_id = regs[3];
-//    
-//    return true;
-//}
+bool __this_topology_0x1f(u32 *lapic_id, u32 *thread_id,
+                          u32 *core_id, u32 *pkg_id)
+{
+    u32 regs[4] = {0};
+    
+    __cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
+    if (regs[0] < 0x1f)
+        return false;
+
+    cpuid(0x1f, 0, &regs[0], &regs[1], &regs[2], &regs[3]);
+    if (regs[1] == 0)
+        return false;
+
+    /* edx holds x2apic id */
+    u32 full_lapic_id = regs[3];
+    u32 smt_shift_width = 0;
+    u32 core_shift_width = 0;
+
+    for (u32 i = 0; ; i++) {
+        cpuid(0x1f, i, &regs[0], &regs[1], &regs[2], &regs[3]);
+        
+        u32 level_type = (regs[2] >> 8) & 0xff;
+        u32 shift = regs[0] & 0x1f;
+
+        if (level_type == INVAL) 
+            break;
+
+        switch (level_type) {
+
+            case SMT:
+                smt_shift_width = shift;
+                break;
+
+            case CORE:
+                core_shift_width = shift;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    if (smt_shift_width != 0)
+        *thread_id = full_lapic_id & ((1U << smt_shift_width) - 1);
+    else
+        *thread_id = 0;
+
+    if (core_shift_width != 0) {
+        u32 core_mask = (1U << core_shift_width) - 1;
+        *core_id = (full_lapic_id & core_mask) >> smt_shift_width;
+        *pkg_id = full_lapic_id >> core_shift_width;
+    } else {
+
+        /* handle weird single core per pkg topos */
+        *core_id = 0;
+        *pkg_id = full_lapic_id >> smt_shift_width;
+    }
+
+    *lapic_id = full_lapic_id;
+    return true;
+}
 
 bool __this_topology_0x0b(u32 *lapic_id, u32 *thread_id, 
                           u32 *core_id, u32 *pkg_id)
@@ -173,8 +215,8 @@ void this_topology(u32 *lapic_id, u32 *thread_id, u32 *core_id, u32 *pkg_id)
 {
     /* grab the core topology with the first leaf that is supported by 
        preference, otherwise it can lead to enumerating wrong info */
-    //if (__this_topology_0x1f(lapic_id, thread_id, core_id, pkg_id))
-    //    return;
+    if (__this_topology_0x1f(lapic_id, thread_id, core_id, pkg_id))
+        return;
 
     if (__this_topology_0x0b(lapic_id, thread_id, core_id, pkg_id))
         return;

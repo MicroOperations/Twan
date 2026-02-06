@@ -37,8 +37,8 @@ void lapic_reconfig(struct vper_cpu *vthis_cpu)
 {
     /* reconfigure NMI's as regular interrupts as handling nmi's has too much
        overhead and bullshit associated with it */
-
-     u32 feature_bits_regs[4] = {CPUID_FEATURE_BITS, 0, 0, 0};
+    
+    u32 feature_bits_regs[4] = {CPUID_FEATURE_BITS, 0, 0, 0};
     __cpuid(&feature_bits_regs[0], &feature_bits_regs[1], 
             &feature_bits_regs[2], &feature_bits_regs[3]);
 
@@ -737,6 +737,9 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
 
     struct vper_cpu *vthis_cpu = &vkernel.per_cpu_data[vprocessor_id];
 
+    vthis_cpu->arch_flags.support.fields.x2apic = 
+        this_cpu_data()->flags.fields.x2apic;
+
     int ret = vper_cpu_data_init(vthis_cpu, vprocessor_id);
     if (ret < 0) {
         kdbg("init vper_cpu failed\n");
@@ -1076,7 +1079,7 @@ int __start_twanvisor(void)
             bsp = i;
             continue;
         }
-
+        
         ipi_run_func(vper_cpu->processor_id, __virtualise_core, i, true);
     }
 

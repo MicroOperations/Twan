@@ -48,9 +48,6 @@ static u32 msr_blocklist[] = {
     /* disallowing umonitor/umwait */
     IA32_UMWAIT_CONTROL,
 
-    /* not emulating an apic (guests should use our vintc) */
-    IA32_XAPIC_DISABLE_STATUS,
-
     /* hide sr bios done */
     IA32_SR_BIOS_DONE,
 
@@ -79,8 +76,60 @@ static u32 msr_blocklist[] = {
     IA32_VMX_PROCBASED_CTLS3,
     IA32_VMX_EXIT_CTLS2,
 
-    /* trap apic msr's either way (x2apic currently not supported) */
-    IA32_APIC_BASE
+    IA32_APIC_BASE,
+    IA32_XAPIC_DISABLE_STATUS,
+    
+    IA32_X2APIC_ID,
+    IA32_X2APIC_VERSION,
+    IA32_X2APIC_TPR,
+    IA32_X2APIC_PPR,
+    IA32_X2APIC_EOI,
+    IA32_X2APIC_LDR,
+    IA32_X2APIC_SIVR,
+
+    IA32_X2APIC_ISR0,
+    IA32_X2APIC_ISR1,
+    IA32_X2APIC_ISR2,
+    IA32_X2APIC_ISR3,
+    IA32_X2APIC_ISR4,
+    IA32_X2APIC_ISR5,
+    IA32_X2APIC_ISR6,
+    IA32_X2APIC_ISR7,
+
+    IA32_X2APIC_TMR0,
+    IA32_X2APIC_TMR1,
+    IA32_X2APIC_TMR2,
+    IA32_X2APIC_TMR3,
+    IA32_X2APIC_TMR4,
+    IA32_X2APIC_TMR5,
+    IA32_X2APIC_TMR6,
+    IA32_X2APIC_TMR7,
+
+    IA32_X2APIC_IRR0,
+    IA32_X2APIC_IRR1,
+    IA32_X2APIC_IRR2,
+    IA32_X2APIC_IRR3,
+    IA32_X2APIC_IRR4,
+    IA32_X2APIC_IRR5,
+    IA32_X2APIC_IRR6,
+    IA32_X2APIC_IRR7,
+
+    IA32_X2APIC_ESR,
+
+    IA32_X2APIC_LVT_CMCI,
+    IA32_X2APIC_ICR,
+
+    IA32_X2APIC_LVT_TIMER,
+    IA32_X2APIC_LVT_THERMAL,
+    IA32_X2APIC_LVT_PMI,
+    IA32_X2APIC_LVT_LINT0,
+    IA32_X2APIC_LVT_LINT1,
+    IA32_X2APIC_LVT_ERROR,
+    IA32_X2APIC_LVT_INIT_COUNT,
+    IA32_X2APIC_LVT_CUR_COUNT,
+
+    IA32_X2APIC_DIV_CONF,
+    IA32_X2APIC_SELF_IPI,
 };
 
 static __unroll_loops bool vis_msr_blocked(u32 msr)

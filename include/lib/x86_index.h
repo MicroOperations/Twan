@@ -755,8 +755,7 @@ typedef union
     u32 val;
     struct 
     {
-        u32 reserved0 : 24;
-        u32 destination : 8;
+        u32 destination : 32;
     } fields;
 } lapic_icr_high_t;
 
@@ -877,14 +876,14 @@ typedef union
 
 typedef enum 
 {
-    DIV_2,
-    DIV_4,
-    DIV_8,
-    DIV_16,
-    DIV_32,
-    DIV_64,
-    DIV_128,
-    DIV_1
+    DIV_2   = 0b0000,
+    DIV_4   = 0b0001,
+    DIV_8   = 0b0010,
+    DIV_16  = 0b0011,
+    DIV_32  = 0b1000,
+    DIV_64  = 0b1001,
+    DIV_128 = 0b1010,
+    DIV_1   = 0b1011
 } lapic_dcr_config_t;
 
 typedef union 
@@ -2659,6 +2658,7 @@ typedef union {
     } fields;
 } ia32_xapic_disable_status_t;
 
+#define IA32_X2APIC_BASE 0x800
 #define IA32_X2APIC_ID 0x802
 #define IA32_X2APIC_VERSION 0x803
 #define IA32_X2APIC_TPR 0x808
@@ -2713,8 +2713,8 @@ enum
     IA32_X2APIC_LVT_CUR_COUNT
 };
 
-#define IA32_X2APIC_DIV_CONF 0x2110
-#define IA32_X2APIC_SELF_IPI 0x2111
+#define IA32_X2APIC_DIV_CONF 2110
+#define IA32_X2APIC_SELF_IPI 2111
 
 /* intrinsics */
 

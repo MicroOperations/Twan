@@ -87,8 +87,8 @@ int __ioapic_config_irq(bool mask, u32 dest, u32 irq, u8 vector,
 
 int __ioapic_config(void);
 
-u32 lapic_read(u32 offset);
-void lapic_write(u32 offset, u32 val);
+u64 lapic_read(u32 offset);
+void lapic_write(u32 offset, u64 val);
 
 void enable_lapic(u8 spurious_vector);
 void disable_lapic(void);

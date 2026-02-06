@@ -7,6 +7,67 @@
 #include <include/subsys/twanvisor/vsched/vsched_mcs.h>
 #include <include/subsys/twanvisor/vsched/vsched_yield.h>
 
+u64 vlapic_read(u32 offset)
+{
+    if (vthis_cpu_data()->arch_flags.support.fields.x2apic == 0) 
+        return *(volatile u32 *)((u8 *)vtwan()->lapic_mmio + offset);
+
+    u32 msr = IA32_X2APIC_BASE + (offset / 16);
+    return __rdmsrl(msr);   
+}
+
+void vlapic_write(u32 offset, u64 val)
+{
+    if (vthis_cpu_data()->arch_flags.support.fields.x2apic == 0) {
+
+        u32 lower = (u32)val;
+        u32 upper = (u32)(val >> 32);
+
+        u64 base = (u64)vtwan()->lapic_mmio;
+
+        if (offset == LAPIC_ICR_HIGH_OFFSET) {
+            *(volatile u32 *)(base + offset) = upper;
+            *(volatile u32 *)(base + LAPIC_ICR_LOW_OFFSET) = lower;
+            return;
+        }
+
+        *(volatile u32 *)(base + offset) = lower;
+        return;
+    }
+
+    if (offset == LAPIC_ICR_HIGH_OFFSET)
+        offset = LAPIC_ICR_LOW_OFFSET;
+
+    u32 msr = IA32_X2APIC_BASE + (offset / 16);
+    __wrmsrl(msr, val);
+}
+
+void trap_msr_write(struct vcpu *vcpu, u32 msr)
+{
+    int base = 0;
+    int idx = 0;
+    map_msr_write(msr, &base, &idx);
+
+    if (base != -1 && idx != -1)
+        vcpu->arch.msr_bitmap[base + (idx / 8)] |= (1 << (idx % 8));
+}
+
+void trap_msr_read(struct vcpu *vcpu, u32 msr)
+{
+    int base = 0;
+    int idx = 0;
+    map_msr_read(msr, &base, &idx);
+
+    if (base != -1 && idx != -1)
+        vcpu->arch.msr_bitmap[base + (idx / 8)] |= (1 << (idx % 8));
+}
+
+void trap_msr(struct vcpu *vcpu, u32 msr)
+{
+    trap_msr_read(vcpu, msr);
+    trap_msr_write(vcpu, msr);
+}
+
 void __vemu_set_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi)
 {
     if (nmi)
