@@ -67,7 +67,7 @@ extern struct vma_partition_ticket __vma_partition_registry_end[];
 #define VMA_PARTITION_TABLE_COUNT(table) (ARRAY_LEN(table))
 
 #define vma_partition_table_get(table, idx) (&(table)[(idx)])
-#define vma_pa_to_pfn(pa) ((pa) << PAGE_SHIFT)
+#define vma_pa_to_pfn(pa) ((pa) >> PAGE_SHIFT)
 
 #define vma_partition_unmap(partition, idx) do {        \
                                                         \
