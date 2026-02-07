@@ -7,7 +7,7 @@
 #include <include/lib/libtwanvisor/libvc.h>
 #include <include/lib/x86_index.h>
 #include <include/subsys/twanvisor/twanvisor.h>
-#include <include/kernel/mem/mmu/paging.h>
+#include <include/subsys/mem/vma.h>
 
 extern char pv_twanvisor_demo_guest_start[];
 extern char pv_shared_buf_start[64];
