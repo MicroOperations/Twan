@@ -16,17 +16,10 @@ extern struct descriptor_table64 idtr;
 /* kernel page tables */
 extern pml4e_t pml4[512];
 
-/* kernel image & kernel heap */
+/* kernel image */
 extern pdpte_t pdpt[512]; // first mapped pdpt
 extern pde_huge_t pd_kernel[512]; // kernel 
 extern pte_t pt_kernel_start[512]; // kernel start with 4KB hole
-extern pde_huge_t pd_heap[512]; // kernel heap
-
-/* kernel reserved page tables */
-extern pdpte_t pdpt_reserved[512]; // pdpt for mappers and io
-extern pde_huge_t pd_pfn[512]; // used for mapping specific pfn's
-extern pde_huge_t pd_pfn_io[512]; // used for mapping specific pfn's as io mem
-extern pde_huge_t pd_keyholes[512]; // used as keyholes for pt walks
 
 extern struct idt_descriptor64 idt[256];
 

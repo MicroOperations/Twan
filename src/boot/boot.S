@@ -36,21 +36,6 @@
 .globl pt_kernel_start
 .type pt_kernel_start, @object
 
-.globl pd_heap
-.type pd_heap, @object
-
-.globl pdpt_reserved
-.type pdpt_reserved, @object
-
-.globl pd_pfn
-.type pd_pfn, @object
-
-.globl pd_pfn_io
-.type pd_pfn_io, @object
-
-.globl pd_keyholes
-.type pd_keyholes, @object
-
 .globl idt
 .type idt, @object
 
@@ -158,49 +143,25 @@ _start:
     orl $0x3, %edx
     movl %edx, pdpt + (PD_KERNEL_PDPT_IDX * 8)
 
-    movl $pd_heap, %ecx
-    orl $0x3, %ecx
-    movl %ecx, pdpt + (PD_HEAP_PDPT_IDX * 8)
-
-    /* link pd_pfn to pdpt_reserved */
-    movl $pd_pfn, %eax
-    orl $0x3, %eax
-    movl %eax, pdpt_reserved + (PD_PFN_PDPT_IDX * 8)
-
-    /* link pd_pfn_io to pdpt_reserved */
-    movl $pd_pfn_io, %ecx
-    orl $0x3, %ecx
-    movl %ecx, pdpt_reserved + (PD_PFN_IO_PDPT_IDX * 8)
-
-    /* link pd_keyholes to pdpt_reserved */
-    movl $pd_keyholes, %edx
-    orl $0x3, %edx
-    movl %edx, pdpt_reserved + (PD_KEYHOLES_PDPT_IDX * 8)
-
     /* link pdpt to pml4 */
     movl $pdpt, %eax
     orl $0x3, %eax
     movl %eax, pml4 + (PDPT_PML4_IDX * 8)
 
-    /* link pdpt_reserved to pml4 */
-    movl $pdpt_reserved, %ecx
-    orl $0x3, %ecx
-    movl %ecx, pml4 + (PDPT_RESERVED_PML4_IDX * 8)
-
     /* setup cr0 */
-    movl %cr0, %edx
-    orl $(MP_MASK | NE_MASK), %edx
-    andl $(~PG_MASK), %edx
-    movl %edx, %cr0
+    movl %cr0, %ecx
+    orl $(MP_MASK | NE_MASK), %ecx
+    andl $(~PG_MASK), %ecx
+    movl %ecx, %cr0
 
     /* set it up into cr3 */
-    movl $pml4, %eax
-    movl %eax, %cr3
+    movl $pml4, %edx
+    movl %edx, %cr3
 
     /* enable pae */
-    movl %cr4, %ecx
-    orl $(PAE_MASK | DE_MASK | OSFXSR_MASK | OSXMMEXCPT_MASK), %ecx
-    movl %ecx, %cr4
+    movl %cr4, %eax
+    orl $(PAE_MASK | DE_MASK | OSFXSR_MASK | OSXMMEXCPT_MASK), %eax
+    movl %eax, %cr4
 
     /* enable lme */
     movl $IA32_EFER, %ecx
@@ -296,13 +257,6 @@ pml4:               .skip 4096
 pdpt:               .skip 4096
 pd_kernel:          .skip 4096
 pt_kernel_start:    .skip 4096
-pd_heap:            .skip 4096
-
-/* kernel reserved page tables */
-pdpt_reserved:      .skip 4096
-pd_pfn:             .skip 4096
-pd_pfn_io:          .skip 4096
-pd_keyholes:        .skip 4096
 
 idt:                .skip 4096
 

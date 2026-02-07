@@ -32,6 +32,11 @@ config KERNEL_MAX_HEAP_SIZE
     range 0 1073741824
     default 1073741824
 
+config KERNEL_MAX_VMA_PARTITIONS
+    int "Maximum kernel vma partitions"
+    range 2 261632
+    default 512
+
 config KDBG_PANIC_ON_BUG
     bool "Kpanic when KBUG checks flag a bug"
     default n

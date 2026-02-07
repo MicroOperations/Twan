@@ -9,7 +9,6 @@
 #include <include/subsys/sync/spinlock.h>
 #include <include/kernel/kernel.h>
 #include <include/lib/x86_index.h>
-#include <include/kernel/mem/mmu/paging_conf.h>
 #include <include/subsys/mem/pma.h>
 #include <include/elf.h>
 

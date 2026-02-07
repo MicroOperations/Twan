@@ -154,10 +154,6 @@ struct twan_kernel
     {
         /* multiboot physaddr */
         struct memory_range multiboot_info;
-
-        /* kernel heap */
-        u64 heap_start;
-        size_t heap_size;
     } mem;
 
     struct

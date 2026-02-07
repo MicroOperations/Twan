@@ -11,38 +11,7 @@ struct mapper
     struct mcslock_isr lock;
 };
 
-struct keyhole 
-{
-    struct mcslock_isr lock;
-};
-
-typedef enum 
-{
-    PGTABLE_NONE,
-    PML4,
-    PDPT,
-    PD,
-    PT
-} pgtable_t;
-
-typedef enum 
-{
-    PGTABLE_LEVEL_NONE,
-    PGTABLE_LEVEL_4K,
-    PGTABLE_LEVEL_2MB,
-    PGTABLE_LEVEL_1GB,
-} pgtable_level_t;
-
-#define virt_to_phys_static(addr) ((u64)addr)
-
-void *__pt_walk(va_t va, int *level);
-void *pt_walk(va_t va, int *level);
-
-u64 __virt_to_phys(va_t va);
-u64 virt_to_phys(void *addr);
-
 void init_mappers(void);
-void init_heap(void);
 
 /* mapping specific pfns */
 
@@ -88,9 +57,5 @@ void __unmap_phys_pg_io_local(void *addr);
 
 void *map_phys_pg_io(u64 phys);
 void unmap_phys_pg_io(void *addr);
-
-/* keyholes */
-
-void __remap_keyhole_local(void *addr, u32 pfn);
 
 #endif

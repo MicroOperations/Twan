@@ -1,4 +1,4 @@
-#include <include/types.h>
+#include <include/subsys/mem/vma.h>
 #include <include/kernel/static.h>
 #include <include/lib/x86_index.h>
 #include <include/subsys/debug/kdbg/kdbg.h>
@@ -83,6 +83,9 @@ __noreturn void __start_twan(u64 multiboot_info_phys, bool is_bsp)
     for (u32 i = 0; i < num_early_initcalls; i++) 
         __early_initcall_registry_start[i].init();
 
+    if (!is_vma_initialized())
+        __early_kpanic("vma not initialized during early boot\n");
+
     __kdbg("twan entered\n");
 
     /* initialize our mapper routines */
@@ -95,8 +98,6 @@ __noreturn void __start_twan(u64 multiboot_info_phys, bool is_bsp)
     /* now we gotta parse the relevant acpi tables */
     if (parse_acpi_tables(lapic_id, thread_id, core_id, pkg_id) < 0)
         __early_kpanic("failed to parse acpi tables\n");
-
-    init_heap();
 
     struct twan_kernel *kernel = twan();
 

@@ -10,8 +10,8 @@
 #include <include/subsys/twanvisor/visr/visr_index.h>
 #include <include/subsys/twanvisor/vportal/vexit.h>
 #include <include/subsys/time/counter.h>
+#include <include/subsys/mem/vma.h>
 #include <include/kernel/kapi.h>
-#include <include/kernel/mem/mmu/paging.h>
 #include <include/kernel/extern.h>
 #include <include/kernel/apic/apic.h>
 

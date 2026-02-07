@@ -13,27 +13,7 @@
 #define PD_KERNEL_PDPT_IDX 0ULL
 #define PD_HEAP_PDPT_IDX 1ULL
 
-#define PD_HEAP_START_ADDR (void *)((PDPT_PML4_IDX << 39) |     \
-                                    (PD_HEAP_PDPT_IDX << 30))
-
-#define PDPT_RESERVED_SIGN 0xffffULL
-
-#define PDPT_RESERVED_PML4_IDX 511ULL
-#define PD_PFN_PDPT_IDX 0ULL
-#define PD_PFN_IO_PDPT_IDX 1ULL
-#define PD_KEYHOLES_PDPT_IDX 2ULL
-
-#define PD_PFN_START_ADDR (void *)((PDPT_RESERVED_SIGN << 48) |         \
-                                   (PDPT_RESERVED_PML4_IDX << 39) |     \
-                                   (PD_PFN_PDPT_IDX << 30))
-
-#define PD_PFN_IO_START_ADDR (void *)((PDPT_RESERVED_SIGN << 48) |     \
-                                      (PDPT_RESERVED_PML4_IDX << 39) | \
-                                      (PD_PFN_IO_PDPT_IDX << 30))
-
-#define PD_KEYHOLES_START_ADDR (void *)((PDPT_RESERVED_SIGN << 48) |     \
-                                        (PDPT_RESERVED_PML4_IDX << 39) | \
-                                        (PD_KEYHOLES_PDPT_IDX << 30))
+#define PDPT_FREE_START_PML4_IDX 1ULL
 
 #define KERNEL_CODE_IDX 1
 #define KERNEL_CODE_SELECTOR (KERNEL_CODE_IDX << 3)

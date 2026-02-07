@@ -2,13 +2,28 @@
 #if LATE_MEM_RTALLOC_TLSF
 
 #include <include/kernel/kapi.h>
-#include <include/subsys/mem/rtalloc.h>
+#include <include/kernel/mem/mmu/tlb.h>
 #include <include/lib/tlsf_alloc.h>
+#include <include/subsys/mem/rtalloc.h>
+#include <include/subsys/mem/vma.h>
+#include <include/subsys/mem/pma.h>
+#include <include/generated/autoconf.h>
 
 /* TODO: alter tlsf library and this to use more fine grained locks, global lock
    on the allocator wouldn't scale very well */
 
+#define RTALLOC_TLSF_NUM_PARTITIONS \
+    (CONFIG_KERNEL_MAX_HEAP_SIZE / VMA_PARTITION_SIZE)
+
+#define RTALLOC_TLSF_NUM_PAGES (CONFIG_KERNEL_MAX_HEAP_SIZE / PAGE_SIZE)
+
 static struct tlsf tlsf_global;
+
+static struct vma_descriptor tlsf_descriptor;
+static DEFINE_VMA_PARTITION_TABLE(tlsf_table, RTALLOC_TLSF_NUM_PARTITIONS);
+REGISTER_VMA_PARTITION_TABLE(tlsf_table, virt_to_phys_static(tlsf_table),
+                             VMA_PARTITION_TABLE_COUNT(tlsf_table),
+                             &tlsf_descriptor);
 
 static void *rtalloc_tlsf(size_t size)
 {
@@ -87,10 +102,38 @@ static struct rtalloc_interface rtalloc_interface = {
 
 static __late_initcall void rtalloc_tlsf_init(void)
 {
-    struct twan_kernel *kernel = twan();
+    if (RTALLOC_TLSF_NUM_PAGES == 0)
+        return;
+
+    u32 count = tlsf_descriptor.num_partitions_valid;
+    if (count == 0 )
+        return;
     
-    u64 heap_start = kernel->mem.heap_start;
-    u64 heap_size = kernel->mem.heap_size;
+    u64 heap_start = tlsf_descriptor.addr;
+    size_t heap_size = tlsf_descriptor.size;
+
+    u32 num_pages = 0;
+    for (u32 i = 0; i < count; i++) {
+
+        struct vma_partition *partition = 
+            vma_partition_table_get(tlsf_table, i);
+
+        for (u32 i = 0; i < VMA_PARTITION_ENTRY_COUNT; i++) {
+
+            if (num_pages == RTALLOC_TLSF_NUM_PAGES)
+                goto done;
+
+            void *id;
+            u64 pa = pma_alloc_pages(1, &id);
+
+            vma_partition_remap(partition, num_pages, vma_pa_to_pfn(pa));
+            num_pages++;
+        }
+    }
+
+    flush_tlb_global(true);
+
+done:
     
     if (__tlsf_init(&tlsf_global, heap_start, heap_size) == 0)
         rtalloc_init(&rtalloc_interface);

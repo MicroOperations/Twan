@@ -13,7 +13,10 @@
 
 /* mem */
 
+#define EARLY_MEM_VMA_PARSER 1
+#define EARLY_MEM_VMA_PARSER_ORDER 2
+
 #define EARLY_MEM_PMA_BUDDY 1
-#define EARLY_MEM_PMA_BUDDY_ORDER 2
+#define EARLY_MEM_PMA_BUDDY_ORDER 3
 
 #endif

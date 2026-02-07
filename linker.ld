@@ -27,6 +27,12 @@ SECTIONS {
         __late_initcall_registry_end = .;
     }
 
+    .vma_partition_registry : ALIGN(64) {
+        __vma_partition_registry_start = .;
+        KEEP(*(.vma_partition_registry))
+        __vma_partition_registry_end = .;
+    }
+
     .text : ALIGN(4K) {
         *(.text*)
     }
