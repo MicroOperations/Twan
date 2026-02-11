@@ -493,7 +493,7 @@ static long vset_vcpu_subscription_perm(struct vregs *vregs)
         return -EINVAL;
 
     return vemu_set_vcpu_subscription_perms(vid, processor_id, 
-                                                       vector, allow);
+                                            vector, allow);
 }
 
 /* long VSET_CRITICALITY_PERM(u8 vid, u32 processor_id,
@@ -547,7 +547,7 @@ static long vwrite_criticality_level(struct vregs *vregs)
         phys_processor_id = vthis_vprocessor_id();
 
     return vemu_write_criticality_level(vid, phys_processor_id, 
-                                                   criticality);
+                                        criticality);
 }
 
 /* long VPV_SPIN_PAUSE(void) */
