@@ -688,6 +688,7 @@ int root_partition_init(void)
     bmp256_set_all(&root.ipi_receivers);
     bmp256_set_all(&root.tlb_shootdown_receivers);
     bmp256_set_all(&root.read_vcpu_state_receivers);
+    bmp256_set_all(&root.pv_spin_kick_receivers);
 
     for (u32 i = 0; i < ARRAY_LEN(root.criticality_perms); i++) {
 

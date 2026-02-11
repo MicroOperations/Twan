@@ -52,6 +52,9 @@ struct vpartition
     struct bmp256 read_vcpu_state_receivers;
     struct bmp256 read_vcpu_state_senders;
 
+    struct bmp256 pv_spin_kick_receivers;
+    struct bmp256 pv_spin_kick_senders;
+
     vcriticality_perm_t criticality_perms[NUM_CPUS];
 
     bool root;

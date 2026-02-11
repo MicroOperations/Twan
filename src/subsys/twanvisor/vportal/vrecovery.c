@@ -56,6 +56,7 @@ void vdo_finalize_teardown(u8 vid)
     bmp256_unset(&vpartition->ipi_senders, root_vid); 
     bmp256_unset(&vpartition->tlb_shootdown_senders, root_vid); 
     bmp256_unset(&vpartition->read_vcpu_state_senders, root_vid);  
+    bmp256_unset(&vpartition->pv_spin_kick_senders, root_vid);  
     
     u32 processor_id = vpartition->terminate_notification.processor_id;
     u8 vector = vpartition->terminate_notification.vector;
@@ -121,6 +122,27 @@ void vdo_finalize_teardown(u8 vid)
 
         bmp256_unset(&pair->read_vcpu_state_senders, vid);
         bmp256_unset(&vpartition->read_vcpu_state_receivers, pair_vid);
+    }
+
+    /* unwind pv spin kick routes */
+    while (
+        (pair_vid = bmp256_fls(&vpartition->pv_spin_kick_senders)) != -1) {
+
+        struct vpartition *pair = vpartition_get_exclusive(pair_vid);
+        VBUG_ON(!pair);
+
+        bmp256_unset(&pair->pv_spin_kick_receivers, vid);
+        bmp256_unset(&vpartition->pv_spin_kick_senders, pair_vid);
+    }
+
+    while (
+        (pair_vid = bmp256_fls(&vpartition->pv_spin_kick_receivers)) != -1) {
+
+        struct vpartition *pair = vpartition_get_exclusive(pair_vid);
+        VBUG_ON(!pair);
+
+        bmp256_unset(&pair->pv_spin_kick_senders, vid);
+        bmp256_unset(&vpartition->pv_spin_kick_receivers, pair_vid);
     }
 
     __vpartition_remove(vid);

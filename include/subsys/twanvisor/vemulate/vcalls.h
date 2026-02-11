@@ -43,6 +43,7 @@ typedef enum
 
     VPV_SPIN_PAUSE,
     VPV_SPIN_KICK,
+    VPV_SPIN_KICK_FAR,
 
     VKDBG,
 

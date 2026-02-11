@@ -156,6 +156,11 @@ inline long tv_vpv_spin_kick(u32 processor_id)
     return tv_vcall(VPV_SPIN_KICK, processor_id, 0, 0, 0, 0, 0);   
 }
 
+inline long tv_vpv_spin_kick_far(u8 vid, u32 processor_id)
+{
+    return tv_vcall(VPV_SPIN_KICK_FAR, vid, processor_id, 0, 0, 0, 0); 
+}
+
 inline long tv_vkdbg(const char *str)
 {
     return tv_vcall(VKDBG, (u64)str, 0, 0, 0, 0, 0);

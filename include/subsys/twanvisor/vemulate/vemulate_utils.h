@@ -9,6 +9,7 @@ typedef enum
     VIPI_ROUTE,
     VTLB_SHOOTDOWN_ROUTE,
     VREAD_VCPU_STATE_ROUTE,
+    VPV_SPIN_KICK_ROUTE,
     VNUM_ROUTE_TYPES /* enum guard, not a valid route type */
 } vroute_type_t;
 
@@ -632,6 +633,8 @@ int vemu_read_criticality_level(u8 requester_vid, u32 physical_processor_id);
 int vemu_write_criticality_level(u8 requester_vid, u32 physical_processor_id, 
                                  u8 criticality_level);   
                                  
-int vemu_pv_spin_kick(u8 vid, u32 processor_id);
+void __vemu_pv_spin_kick(struct vcpu *vcpu);
+int vemu_pv_spin_kick_local(u32 processor_id);
+int vemu_pv_spin_kick_far(u8 target_vid, u32 processor_id);
 
 #endif

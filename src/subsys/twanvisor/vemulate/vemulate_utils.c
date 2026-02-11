@@ -549,6 +549,12 @@ int vemu_set_route(u8 target_vid, u8 sender_vid, vroute_type_t route_type,
             target_senders_map = &target->read_vcpu_state_senders;
             break;
 
+        case VPV_SPIN_KICK_ROUTE:
+
+            sender_receivers_map = &sender->pv_spin_kick_receivers;
+            target_senders_map = &target->pv_spin_kick_senders;
+            break;
+
         default:
             VBUG_ON(true);
             break;
@@ -693,20 +699,8 @@ int vemu_write_criticality_level(u8 requester_vid, u32 physical_processor_id,
     return ret;
 }
 
-int vemu_pv_spin_kick(u8 vid, u32 processor_id)
-{   
-    struct mcsnode vpartition_node = INITIALIZE_MCSNODE();
-    struct vpartition *vpartition = vpartition_get(vid, &vpartition_node);
-
-    if (!vpartition)
-        return -EINVAL;
-
-    if (processor_id >= vpartition->vcpu_count) {
-        vpartition_put(vid, &vpartition_node);
-        return -EINVAL;
-    }
-
-    struct vcpu *vcpu = &vpartition->vcpus[processor_id];
+void __vemu_pv_spin_kick(struct vcpu *vcpu)
+{
     struct vscheduler *vsched = vscheduler_of(vcpu);
 
     struct mcsnode vsched_node = INITIALIZE_MCSNODE();
@@ -730,8 +724,50 @@ int vemu_pv_spin_kick(u8 vid, u32 processor_id)
     }
 
     vmcs_unlock_isr_restore(&vsched->lock, &vsched_node);
+}
+
+int vemu_pv_spin_kick_local(u32 processor_id)
+{   
+    u8 vid = vcurrent_vcpu()->vid;
+
+    struct mcsnode vpartition_node = INITIALIZE_MCSNODE();
+    struct vpartition *vpartition = vpartition_get(vid, &vpartition_node);
+
+    if (!vpartition)
+        return -EINVAL;
+
+    if (processor_id >= vpartition->vcpu_count) {
+        vpartition_put(vid, &vpartition_node);
+        return -EINVAL;
+    }
+
+    struct vcpu *vcpu = &vpartition->vcpus[processor_id];
+    __vemu_pv_spin_kick(vcpu);
 
     vpartition_put(vid, &vpartition_node);
+    return 0;
+}
+
+int vemu_pv_spin_kick_far(u8 target_vid, u32 processor_id)
+{
+    u8 sender_vid = vcurrent_vcpu()->vid;
+
+    struct mcsnode node = INITIALIZE_MCSNODE();
+    struct vpartition *vpartition = vpartition_get(target_vid, &node);
+    if (!vpartition)
+        return -EINVAL;
+
+    if (!bmp256_test(&vpartition->pv_spin_kick_senders, sender_vid) ||
+        processor_id >= vpartition->vcpu_count) {
+
+        vpartition_put(target_vid, &node);
+        return -EINVAL;
+    }
+
+    struct vcpu *vcpu = &vpartition->vcpus[processor_id];
+    __vemu_pv_spin_kick(vcpu);
+
+    vpartition_put(target_vid, &node);
     return 0;
 }
 

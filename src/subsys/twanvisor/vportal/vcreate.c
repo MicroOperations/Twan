@@ -160,7 +160,9 @@ int vpartition_precheck(struct vpartition *vpartition)
         bmp256_ffs(&vpartition->tlb_shootdown_receivers) != -1 ||
         bmp256_ffs(&vpartition->tlb_shootdown_senders) != -1 ||
         bmp256_ffs(&vpartition->read_vcpu_state_receivers) != -1 ||
-        bmp256_ffs(&vpartition->read_vcpu_state_senders) != -1) {
+        bmp256_ffs(&vpartition->read_vcpu_state_senders) != -1 ||
+        bmp256_ffs(&vpartition->pv_spin_kick_receivers) != -1 ||
+        bmp256_ffs(&vpartition->pv_spin_kick_senders) != -1) {
 
         return -EINVAL;
     }
@@ -214,6 +216,7 @@ void vpartition_setup(struct vpartition *vpartition, u8 vid)
     bmp256_set(&vpartition->ipi_senders, root_vid);
     bmp256_set(&vpartition->tlb_shootdown_senders, root_vid);
     bmp256_set(&vpartition->read_vcpu_state_senders, root_vid);
+    bmp256_set(&vpartition->pv_spin_kick_senders, root_vid);
 
     for (u32 i = 0; i < vpartition->vcpu_count; i++)
         vcpu_setup(vpartition, &vpartition->vcpus[i], i);

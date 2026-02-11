@@ -565,7 +565,18 @@ static long vpv_spin_kick(struct vregs *vregs)
     vcurrent_vcpu_enable_preemption();
 
     u32 processor_id = vregs->regs.rdi & 0xffffffff;
-    return vemu_pv_spin_kick(vcurrent_vcpu()->vid, processor_id);
+    return vemu_pv_spin_kick_local(processor_id);
+}
+
+/* long VPV_SPIN_KICK_FAR(u8 vid, u32 processor_id) */
+static long vpv_spin_kick_far(struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+
+    u8 vid = vregs->regs.rdi & 0xff;
+    u32 processor_id = vregs->regs.rsi & 0xffffffff;
+
+    return vemu_pv_spin_kick_far(vid, processor_id);
 }
 
 /* long VKDBG(const char *str) */
@@ -665,6 +676,7 @@ static vcall_func_t vcall_table[] = {
 
     [VPV_SPIN_PAUSE] = vpv_spin_pause,
     [VPV_SPIN_KICK] = vpv_spin_kick,
+    [VPV_SPIN_KICK_FAR] = vpv_spin_kick_far,
 
     [VKDBG] = vkdbg,
 
