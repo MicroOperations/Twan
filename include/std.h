@@ -60,6 +60,24 @@ struct memory_range
 #define ms_to_ticks(ms, freq) (((ms) * (freq)) / 1000ULL)
 #define us_to_ticks(us, freq) (((us) * (freq)) / 1000000ULL)
 
+#define READ_ONCE(x)					                        \
+({      					                                    \
+	union {typeof((x)) __val; char __c[1];} __u = {.__c = {0}}; \
+                                                                \
+	__read_once_size(&(x), __u.__c, sizeof((x)));	            \
+                                                                \
+	__u.__val;					                                \
+})
+
+#define WRITE_ONCE(x, val)				                                \
+({							                                            \
+	union {typeof((x)) __val; char __c[1];} __u = {.__val = (val)};     \
+                                                                        \
+	__write_once_size(&(x), __u.__c, sizeof((x)));	                    \
+                                                                        \
+	__u.__val;					                                        \
+})
+
 inline bool is_canonical(u64 va)
 {
     u64 bit = ((va >> 47) & 1) != 0;
@@ -251,9 +269,9 @@ inline void *memset(void *str, int c, size_t n)
     return str;
 }
 
-inline void *memcpy(void *dest, void *src, size_t n)
+inline void *memcpy(void *dest, const void *src, size_t n)
 {
-    char *_src = src;
+    const char *_src = src;
     char *_dest = dest;
 
     for (u64 i = 0; i < n; i++)
@@ -430,6 +448,38 @@ inline u8 bcd_to_decimal(u8 bcd)
 inline u8 decimal_to_bcd(u8 dec)
 {
     return ((dec / 10) << 4) | (dec % 10);
+}
+
+inline void __read_once_size(const volatile void *p, void *res, int size)
+{
+	switch (size) {
+        
+	    case 1: *(u8  *) res = *(volatile u8  *)p; break;
+	    case 2: *(u16 *) res = *(volatile u16 *)p; break;
+	    case 4: *(u32 *) res = *(volatile u32 *)p; break;
+	    case 8: *(u64 *) res = *(volatile u64 *)p; break;
+	    default:
+		    barrier();
+		    memcpy((void *)res, (const void *)p, size);
+		    barrier();
+            break;
+	    }
+}
+
+inline void __write_once_size(volatile void *p, void *res, int size)
+{
+	switch (size) {
+
+	    case 1: *(volatile  u8 *) p = *(u8  *)res; break;
+	    case 2: *(volatile u16 *) p = *(u16 *)res; break;
+	    case 4: *(volatile u32 *) p = *(u32 *)res; break;
+	    case 8: *(volatile u64 *) p = *(u64 *)res; break;
+	    default:
+		    barrier();
+		    memcpy((void *)p, (const void *)res, size);
+		    barrier();
+            break;
+	}
 }
 
 #endif

@@ -72,31 +72,42 @@ extern struct vma_partition_ticket __vma_partition_registry_end[];
 #define vma_partition_unmap(partition, idx) do {        \
                                                         \
     KBUG_ON(idx >= VMA_PARTITION_ENTRY_COUNT);          \
-    (partition)->pde[idx].val = 0;                      \
+                                                        \
+    WRITE_ONCE((partition)->pde[idx].val, 0);           \
 } while (0)
 
 #define vma_partition_remap(partition, idx, _pfn) do {  \
                                                         \
     KBUG_ON(idx >= VMA_PARTITION_ENTRY_COUNT);          \
                                                         \
-    (partition)->pde[idx].val = 0;                      \
-    (partition)->pde[idx].fields.rw = 1;                \
-    (partition)->pde[idx].fields.present = 1;           \
-    (partition)->pde[idx].fields.ps = 1;                \
-    (partition)->pde[idx].fields.pfn = (_pfn);          \
+    pde_huge_t __pde = {                                \
+        .fields = {                                     \
+            .rw = 1,                                    \
+            .present = 1,                               \
+            .ps = 1,                                    \
+            .pfn = (_pfn),                              \
+        }                                               \
+    };                                                  \
+                                                        \
+    WRITE_ONCE((partition)->pde[idx].val, __pde.val);   \
 } while (0)
 
 #define vma_partition_remap_mmio(partition, idx, _pfn) do { \
                                                             \
     KBUG_ON(idx >= VMA_PARTITION_ENTRY_COUNT);              \
                                                             \
-    (partition)->pde[idx].val = 0;                          \
-    (partition)->pde[idx].fields.rw = 1;                    \
-    (partition)->pde[idx].fields.present = 1;               \
-    (partition)->pde[idx].fields.pwt = 1;                   \
-    (partition)->pde[idx].fields.pcd = 1;                   \
-    (partition)->pde[idx].fields.ps = 1;                    \
-    (partition)->pde[idx].fields.pfn = (_pfn);              \
+    pde_huge_t __pde = {                                    \
+        .fields = {                                         \
+            .rw = 1,                                        \
+            .present = 1,                                   \
+            .pwt = 1,                                       \
+            .pcd = 1,                                       \
+            .ps = 1,                                        \
+            .pfn = (_pfn),                                  \
+        }                                                   \
+    };                                                      \
+                                                            \
+    WRITE_ONCE((partition)->pde[idx].val, __pde.val);       \
 } while (0)
 
 struct vma_interface

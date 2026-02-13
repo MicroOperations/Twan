@@ -61,4 +61,10 @@
 
 #define FEMTOSECOND 1000000000000000ULL
 
+#ifndef barrier
+
+#define barrier() __asm__ __volatile__("": : :"memory")
+
+#endif
+
 #endif
