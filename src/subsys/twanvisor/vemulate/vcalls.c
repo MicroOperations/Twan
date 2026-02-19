@@ -659,8 +659,8 @@ static vcall_func_t vcall_table[] = {
 
     [VIS_SERVICED] = vis_serviced,
     [VIS_PENDING] = vis_pending,
-
     [VEOI] = veoi,
+
     [VYIELD] = vyield,
     [VPAUSE] = vpause,
 

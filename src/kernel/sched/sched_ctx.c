@@ -4,6 +4,7 @@
 
 void sched_save_current_ctx(struct task *current, struct interrupt_info *ctx)
 {
+    current->context.cr8 = ctx->regs.cr8;
     current->context.r15 = ctx->regs.r15;
     current->context.r14 = ctx->regs.r14;
     current->context.r13 = ctx->regs.r13;
@@ -40,6 +41,7 @@ void sched_put_current_ctx(struct interrupt_info *ctx, bool push)
 
 void sched_set_ctx(struct interrupt_info *ctx, struct task *task)
 {
+    ctx->regs.cr8 = task->context.cr8;
     ctx->regs.r15 = task->context.r15;
     ctx->regs.r14 = task->context.r14;
     ctx->regs.r13 = task->context.r13;

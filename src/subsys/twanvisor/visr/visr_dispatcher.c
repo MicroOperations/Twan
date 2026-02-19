@@ -18,7 +18,7 @@ void vacknowledge_interrupt(u8 vector)
 
 void vpanic_exception(struct interrupt_info *stack_trace)
 {
-    u8 vector = stack_trace->vector;
+    u8 vector = stack_trace->dispatch_info.fields.vector;
 
     char *exception_str = NULL;
     if (vector >= ARRAY_LEN(vector_to_str))
@@ -101,7 +101,8 @@ void __visr_dispatcher(struct interrupt_info *stack_trace)
 {
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
 
-    u8 vector = stack_trace->vector;
+    u8 vector = stack_trace->dispatch_info.fields.vector;
+    bool emulated = stack_trace->dispatch_info.fields.emulated != 0;
     bool was_in_isr = vthis_cpu->handling_isr;
 
     if (!was_in_isr) {
@@ -193,7 +194,7 @@ void __visr_dispatcher(struct interrupt_info *stack_trace)
     if (should_dispatch)
         vdispatch_interrupt(vector);
 
-    if (stack_trace->emulated == 0)
+    if (!emulated)
         vacknowledge_interrupt(vector);
     
     if (!was_in_isr) {

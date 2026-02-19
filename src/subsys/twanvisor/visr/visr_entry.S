@@ -37,7 +37,8 @@ __vdo_isr_entry:
 .align 64
 __vemulate_interrupt:
 
-    movzx %sil, %esi 
+    movzx %sil, %esi
+    orl $(1 << 31), %esi
 
     pushfq 
     cli
@@ -57,7 +58,6 @@ __vemulate_interrupt:
     pushq %r8
     pushq %rdx
     pushq %rsi
-    pushq $1
 
     jmp __vdo_isr_entry
 

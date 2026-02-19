@@ -67,6 +67,9 @@ void __pv_mcs_lock(struct mcslock *lock, struct mcsnode *node)
                     int expected = MCS_LOCKED;
                     if (atomic32_cmpxchg(&node->state, &expected, MCS_PAUSED))
                         tv_vpv_spin_pause();
+                    
+                } else {
+                    cpu_relax();
                 }
             }
         }

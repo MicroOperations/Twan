@@ -1,9 +1,11 @@
 #include <include/subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
+#include <include/subsys/twanvisor/visr/visr_dispatcher.h>
 #include <include/subsys/twanvisor/visr/visr_index.h>
 #include <include/subsys/twanvisor/twanvisor.h>
 #include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <include/subsys/twanvisor/vsched/vsched_timer.h>
 #include <include/kernel/kapi.h>
 
 extern void __vemulate_interrupt(u64 rsp, u8 vector, u64 errcode);
@@ -155,23 +157,54 @@ int vipi_check_ack(u32 vprocessor_id, struct vcpu *vcpu)
     return ret ? 0 : 1;
 }
 
+void vhandle_buggy_lapic_isr(void)
+{
+    /* on certain testing equipment, interrupts occurring in parallel with
+       vmexits were causing the lapic ISR to be set but not vectored, and
+       would then cause a vmexit due to external interrupt on vmentry. we 
+       should handle this case here by draining the ISR before we drain IPIs
+       from the IRR, when this is done, the interrupt does not get vectored nor
+       does it cause the vmexit due to external interrupt on vmentry, */
+
+    struct vper_cpu *vthis_cpu = vthis_cpu_data();
+
+    STATIC_ASSERT(VSCHED_TIMER_VECTOR > VIPI_VECTOR);
+
+    if (vis_lapic_isr_set(VSCHED_TIMER_VECTOR)) {
+
+        if (vis_sched_timer_done())
+            vcurrent_vcpu()->flags.fields.yield_request = 1;
+
+        vlapic_eoi();
+    }
+
+    if (vis_lapic_isr_set(VIPI_VECTOR)) {
+
+        if (vthis_cpu->vipi_data.dead)
+            vdead_local();
+        
+        vlapic_eoi();
+    }
+
+    for (int i = VIPI_VECTOR - 1; i >= 240; i--) {
+
+        if (vis_lapic_isr_set(i)) {
+
+            vdispatch_interrupt(i);
+            vlapic_eoi();
+        }
+    }
+}
+
 void vipi_drain_no_yield(void)
 {
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
 
     u64 flags = read_flags_and_disable_interrupts();
 
+    vhandle_buggy_lapic_isr();
+
     if (vis_lapic_irr_set(VIPI_VECTOR)) {
-
-        /* this is fine aslong as the hv doesn't use priority based nested
-           interrupts or VIPI_VECTOR is max intl */
-        if (vis_lapic_isr_set(VIPI_VECTOR)) {
-
-            if (vthis_cpu->vipi_data.dead)
-                vdead_local();
-
-            vlapic_eoi();
-        }
 
         vthis_cpu->vipi_data.vcpus.drain = 1;
 

@@ -6,6 +6,7 @@
 
 void vsched_put_ctx(struct vcpu *vcpu, struct interrupt_info *ctx)
 {
+    vcpu->context.cr8 = ctx->regs.cr8;
     vcpu->context.r15 = ctx->regs.r15;
     vcpu->context.r14 = ctx->regs.r14;
     vcpu->context.r13 = ctx->regs.r13;
@@ -32,6 +33,7 @@ void vsched_put_ctx(struct vcpu *vcpu, struct interrupt_info *ctx)
 
 void vsched_set_ctx(struct vcpu *vcpu, struct interrupt_info *ctx)
 {
+    ctx->regs.cr8 = vcpu->context.cr8;
     ctx->regs.r15 = vcpu->context.r15;
     ctx->regs.r14 = vcpu->context.r14;
     ctx->regs.r13 = vcpu->context.r13;

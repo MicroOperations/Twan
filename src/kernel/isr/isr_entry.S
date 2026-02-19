@@ -46,6 +46,7 @@ __do_isr_entry:
 __emulate_interrupt:
 
     movzx %sil, %esi 
+    orl $(1 << 31), %esi
 
     pushfq 
     cli
@@ -65,7 +66,6 @@ __emulate_interrupt:
     pushq %r8
     pushq %rdx
     pushq %rsi
-    pushq $1
 
     jmp __do_isr_entry
 

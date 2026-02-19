@@ -87,7 +87,7 @@ bool is_critical_exception(u8 vector)
 
 void log_exception(struct interrupt_info *stack_trace)
 {
-    u8 vector = stack_trace->vector;
+    u8 vector = stack_trace->dispatch_info.fields.vector;
 
     char *exception_str = NULL;
     if (vector >= ARRAY_LEN(vector_to_str))
@@ -184,7 +184,8 @@ void __isr_dispatcher(struct interrupt_info *stack_trace)
 {
     struct per_cpu *this_cpu = this_cpu_data();
 
-    u8 vector = stack_trace->vector;
+    u8 vector = stack_trace->dispatch_info.fields.vector;
+    bool emulated = stack_trace->dispatch_info.fields.emulated != 0;
     bool was_in_isr = this_cpu->handling_isr;
     int old_intl = this_cpu->intl;
     struct interrupt_info *old_int_ctx = this_cpu->int_ctx;
@@ -195,8 +196,6 @@ void __isr_dispatcher(struct interrupt_info *stack_trace)
         this_cpu->handling_isr = true;
         this_cpu->task_ctx = stack_trace;
     }
-
-    bool emulated = stack_trace->emulated == 1;
     
     int intl = vector_to_intl(vector);
     bool external = !emulated && intl > old_intl && __in_service(vector);

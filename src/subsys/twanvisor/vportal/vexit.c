@@ -454,7 +454,7 @@ static void vexit_cr_access(struct vregs *vregs)
                 return;
             }
 
-            vregs->cr8 = val.val;
+            vregs->regs.cr8 = val.val;
             intl_t intl = {.val = val.val};
 
             set_intl(current, intl);

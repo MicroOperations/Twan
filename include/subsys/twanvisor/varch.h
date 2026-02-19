@@ -10,10 +10,6 @@
     PUSH_REGS
 
     push %rax
-    movq %cr8, %rax
-    xchgq %rax, (%rsp)
-
-    push %rax
     movq %cr2, %rax
     xchgq %rax, (%rsp)
 
@@ -60,9 +56,6 @@
 
     popq %rax
     movq %rax, %cr2
-
-    popq %rax
-    movq %rax, %cr8
     
     POP_REGS
 
@@ -78,11 +71,10 @@ struct vregs
     u64 dr3;
     u64 dr6;
     u64 cr2;
-    u64 cr8;
     struct regs regs;
 } __packed;
 
-SIZE_ASSERT(struct vregs, sizeof(struct regs) + (sizeof(u64) * 7));
+SIZE_ASSERT(struct vregs, sizeof(struct regs) + (sizeof(u64) * 6));
 
 #endif
 

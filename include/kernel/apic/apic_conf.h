@@ -3,7 +3,7 @@
 
 #include <include/std.h>
 
-#define NUM_IOAPICS 1U
+#define NUM_IOAPICS CONFIG_NUM_IOAPICS
 
 /* each ioapic's mmio region will have to be mapped, the max should be enough
    to guarantee every mmio region we need to map early on can be satisfied */

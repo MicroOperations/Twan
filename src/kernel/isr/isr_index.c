@@ -105,7 +105,7 @@ char *vector_to_str[NUM_RESERVED_VECTORS] =
 
 u64 get_int_stack(struct interrupt_info *ctx)
 {
-    u8 vector = ctx->vector;
+    u8 vector = ctx->dispatch_info.fields.vector;
     if (vector == NMI || vector == DOUBLE_FAULT || vector == MACHINE_CHECK)
         return (u64)ctx;
 

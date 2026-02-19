@@ -1,11 +1,16 @@
 mainmenu "Twan Configuration"
 
-# Generic
+# Hardware
 
 config NUM_CPUS
     int "Maximum cpu count"
     range 1 1024
     default 32
+
+config NUM_IOAPICS
+    int "IOAPIC count"
+    range 1 15
+    default 1
 
 # Kernel
 

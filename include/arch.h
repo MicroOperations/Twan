@@ -19,7 +19,6 @@
     \prefix\ISR_NO:
         pushq $0
         pushq $\ISR_NO
-        pushq $0
         jmp \entry_func
 
 .endm
@@ -28,7 +27,6 @@
     .align 16
     \prefix\ISR_NO:
         pushq $\ISR_NO
-        pushq $0
         jmp \entry_func
 .endm
 
@@ -90,9 +88,16 @@
     pushq %r14
     pushq %r15
 
+    pushq %rax
+    movq %cr8, %rax
+    xchg %rax, (%rsp)
+
 .endm
 
 .macro POP_REGS
+
+    popq %rax
+    movq %rax, %cr8
 
     popq %r15
     popq %r14
@@ -116,6 +121,7 @@
 .endm
 
 .macro SETUP_ISR_ENTRY 
+    push $0
     PUSH_REGS
 .endm
 
@@ -128,8 +134,21 @@
 
 #include <include/lib/x86_index.h>
 
+typedef union
+{
+    u64 val;
+    struct 
+    {
+        u64 vector : 8;
+        u64 reserved0 : 23;
+        u64 emulated : 1;
+        u64 reserved1 : 32;
+    } fields;
+} dispatch_info_t;
+
 struct regs 
 {   
+    u64 cr8;
     u64 r15;
     u64 r14;
     u64 r13;
@@ -151,8 +170,9 @@ struct regs
 struct interrupt_info
 {
     struct regs regs;
-    u64 emulated;
-    u64 vector;
+    u64 alignment;
+    
+    dispatch_info_t dispatch_info;
     u64 errcode;
     u64 rip;
     u64 cs;
@@ -163,6 +183,7 @@ struct interrupt_info
 
 struct context 
 {
+    u64 cr8;
     u64 r15;
     u64 r14;
     u64 r13;
