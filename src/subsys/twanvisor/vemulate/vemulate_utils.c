@@ -751,6 +751,8 @@ int vemu_pv_spin_kick_local(u32 processor_id)
 int vemu_pv_spin_kick_far(u8 target_vid, u32 processor_id)
 {
     u8 sender_vid = vcurrent_vcpu()->vid;
+    if (target_vid == sender_vid)
+        return -EINVAL;
 
     struct mcsnode node = INITIALIZE_MCSNODE();
     struct vpartition *vpartition = vpartition_get(target_vid, &node);
