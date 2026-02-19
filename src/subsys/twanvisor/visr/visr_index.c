@@ -168,29 +168,38 @@ void vhandle_buggy_lapic_isr(void)
 
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
 
-    STATIC_ASSERT(VSCHED_TIMER_VECTOR > VIPI_VECTOR);
-
-    if (vis_lapic_isr_set(VSCHED_TIMER_VECTOR)) {
-
-        if (vis_sched_timer_done())
-            vcurrent_vcpu()->flags.fields.yield_request = 1;
-
-        vlapic_eoi();
-    }
-
-    if (vis_lapic_isr_set(VIPI_VECTOR)) {
-
-        if (vthis_cpu->vipi_data.dead)
-            vdead_local();
-        
-        vlapic_eoi();
-    }
-
-    for (int i = VIPI_VECTOR - 1; i >= 240; i--) {
+    for (int i = 255; i >= 240; i--) {
 
         if (vis_lapic_isr_set(i)) {
 
-            vdispatch_interrupt(i);
+            switch (i) {
+
+                case VSCHED_TIMER_VECTOR:
+
+                    if (vis_sched_timer_done())
+                        vcurrent_vcpu()->flags.fields.yield_request = 1;
+
+                    break;
+
+                case VIPI_VECTOR:
+
+                    if (vthis_cpu->vipi_data.dead)
+                        vdead_local();
+
+                    break;
+
+#if SPURIOUS_INT_VECTOR >= 240
+
+                case VSPURIOUS_INT_VECTOR:
+                    break;
+#endif
+
+                default:
+                
+                    vdispatch_interrupt(i);
+                    break;
+            }
+
             vlapic_eoi();
         }
     }

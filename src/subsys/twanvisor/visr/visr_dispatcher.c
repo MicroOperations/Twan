@@ -207,14 +207,12 @@ void vexit_ext_dispatcher(u8 vector)
 {
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
 
-    bool yield_pending = false;
-
     switch (vector) {
 
         case VSCHED_TIMER_VECTOR:
 
             if (vis_sched_timer_done())
-                yield_pending = true;
+                vcurrent_vcpu()->flags.fields.yield_request = 1;
 
             break;
 
@@ -247,9 +245,6 @@ void vexit_ext_dispatcher(u8 vector)
     vipi_drain_no_yield();
 
 #endif
-
-    if (yield_pending)
-        vsched_yield();
 }
 
 #endif
