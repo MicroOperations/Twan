@@ -96,6 +96,9 @@ struct per_cpu
     u64 vtimer_frequency_hz;
     u64 vtimer_period_fs;
 
+    u64 vsched_timer_frequency_hz;
+    u64 vsched_timer_period_fs;
+
 #endif
 
     atomic_ptr_t isr_table[NUM_VECTORS];
@@ -194,6 +197,9 @@ struct twan_kernel
 
 #define num_cpus() \
     (twan()->cpu.num_cpus)
+
+#define num_enabled_cpus() \
+    (twan()->cpu.num_enabled_cpus)
 
 #define this_processor_id() \
     (__readgs32(offsetof(struct per_cpu, processor_id)))

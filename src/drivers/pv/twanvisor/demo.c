@@ -17,6 +17,9 @@ extern char pv_twanvisor_demo_guest_end[];
 #define TERMINATE_ISR_VECTOR 69
 #define TERMINATE_ISR_PROCESSOR_ID 0
 
+#define ROOT_TIMESLICE_MS 10
+#define GUEST_TIMESLICE_MS 10
+
 static struct vcpu guest_vcpus[NUM_CPUS];
 
 static ept_pml4e_t pml4[512] __aligned(4096);
@@ -40,19 +43,25 @@ static u8 guest_mem[4096] __aligned(4096);
 
 static void guest_init(void)
 {
-    u32 num_vcpus = twan()->num_physical_processors;
-    guest.vcpu_count = num_vcpus;
+    u32 phys_id = 0;
+    u32 ncpus = num_cpus();
+    for (u32 i = 0; i < ncpus; i++) {
 
-    for (u32 i = 0; i < num_vcpus; i++) {
+        struct per_cpu *cpu = cpu_data(i);
+        if (!cpu_enabled(cpu->flags))
+            continue;
 
-        struct vcpu *vcpu = &guest_vcpus[i];
+        u32 ticks = ms_to_ticks(GUEST_TIMESLICE_MS, 
+                                cpu->vsched_timer_frequency_hz);
+
+        struct vcpu *vcpu = &guest_vcpus[phys_id];
 
         vcpu->vlaunch.cs.val = 0;
-        vcpu->vlaunch.rip = _guest_start - pv_twanvisor_demo_guest_start;
+        vcpu->vlaunch.rip = 0;
         
         vcpu->vboot_state = VBOOT_READY;
-        vcpu->vsched_metadata.time_slice_ticks = 100000;
-        vcpu->vqueue_id = vprocessor_to_vqueue_id(i);
+        vcpu->vsched_metadata.time_slice_ticks = ticks;
+        vcpu->vqueue_id = vprocessor_to_vqueue_id(phys_id);
 
         vcpu->arch.io_bitmap_a_phys = 
             virt_to_phys_static(vcpu->arch.io_bitmap_a);
@@ -68,7 +77,14 @@ static void guest_init(void)
 
         vcpu->arch.vmcs_phys = 
             virt_to_phys_static(&vcpu->arch.vmcs);
+
+        phys_id++;
     }
+
+    u32 num_physical_processors = twan()->num_physical_processors;
+    KBUG_ON(phys_id != num_physical_processors);
+
+    guest.vcpu_count = num_physical_processors;
     
     guest.arch.ept_state.fields.ept_base_phys = pml4_phys >> 12;
     guest.arch.ept_state.fields.ept_enabled = 1;
@@ -139,8 +155,13 @@ static __driver_init void pv_twanvisor_demo_init(void)
     for (u32 i = 0; i < num_cpus; i++) {
 
         struct per_cpu *cpu = cpu_data(i);
-        if (cpu_enabled(cpu->flags))
-            tv_valter_vcpu_timeslice(root_vid, i, 10000);
+        if (cpu_enabled(cpu->flags)) {
+
+            u32 ticks = ms_to_ticks(ROOT_TIMESLICE_MS,
+                                    cpu->vsched_timer_frequency_hz);
+                                    
+            tv_valter_vcpu_timeslice(root_vid, i, ticks);
+        }
     }
 
     kdbg("root vcpus are now preemptive!\n");

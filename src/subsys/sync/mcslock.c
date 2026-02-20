@@ -60,9 +60,23 @@ void __pv_mcs_lock(struct mcslock *lock, struct mcsnode *node)
             long long processor_id = atomic64_read(&prev->processor_id);
             atomic_ptr_set(&prev->next, node);
 
+            u32 iterations = 0;
             while (atomic32_read(&node->state) != MCS_UNLOCKED) {
 
-                if (processor_id >= 0 && !tv_vis_vcpu_active(processor_id)) {
+                if (processor_id < 0) {
+                    cpu_relax();
+                    continue;
+                }
+
+                if (iterations != CONFIG_TWANVISOR_PV_LOCK_THRESHOLD) {
+                    
+                    iterations++;
+                    cpu_relax();
+                    continue;
+                }
+
+                iterations = 0;
+                if (!tv_vis_vcpu_active(processor_id)) {
 
                     int expected = MCS_LOCKED;
                     if (atomic32_cmpxchg(&node->state, &expected, MCS_PAUSED))

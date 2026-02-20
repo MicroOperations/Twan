@@ -605,8 +605,11 @@ int vper_cpu_data_init(struct vper_cpu *vthis_cpu, u32 vprocessor_id)
     vthis_cpu->arch_flags.ia32_vmx_entry_ctls = ia32_vmx_entry_ctls;
 
     this_cpu->num_vtimers = VNUM_VTIMERS;
-    this_cpu->vtimer_frequency_hz = vmx_preempt_frequency_hz;
     this_cpu->vtimer_period_fs = vmx_preempt_period_fs;
+    this_cpu->vtimer_frequency_hz = vmx_preempt_frequency_hz;
+
+    this_cpu->vsched_timer_period_fs = lapic_period_fs;
+    this_cpu->vsched_timer_frequency_hz = lapic_frequency_hz;
 
     this_cpu->flags.fields.nmis_as_normal = 1;
 

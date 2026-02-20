@@ -86,9 +86,21 @@ config TWANVISOR_PV_LOCKS
     bool "Enable kernel paravirtualised locking"
     default y
 
+config TWANVISOR_PV_LOCK_THRESHOLD
+    depends on TWANVISOR_PV_LOCKS
+    int "Number of iterations before making a vcall under lock contention"
+    range 0 4294967295
+    default 4096
+
 config TWANVISOR_PV_IPIS
     bool "Enable kernel paravirtualised ipis"
     default y
+
+config TWANVISOR_PV_IPI_THRESHOLD
+    depends on TWANVISOR_PV_IPIS
+    int "Number of iterations before making a vcall during ipi's"
+    range 0 4294967295
+    default 4096
 
 config TWANVISOR_VIPI_DRAIN_STRICT
     bool "Enable strict IPI draining"

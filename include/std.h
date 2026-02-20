@@ -57,8 +57,8 @@ struct memory_range
 
 #define vector_to_intl(vector) ((vector) / NUM_INTLS)
 
-#define ms_to_ticks(ms, freq) (((ms) * (freq)) / 1000ULL)
-#define us_to_ticks(us, freq) (((us) * (freq)) / 1000000ULL)
+#define ms_to_ticks(ms, freq_hz) (((ms) * (freq_hz)) / 1000ULL)
+#define us_to_ticks(us, freq_hz) (((us) * (freq_hz)) / 1000000ULL)
 
 #define READ_ONCE(x)					                        \
 ({      					                                    \

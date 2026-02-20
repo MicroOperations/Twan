@@ -39,10 +39,22 @@ void __ipi_wait(u32 target_processor_id)
 
     if (kernel->flags.fields.twanvisor_on != 0) {
 
+        u32 iterations = 0;
         while (atomic32_read(&data->signal) != IPI_UNLOCKED) {
+
+            if (iterations != CONFIG_TWANVISOR_PV_IPI_THRESHOLD) {
+
+                iterations++;
+                cpu_relax();
+                continue;
+            }
+
+            iterations = 0;
 
             if (!tv_vis_vcpu_active(target_processor_id)) 
                 tv_vyield();
+            else
+                cpu_relax();
         }
 
         return;
