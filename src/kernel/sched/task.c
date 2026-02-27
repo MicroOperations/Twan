@@ -29,7 +29,7 @@ int task_init(struct task *task, u32 processor_id, void *mempool,
     task->mempool = mempool;
 
     task->context.rip = (u64)func;
-    task->context.rsp = (u64)stack_top;
+    task->context.rsp = stack_top;
     task->context.rbp = stack_top;
     task->context.rdi = (u64)arg;
     task->context.rflags.fields._if = 1;

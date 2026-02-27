@@ -107,30 +107,27 @@ bool vsched_put_paused(struct vcpu *vcpu, bool pv_spin, bool put_ctx,
 struct vcpu *__vsched_get(struct interrupt_info *ctx)
 {
     struct vcpu *vcpu = __vsched_pop();
-    if (vcpu) {
-
-        vthis_cpu_data()->current_vcpu = vcpu;
-
-        vcpu->vsched_metadata.state = VTRANSITIONING;
-
-        vsched_set_ctx(vcpu, ctx);
-
-        vcpu->vsched_metadata.current_time_slice_ticks = 
-            vcpu->vsched_metadata.time_slice_ticks;
-    }
+    if (vcpu)
+        vsched_enter_ctx(vcpu, ctx);
 
     return vcpu;
 }
 
-struct vcpu *vsched_get(struct interrupt_info *ctx)
+struct vcpu *vsched_get_or_idle(struct interrupt_info *ctx)
 {
     struct vscheduler *vsched = vthis_vscheduler();
 
     struct mcsnode node = INITIALIZE_MCSNODE();
     vmcs_lock_isr_save(&vsched->lock, &node);
 
-    struct vcpu *vcpu = __vsched_get(ctx);    
+    struct vcpu *vcpu = __vsched_get(ctx);   
+    if (!vcpu) {
+        vcpu = &vsched->idle_vcpu;
 
+        vsched_enter_ctx(vcpu, ctx);
+        atomic32_set(&vsched->kick, VSCHED_IDLE_KICK_UNSET);
+    }
+    
     u32 ticks = vcpu->vsched_metadata.current_time_slice_ticks;
 
     vmcs_unlock_isr_restore(&vsched->lock, &node);
@@ -200,6 +197,19 @@ void vsched_preempt_isr(void)
 
     current->flags.fields.yield_request = 0;
     vthis_vsched_reschedule(current, ctx);
+}
+
+void vidle_vcpu_loop(void)
+{
+    enable_interrupts();
+
+    struct vscheduler *vsched = vthis_vscheduler();
+    atomic32_t *kick = &vsched->kick;
+
+    while (1) {
+        spin_until(atomic32_read(kick) == VSCHED_IDLE_KICK_SET);
+        vsched_idle_yield();
+    }
 }
 
 #endif

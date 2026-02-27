@@ -386,6 +386,8 @@ int vper_cpu_data_init(struct vper_cpu *vthis_cpu, u32 vprocessor_id)
     
     struct per_cpu *this_cpu = this_cpu_data();
 
+    vthis_cpu->mxcsr_mask = mxcsr_mask();
+
     vthis_cpu->processor_id = this_processor_id();
     vthis_cpu->vprocessor_id = vprocessor_id;
     vthis_cpu->lapic_id = this_cpu->lapic_id;
@@ -403,6 +405,16 @@ int vper_cpu_data_init(struct vper_cpu *vthis_cpu, u32 vprocessor_id)
 
     vthis_cpu->vscheduler.vcriticality_level = VSCHED_MIN_CRITICALITY;
     mcslock_isr_init(&vthis_cpu->vscheduler.lock);
+
+    struct vcpu *idle = &vthis_cpu->vscheduler.idle_vcpu;
+
+    idle->context.rip = (u64)vidle_vcpu_loop;
+    idle->context.rsp = (u64)&idle->vexit_stack[sizeof(idle->vexit_stack)];
+    idle->context.rbp = idle->context.rsp;
+    idle->context.rflags.val = 0x2;
+    idle->context.fp_context.fcw = DEFAULT_FCW;
+    idle->context.fp_context.mxcsr = DEFAULT_MXCSR;
+    idle->context.fp_context.mxcsr_mask = mxcsr_mask();
 
     vthis_cpu->tss.ist1 = 
         (u64)(&vthis_cpu->nmi_stack[sizeof(vthis_cpu->nmi_stack)]);

@@ -6,5 +6,6 @@
 
 void vsched_put_ctx(struct vcpu *vcpu, struct interrupt_info *ctx);
 void vsched_set_ctx(struct vcpu *vcpu, struct interrupt_info *ctx);
+void vsched_enter_ctx(struct vcpu *vcpu, struct interrupt_info *ctx);
 
 #endif

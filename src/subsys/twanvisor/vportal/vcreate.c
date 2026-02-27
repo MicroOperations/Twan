@@ -206,6 +206,11 @@ void vcpu_setup(struct vpartition *vpartition, struct vcpu *vcpu,
 
     vcpu->context.rip = (u64)vcpu_entry;
     vcpu->context.rsp = (u64)&vcpu->vexit_stack[sizeof(vcpu->vexit_stack)];
+    vcpu->context.rbp = vcpu->context.rsp;
+    vcpu->context.rflags.val = 0x2;
+    vcpu->context.fp_context.fcw = DEFAULT_FCW;
+    vcpu->context.fp_context.mxcsr = DEFAULT_MXCSR;
+    vcpu->context.fp_context.mxcsr_mask = vmxcsr_mask();
 }
 
 void vpartition_setup(struct vpartition *vpartition, u8 vid)

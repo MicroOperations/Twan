@@ -74,4 +74,18 @@ void vsched_recover(void)
     vemulate_self_ipi(vsched_recover_ipi, 0);
 }
 
+void vsched_idle_yield_ipi(__unused u64 unused0)
+{
+    struct vcpu *current = vcurrent_vcpu();
+    struct interrupt_info *ctx = vthis_cpu_data()->vcpu_ctx;
+
+    vsched_put_ctx(current, ctx);
+    vsched_get_spin(ctx);
+}
+
+void vsched_idle_yield(void)
+{
+    vemulate_self_ipi(vsched_idle_yield_ipi, 0);
+}
+
 #endif

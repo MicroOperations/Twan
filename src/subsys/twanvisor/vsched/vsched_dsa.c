@@ -36,6 +36,8 @@ void __vsched_push(struct vcpu *vcpu)
 
     for (u32 i = 0; i <= criticality; i++)
         dq_pushback(&vsched->queues[i], &vcpu->vsched_nodes[i]);
+
+    atomic32_set(&vsched->kick, VSCHED_IDLE_KICK_SET);
 }
 
 struct vcpu *__vsched_pop(void)

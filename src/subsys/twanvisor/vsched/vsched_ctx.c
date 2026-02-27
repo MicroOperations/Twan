@@ -58,4 +58,16 @@ void vsched_set_ctx(struct vcpu *vcpu, struct interrupt_info *ctx)
         INDIRECT_BRANCH_SAFE(vcpu->set_callback_func());
 }
 
+void vsched_enter_ctx(struct vcpu *vcpu, struct interrupt_info *ctx)
+{
+    vthis_cpu_data()->current_vcpu = vcpu;
+
+    vcpu->vsched_metadata.state = VTRANSITIONING;
+
+    vsched_set_ctx(vcpu, ctx);
+
+    vcpu->vsched_metadata.current_time_slice_ticks = 
+        vcpu->vsched_metadata.time_slice_ticks;
+}
+
 #endif

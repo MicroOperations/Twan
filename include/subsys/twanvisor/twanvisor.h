@@ -217,6 +217,8 @@ struct vper_cpu
     char df_stack[VINT_STACK_SIZE] __aligned(16);
     char mce_stack[VINT_STACK_SIZE] __aligned(16);
 
+    u32 mxcsr_mask;
+
     struct vcpu *current_vcpu;
 
     u32 processor_id;
@@ -289,6 +291,8 @@ struct vtwan_kernel
 
 #define vscheduler_of(vcpu) \
     (&vper_cpu_data(vqueue_to_vprocessor_id((vcpu)->vqueue_id))->vscheduler)
+
+#define vmxcsr_mask() (vthis_cpu_data()->mxcsr_mask)
 
 inline bool vcurrent_vcpu_is_preemption_enabled(void)
 {

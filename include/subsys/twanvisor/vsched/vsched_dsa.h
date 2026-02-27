@@ -1,6 +1,7 @@
 #ifndef _VSCHED_DSA_H_
 #define _VSCHED_DSA_H_
 
+#include <lib/atomic.h>
 #include <lib/dsa/dq.h>
 #include <subsys/twanvisor/vsched/vsched_conf.h>
 #include <subsys/twanvisor/vsched/vcpu.h>
@@ -12,6 +13,8 @@ struct vscheduler
     struct dq queues[VSCHED_NUM_CRITICALITIES];
     struct dq paused_queue;
     struct mcslock_isr lock;
+    atomic32_t kick;
+    struct vcpu idle_vcpu;
 };
 
 struct dq *__vsched_get_bucket(u8 *criticality);
