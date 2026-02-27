@@ -1,6 +1,6 @@
 #define ASM_FILE 1
 
-#include <include/generated/autoconf.h>
+#include <generated/autoconf.h>
 #if CONFIG_DEMO_PV_TWANVISOR
 
 .globl pv_twanvisor_demo_guest_start

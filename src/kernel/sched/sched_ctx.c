@@ -1,6 +1,6 @@
-#include <include/kernel/sched/sched_ctx.h>
-#include <include/kernel/sched/sched.h>
-#include <include/kernel/kernel.h>
+#include <kernel/sched/sched_ctx.h>
+#include <kernel/sched/sched.h>
+#include <kernel/kernel.h>
 
 void sched_save_current_ctx(struct task *current, struct interrupt_info *ctx)
 {

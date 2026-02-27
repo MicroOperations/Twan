@@ -1,8 +1,8 @@
 #ifndef _KDBG_H_
 #define _KDBG_H_
 
-#include <include/subsys/debug/kdbg/kdbg_conf.h>
-#include <include/subsys/sync/mcslock.h>
+#include <subsys/debug/kdbg/kdbg_conf.h>
+#include <subsys/sync/mcslock.h>
 
 typedef void (*__kdbg_t)(const char *str);
 

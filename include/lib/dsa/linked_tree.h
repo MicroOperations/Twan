@@ -1,7 +1,7 @@
 #ifndef _LINKED_TREE_H_
 #define _LINKED_TREE_H_
 
-#include <include/std.h>
+#include <std.h>
 
 struct tree_node
 {

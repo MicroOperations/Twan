@@ -1,8 +1,8 @@
-#include <include/subsys/watchdog/watchdog.h>
+#include <subsys/watchdog/watchdog.h>
 #if CONFIG_SUBSYS_WATCHDOG
 
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/errno.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <errno.h>
 
 static struct watchdog watchdog_global;
 

@@ -1,7 +1,7 @@
 #ifndef _BASE_ISRS_H_
 #define _BASE_ISRS_H_
 
-#include <include/kernel/isr/isr_index.h>
+#include <kernel/isr/isr_index.h>
 
 /* x86 isr priority level 14 */
 #define SELF_IPI_CMD_VECTOR 237

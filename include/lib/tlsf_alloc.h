@@ -1,8 +1,8 @@
 #ifndef _TLSF_H_
 #define _TLSF_H_
 
-#include <include/kernel/kernel.h>
-#include <include/subsys/sync/mcslock.h>
+#include <kernel/kernel.h>
+#include <subsys/sync/mcslock.h>
 
 #define TLSF_FL_SHIFT (PAGE_SHIFT_2MB + 6)
 #define TLSF_SL_SHIFT 5 

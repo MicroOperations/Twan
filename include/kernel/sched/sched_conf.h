@@ -1,8 +1,8 @@
 #ifndef _SCHED_CONF_H_
 #define _SCHED_CONF_H_
 
-#include <include/kernel/boot.h>
-#include <include/types.h>
+#include <kernel/boot.h>
+#include <types.h>
 #include <stdint.h>
 
 #define SCHED_TASK_STACK_SIZE 2048

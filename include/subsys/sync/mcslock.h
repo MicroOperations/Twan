@@ -1,9 +1,9 @@
 #ifndef _MCSLOCK_H_
 #define _MCSLOCK_H_
 
-#include <include/std.h>
-#include <include/lib/atomic.h>
-#include <include/subsys/twanvisor/vconf.h>
+#include <std.h>
+#include <lib/atomic.h>
+#include <subsys/twanvisor/vconf.h>
 
 struct mcsnode
 {

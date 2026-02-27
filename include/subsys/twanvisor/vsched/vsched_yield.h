@@ -1,7 +1,7 @@
 #ifndef _VSCHED_YIELD_H_
 #define _VSCHED_YIELD_H_
 
-#include <include/subsys/twanvisor/vsched/vcpu.h>
+#include <subsys/twanvisor/vsched/vcpu.h>
 
 bool __vsched_is_current_preemptible(struct vcpu *current);
 bool vsched_should_request_yield(struct vcpu *current);

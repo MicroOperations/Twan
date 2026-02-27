@@ -1,5 +1,5 @@
-#include <include/lib/buddy_alloc.h>
-#include <include/errno.h>
+#include <lib/buddy_alloc.h>
+#include <errno.h>
 
 int buddy_arena_init(struct buddy_arena *arena, u64 base_addr, size_t size)
 {

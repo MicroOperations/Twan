@@ -1,8 +1,8 @@
-#include <include/subsys/time/clock.h>
+#include <subsys/time/clock.h>
 #if CONFIG_SUBSYS_CLOCK
 
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/errno.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <errno.h>
 
 static struct clock clock_global;
 

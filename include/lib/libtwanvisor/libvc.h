@@ -1,7 +1,7 @@
 #ifndef _LIBVC_H_
 #define _LIBVC_H_
 
-#include <include/lib/libtwanvisor/libvcalls.h>
+#include <lib/libtwanvisor/libvcalls.h>
 
 struct vsub_ipi_arg
 {

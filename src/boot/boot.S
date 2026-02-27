@@ -1,7 +1,7 @@
 #define ASM_FILE 1
-#include <include/multiboot2.h>
-#include <include/kernel/boot.h>
-#include <include/arch.h>
+#include <multiboot2.h>
+#include <kernel/boot.h>
+#include <arch.h>
 
 .extern __bss_start
 .extern __bss_end

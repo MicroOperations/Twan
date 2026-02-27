@@ -1,8 +1,8 @@
-#include <include/subsys/sync/spinlock.h>
-#include <include/types.h>
-#include <include/kernel/sched/sched.h>
-#include <include/kernel/apic/apic.h>
-#include <include/kernel/kapi.h>
+#include <subsys/sync/spinlock.h>
+#include <types.h>
+#include <kernel/sched/sched.h>
+#include <kernel/apic/apic.h>
+#include <kernel/kapi.h>
 
 /* TODO: pv spinlocks */
 

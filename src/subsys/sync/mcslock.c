@@ -1,7 +1,7 @@
-#include <include/subsys/sync/mcslock.h>
-#include <include/kernel/kapi.h>
-#include <include/lib/libtwanvisor/libvcalls.h>
-#include <include/lib/libtwanvisor/libvc.h>
+#include <subsys/sync/mcslock.h>
+#include <kernel/kapi.h>
+#include <lib/libtwanvisor/libvcalls.h>
+#include <lib/libtwanvisor/libvc.h>
 
 void mcsnode_init(struct mcsnode *node)
 {

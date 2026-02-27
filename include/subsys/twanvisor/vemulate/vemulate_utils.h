@@ -1,8 +1,8 @@
 #ifndef _VEMULATE_UTILS_H_
 #define _VEMULATE_UTILS_H_
 
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/subsys/twanvisor/vsched/vpartition.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vsched/vpartition.h>
 
 typedef enum
 {
@@ -25,7 +25,7 @@ typedef enum
 #define MSR_WRITE_LOW 2048
 #define MSR_WRITE_HIGH 3072
 
-inline void trap_io(struct vcpu *vcpu, u16 port)
+inline void vtrap_io(struct vcpu *vcpu, u16 port)
 {
     if (port < 0x8000) 
         vcpu->arch.io_bitmap_a[port / 8] |= (1 << (port % 8));
@@ -33,7 +33,7 @@ inline void trap_io(struct vcpu *vcpu, u16 port)
         vcpu->arch.io_bitmap_b[port / 8] |= (1 << (port % 8));
 }
 
-inline void untrap_io(struct vcpu *vcpu, u16 port)
+inline void vuntrap_io(struct vcpu *vcpu, u16 port)
 {
     if (port < 0x8000) 
         vcpu->arch.io_bitmap_a[port / 8] &= ~(1 << (port % 8));
@@ -41,7 +41,7 @@ inline void untrap_io(struct vcpu *vcpu, u16 port)
         vcpu->arch.io_bitmap_b[port / 8] &= ~(1 << (port % 8));
 }
 
-inline bool is_io_trapped(struct vcpu *vcpu, u16 port)
+inline bool vis_io_trapped(struct vcpu *vcpu, u16 port)
 {
     bool ret;
     if (port < 0x8000) 
@@ -52,12 +52,12 @@ inline bool is_io_trapped(struct vcpu *vcpu, u16 port)
     return ret;
 }
 
-inline bool in_msr_bitmap_range(u32 msr)
+inline bool vin_msr_bitmap_range(u32 msr)
 {
     return (msr <= 0x1ff || (msr >= 0xc0000000 && msr <= 0xc0001fff));
 }
 
-inline void map_msr_write(u32 msr, int *base, int *idx)
+inline void vmap_msr_write(u32 msr, int *base, int *idx)
 {
     if (msr <= 0x1ff) {
 
@@ -76,7 +76,7 @@ inline void map_msr_write(u32 msr, int *base, int *idx)
     }
 }
 
-inline void map_msr_read(u32 msr, int *base, int *idx)
+inline void vmap_msr_read(u32 msr, int *base, int *idx)
 {
     if (msr <= 0x1ff) {
 
@@ -95,55 +95,55 @@ inline void map_msr_read(u32 msr, int *base, int *idx)
     }
 }
 
-inline void untrap_msr_write(struct vcpu *vcpu, u32 msr)
+inline void vunvtrap_msr_write(struct vcpu *vcpu, u32 msr)
 {
     int base = 0;
     int idx = 0;
-    map_msr_write(msr, &base, &idx);
+    vmap_msr_write(msr, &base, &idx);
 
     if (base != -1 && idx != -1)
         vcpu->arch.msr_bitmap[base + (idx / 8)] &= ~(1 << (idx % 8));   
 }
 
-inline bool is_msr_write_trapped(struct vcpu *vcpu, u32 msr)
+inline bool vis_msr_write_trapped(struct vcpu *vcpu, u32 msr)
 {
     int base = 0;
     int idx = 0;
-    map_msr_write(msr, &base, &idx);
+    vmap_msr_write(msr, &base, &idx);
 
     return base != -1 && idx != -1 &&
            ((vcpu->arch.msr_bitmap[base + (idx / 8)] >> 
             (idx % 8)) & 1) != 0;
 }
 
-inline void untrap_msr_read(struct vcpu *vcpu, u32 msr)
+inline void vunvtrap_msr_read(struct vcpu *vcpu, u32 msr)
 {
     int base = 0;
     int idx = 0;
-    map_msr_read(msr, &base, &idx);
+    vmap_msr_read(msr, &base, &idx);
 
     if (base != -1 && idx != -1)
         vcpu->arch.msr_bitmap[base + (idx / 8)] &= ~(1 << (idx % 8));   
 }
 
-inline void untrap_msr(struct vcpu *vcpu, u32 msr)
+inline void vunvtrap_msr(struct vcpu *vcpu, u32 msr)
 {
-    untrap_msr_read(vcpu, msr);
-    untrap_msr_write(vcpu, msr);
+    vunvtrap_msr_read(vcpu, msr);
+    vunvtrap_msr_write(vcpu, msr);
 }
 
-inline bool is_msr_read_trapped(struct vcpu *vcpu, u32 msr)
+inline bool vis_msr_read_trapped(struct vcpu *vcpu, u32 msr)
 {
     int base = 0;
     int idx = 0;
-    map_msr_read(msr, &base, &idx);
+    vmap_msr_read(msr, &base, &idx);
 
     return base != -1 && idx != -1 && 
            ((vcpu->arch.msr_bitmap[base + (idx / 8)] >> (
              idx % 8)) & 1) != 0;
 }
 
-inline bool inject_interrupt(u8 vector, interrupt_type_t type, 
+inline bool vinject_interrupt(u8 vector, interrupt_type_t type, 
                             bool deliver_errcode, u64 errcode, 
                             bool deliver_length, u32 length)
 {
@@ -174,32 +174,32 @@ inline bool inject_interrupt(u8 vector, interrupt_type_t type,
     return true;
 }
 
-inline bool inject_gp(u64 errcode)
+inline bool vinject_gp(u64 errcode)
 {
-    return inject_interrupt(GENERAL_PROTECTION_FAULT, 
+    return vinject_interrupt(GENERAL_PROTECTION_FAULT, 
                             INTERRUPT_TYPE_HARDWARE_EXCEPTION, true, errcode,
                             false, 0);
 }
 
-inline bool inject_ud(void)
+inline bool vinject_ud(void)
 {
-    return inject_interrupt(INVALID_OPCODE, INTERRUPT_TYPE_HARDWARE_EXCEPTION,
+    return vinject_interrupt(INVALID_OPCODE, INTERRUPT_TYPE_HARDWARE_EXCEPTION,
                             false, 0, false, 0);
 }
 
-inline bool inject_ac(u64 errcode)
+inline bool vinject_ac(u64 errcode)
 {
-    return inject_interrupt(ALIGNMENT_CHECK, INTERRUPT_TYPE_HARDWARE_EXCEPTION,
+    return vinject_interrupt(ALIGNMENT_CHECK, INTERRUPT_TYPE_HARDWARE_EXCEPTION,
                             true, errcode, false, 0);
 }
 
-inline bool inject_db(interrupt_type_t int_type, bool deliver_len, u32 len)
+inline bool vinject_db(interrupt_type_t int_type, bool deliver_len, u32 len)
 {
-    return inject_interrupt(DEBUG_EXCEPTION, int_type,
+    return vinject_interrupt(DEBUG_EXCEPTION, int_type,
                             false, 0, deliver_len, len);
 }
 
-inline int get_guest_mode(void)
+inline int vget_guest_mode(void)
 {
     cr0_t cr0 = {.val = vmread(VMCS_GUEST_CR0)};
     if (cr0.fields.pe == 0)
@@ -221,9 +221,9 @@ inline int get_guest_mode(void)
     return rights.fields.db != 0 ? VOP_32_BIT : VOP_16_BIT;    
 }
 
-inline void advance_guest_rip(void)
+inline void vadvance_guest_rip(void)
 {
-    int mode = get_guest_mode();
+    int mode = vget_guest_mode();
 
     u64 rip = vmread(VMCS_GUEST_RIP) + 
               vmread(VMCS_RO_VMEXIT_INSTRUCTION_LENGTH);
@@ -260,7 +260,7 @@ inline bool vmwrite_adjusted(u32 msr, u64 field, u64 val)
     return __vmwrite(field, val);
 }
 
-inline cr0_t adjust_cr0(cr0_t cr0)
+inline cr0_t vadjust_cr0(cr0_t cr0)
 {
     cr0.val |= __rdmsrl(IA32_VMX_CR0_FIXED0);
     cr0.val &= __rdmsrl(IA32_VMX_CR0_FIXED1);
@@ -268,7 +268,7 @@ inline cr0_t adjust_cr0(cr0_t cr0)
     return cr0;
 }
 
-inline cr4_t adjust_cr4(cr4_t cr4)
+inline cr4_t vadjust_cr4(cr4_t cr4)
 {
     cr4.val |= __rdmsrl(IA32_VMX_CR4_FIXED0);
     cr4.val &= __rdmsrl(IA32_VMX_CR4_FIXED1);
@@ -326,7 +326,7 @@ inline void vinject_interrupt_external(u8 vector, bool nmi)
     interrupt_type_t type = vector == NMI && nmi ? INTERRUPT_TYPE_NMI : 
                                                   INTERRUPT_TYPE_EXTERNAL;
    
-    inject_interrupt(vector, type, false, 0, false, 0);
+    vinject_interrupt(vector, type, false, 0, false, 0);
 }
 
 inline void vlapic_wait_delivery_complete(void)
@@ -451,13 +451,13 @@ inline u64 vgpr_val(struct vregs *vregs, u32 gpr)
     return val;
 }
 
-inline void queue_advance_guest(void)
+inline void vqueue_advance_guest(void)
 {
     struct vcpu *current = vcurrent_vcpu();
     current->voperation_queue.pending.fields.should_advance = 1;
 }
 
-inline bool is_guest_cpl0(int *mode)
+inline bool vis_guest_cpl0(int *mode)
 {
     cr0_t cr0 = {.val = vmread(VMCS_GUEST_CR0)};
     if (cr0.fields.pe == 0) {
@@ -490,7 +490,7 @@ inline bool is_guest_cpl0(int *mode)
     return true;
 }
 
-inline void queue_inject_gp0(void)
+inline void vqueue_inject_gp0(void)
 {
     struct vcpu *current = vcurrent_vcpu();
     
@@ -500,7 +500,7 @@ inline void queue_inject_gp0(void)
     vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
 }
 
-inline void queue_inject_ud(void)
+inline void vqueue_inject_ud(void)
 {
     struct vcpu *current = vcurrent_vcpu();
     
@@ -510,7 +510,7 @@ inline void queue_inject_ud(void)
     vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
 }
 
-inline void queue_inject_db(interrupt_type_t int_type)
+inline void vqueue_inject_db(interrupt_type_t int_type)
 {
     struct vcpu *current = vcurrent_vcpu();
     
@@ -523,7 +523,7 @@ inline void queue_inject_db(interrupt_type_t int_type)
     vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
 }
 
-inline void queue_inject_ac0(void)
+inline void vqueue_inject_ac0(void)
 {
     struct vcpu *current = vcurrent_vcpu();
     
@@ -533,20 +533,14 @@ inline void queue_inject_ac0(void)
     vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
 }
 
-inline void queue_vmwrite_cr4(cr4_t cr4)
+inline void vqueue_vmwrite_cr4(cr4_t cr4)
 {
     struct vcpu *current = vcurrent_vcpu();
     current->voperation_queue.pending.fields.vmwrite_cr4 = 1;
     current->voperation_queue.cr4 = cr4;    
 }
 
-inline bool sr_bios_done(void)
-{
-    ia32_sr_bios_done_t done = {.val = __rdmsrl(IA32_SR_BIOS_DONE)};
-    return done.fields.invd_ud != 0;
-}
-
-inline void out_nmi(struct vcpu *vcpu)
+inline void vout_nmi(struct vcpu *vcpu)
 {
     struct mcsnode node = INITIALIZE_MCSNODE();
 
@@ -555,7 +549,7 @@ inline void out_nmi(struct vcpu *vcpu)
     vmcs_unlock_isr_restore(&vcpu->visr_pending.lock, &node);
 }
 
-inline void set_intl(struct vcpu *vcpu, intl_t intl)
+inline void vset_intl(struct vcpu *vcpu, intl_t intl)
 {
     struct mcsnode node = INITIALIZE_MCSNODE();
 
@@ -589,9 +583,9 @@ inline bool vis_external_interrupts_blocked(void)
     return state.fields.sti_blocking != 0 || state.fields.mov_ss_blocking != 0;
 }
 
-void trap_msr_write(struct vcpu *vcpu, u32 msr);
-void trap_msr_read(struct vcpu *vcpu, u32 msr);
-void trap_msr(struct vcpu *vcpu, u32 msr);
+void vtrap_msr_write(struct vcpu *vcpu, u32 msr);
+void vtrap_msr_read(struct vcpu *vcpu, u32 msr);
+void vtrap_msr(struct vcpu *vcpu, u32 msr);
 
 void __vemu_set_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi);
 int vemu_set_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi);

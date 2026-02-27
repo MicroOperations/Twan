@@ -1,11 +1,11 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/subsys/twanvisor/vsched/vpartition.h>
-#include <include/subsys/twanvisor/vsched/vsched_mcs.h>
-#include <include/subsys/twanvisor/vsched/vsched_yield.h>
+#include <subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vsched/vpartition.h>
+#include <subsys/twanvisor/vsched/vsched_mcs.h>
+#include <subsys/twanvisor/vsched/vsched_yield.h>
 
 u64 vlapic_read(u32 offset)
 {
@@ -42,30 +42,30 @@ void vlapic_write(u32 offset, u64 val)
     __wrmsrl(msr, val);
 }
 
-void trap_msr_write(struct vcpu *vcpu, u32 msr)
+void vtrap_msr_write(struct vcpu *vcpu, u32 msr)
 {
     int base = 0;
     int idx = 0;
-    map_msr_write(msr, &base, &idx);
+    vmap_msr_write(msr, &base, &idx);
 
     if (base != -1 && idx != -1)
         vcpu->arch.msr_bitmap[base + (idx / 8)] |= (1 << (idx % 8));
 }
 
-void trap_msr_read(struct vcpu *vcpu, u32 msr)
+void vtrap_msr_read(struct vcpu *vcpu, u32 msr)
 {
     int base = 0;
     int idx = 0;
-    map_msr_read(msr, &base, &idx);
+    vmap_msr_read(msr, &base, &idx);
 
     if (base != -1 && idx != -1)
         vcpu->arch.msr_bitmap[base + (idx / 8)] |= (1 << (idx % 8));
 }
 
-void trap_msr(struct vcpu *vcpu, u32 msr)
+void vtrap_msr(struct vcpu *vcpu, u32 msr)
 {
-    trap_msr_read(vcpu, msr);
-    trap_msr_write(vcpu, msr);
+    vtrap_msr_read(vcpu, msr);
+    vtrap_msr_write(vcpu, msr);
 }
 
 void __vemu_set_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi)
@@ -414,28 +414,15 @@ int vemu_alter_vcpu(u8 vid, u32 processor_id, bool alter_ticks, u32 ticks,
 
     if (alter_criticality && vcpu->vsched_metadata.criticality != criticality) {
 
-        switch (vcpu->vsched_metadata.state) {
+        if (vcpu->vsched_metadata.state == VREADY) {
 
-            case VREADY:
+            __vsched_dequeue(vcpu);
+            vcpu->vsched_metadata.criticality = criticality;
+            __vsched_push(vcpu);
 
-                __vsched_dequeue(vcpu);
-                vcpu->vsched_metadata.criticality = criticality;
-                __vsched_push(vcpu);
-                break;
-
-            case VPAUSED:
-            case VSPIN_PAUSED:
-
-                __vsched_dequeue_paused(vcpu);
-                vcpu->vsched_metadata.criticality = criticality;
-                __vsched_push_paused(vcpu);
-                break;
-
-            default:
-                vcpu->vsched_metadata.criticality = criticality;
-                break;
+        } else {
+            vcpu->vsched_metadata.criticality = criticality;
         }
-
     }
 
     vmcs_unlock_isr_restore(&vsched->lock, &sched_node);

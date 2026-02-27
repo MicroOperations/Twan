@@ -1,9 +1,9 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vsched/vsched_dsa.h>
-#include <include/subsys/twanvisor/vsched/vsched_mcs.h>
-#include <include/subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vsched/vsched_dsa.h>
+#include <subsys/twanvisor/vsched/vsched_mcs.h>
+#include <subsys/twanvisor/twanvisor.h>
 
 struct dq *__vsched_get_bucket(u8 *criticality)
 {
@@ -67,25 +67,14 @@ void __vsched_dequeue(struct vcpu *vcpu)
 void __vsched_push_paused(struct vcpu *vcpu)
 {
     struct vscheduler *vsched = vscheduler_of(vcpu);
-    u8 criticality = vcpu->vsched_metadata.criticality;
-
-    for (u32 i = 0; i <= criticality; i++)
-        dq_pushback(&vsched->paused_queues[i], &vcpu->vsched_nodes[i]);
+    dq_pushback(&vsched->paused_queue, &vcpu->vsched_nodes[0]);
 }
 
 void __vsched_dequeue_paused(struct vcpu *vcpu)
 {
     struct vscheduler *vsched = vscheduler_of(vcpu);
-    u8 criticality = vcpu->vsched_metadata.criticality;
-
-    for (u32 i = 0; i <= criticality; i++) {
-
-        struct dq *dq = &vsched->paused_queues[i];
-        struct list_double *node = &vcpu->vsched_nodes[i];
-
-        if (dq_is_queued(dq, node))
-            dq_dequeue(dq, node);
-    }
+    if (dq_is_queued(&vsched->paused_queue, &vcpu->vsched_nodes[0]))
+        dq_dequeue(&vsched->paused_queue, &vcpu->vsched_nodes[0]);   
 }
 
 #endif

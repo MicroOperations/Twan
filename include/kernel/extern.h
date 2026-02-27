@@ -1,8 +1,8 @@
 #ifndef _EXTERN_H_
 #define _EXTERN_H_
 
-#include <include/kernel/isr/isr_index.h>
-#include <include/lib/x86_index.h>
+#include <kernel/isr/isr_index.h>
+#include <lib/x86_index.h>
 
 extern char __bss_start[];
 extern char __bss_end[];

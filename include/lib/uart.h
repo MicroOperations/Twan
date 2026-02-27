@@ -1,8 +1,8 @@
 #ifndef _UART_H_
 #define _UART_H_
 
-#include <include/std.h>
-#include <include/errno.h>
+#include <std.h>
+#include <errno.h>
 
 /* register offsets */
 

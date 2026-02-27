@@ -1,12 +1,12 @@
 #ifndef _TWANVISOR_H_
 #define _TWANVISOR_H_
 
-#include <include/subsys/twanvisor/vsched/vsync.h>
-#include <include/subsys/twanvisor/vsched/vsched.h>
-#include <include/subsys/twanvisor/vsched/vsched_yield.h>
-#include <include/subsys/twanvisor/vdbg/vdbg.h>
-#include <include/kernel/kernel.h>
-#include <include/lib/dsa/bmp512.h>
+#include <subsys/twanvisor/vsched/vsync.h>
+#include <subsys/twanvisor/vsched/vsched.h>
+#include <subsys/twanvisor/vsched/vsched_yield.h>
+#include <subsys/twanvisor/vdbg/vdbg.h>
+#include <kernel/kernel.h>
+#include <lib/dsa/bmp512.h>
 
 #define VROOT_PARTITION_CRITICALITY VSCHED_MAX_CRITICALITY
 #define VSCHED_LAPIC_DCR DIV_16

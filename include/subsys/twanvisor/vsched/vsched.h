@@ -1,9 +1,9 @@
 #ifndef _VSCHED_H_
 #define _VSCHED_H_
 
-#include <include/subsys/twanvisor/vsched/vcpu.h>
-#include <include/subsys/twanvisor/vsched/vsched_ctx.h>
-#include <include/subsys/twanvisor/vsched/vsched_dsa.h>
+#include <subsys/twanvisor/vsched/vcpu.h>
+#include <subsys/twanvisor/vsched/vsched_ctx.h>
+#include <subsys/twanvisor/vsched/vsched_dsa.h>
 
 #define vsched_get_spin(ctx) spin_until(vsched_get((ctx)))
 

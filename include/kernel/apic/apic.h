@@ -1,9 +1,9 @@
 #ifndef _APIC_H_
 #define _APIC_H_
 
-#include <include/kernel/kernel.h>
-#include <include/lib/x86_index.h>
-#include <include/types.h>
+#include <kernel/kernel.h>
+#include <lib/x86_index.h>
+#include <types.h>
 
 #define PIC1_COMMAND 0x20
 #define PIC1_DATA 0x21

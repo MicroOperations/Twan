@@ -1,15 +1,15 @@
-#include <include/kernel/isr/isr_dispatcher.h>
-#include <include/kernel/isr/isr_index.h>
-#include <include/kernel/kernel.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/kernel/apic/apic.h>
-#include <include/kernel/sched/sched.h>
-#include <include/kernel/kapi.h>
-#include <include/subsys/twanvisor/vconf.h>
-#include <include/subsys/watchdog/watchdog.h>
-#include <include/lib/x86_index.h>
-#include <include/lib/libtwanvisor/libvcalls.h>
-#include <include/lib/libtwanvisor/libvc.h>
+#include <kernel/isr/isr_dispatcher.h>
+#include <kernel/isr/isr_index.h>
+#include <kernel/kernel.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <kernel/apic/apic.h>
+#include <kernel/sched/sched.h>
+#include <kernel/kapi.h>
+#include <subsys/twanvisor/vconf.h>
+#include <subsys/watchdog/watchdog.h>
+#include <lib/x86_index.h>
+#include <lib/libtwanvisor/libvcalls.h>
+#include <lib/libtwanvisor/libvc.h>
 
 void __ipi_assert(struct ipi_data *data)
 {

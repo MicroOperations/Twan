@@ -1,8 +1,8 @@
 #ifndef _X86_INDEX_H_
 #define _X86_INDEX_H_
 
-#include <include/types.h>
-#include <include/compiler.h>
+#include <types.h>
+#include <compiler.h>
 
 /* vmcs encoding */
 

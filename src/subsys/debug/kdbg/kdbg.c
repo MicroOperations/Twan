@@ -1,8 +1,8 @@
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/errno.h>
-#include <include/kernel/kapi.h>
-#include <include/lib/twanprintf.h>
-#include <include/lib/libtwanvisor/libvcalls.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <errno.h>
+#include <kernel/kapi.h>
+#include <lib/twanprintf.h>
+#include <lib/libtwanvisor/libvcalls.h>
 
 static struct kdbg kdbg_global;
 

@@ -1,7 +1,7 @@
 #ifndef _INIT_H_
 #define _INIT_H_
 
-#include <include/kernel/kernel.h>
+#include <kernel/kernel.h>
 
 u32 mxcsr_mask64(void);
 

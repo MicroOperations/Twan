@@ -1,6 +1,6 @@
-#include <include/subsys/sync/rwlock.h>
-#include <include/kernel/kernel.h>
-#include <include/kernel/kapi.h>
+#include <subsys/sync/rwlock.h>
+#include <kernel/kernel.h>
+#include <kernel/kapi.h>
 
 /* TODO: pv rwlocks */
 

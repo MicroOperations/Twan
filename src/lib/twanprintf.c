@@ -1,5 +1,5 @@
-#include <include/lib/twanprintf.h>
-#include <include/nanoprintf.h>
+#include <lib/twanprintf.h>
+#include <nanoprintf.h>
 
 int twan_vsnprintf(char *restrict buffer, size_t bufsz,
                   char const *restrict format,

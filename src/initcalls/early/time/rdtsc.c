@@ -1,9 +1,9 @@
-#include <include/initcalls/early_initcalls_conf.h>
+#include <initcalls/early_initcalls_conf.h>
 #if EARLY_TIME_RDTSC
 
-#include <include/kernel/kapi.h>
-#include <include/subsys/time/counter.h>
-#include <include/lib/x86_index.h>
+#include <kernel/kapi.h>
+#include <subsys/time/counter.h>
+#include <lib/x86_index.h>
 
 static u64 period_fs;
 static u64 frequency_hz;

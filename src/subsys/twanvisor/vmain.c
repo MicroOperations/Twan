@@ -1,19 +1,19 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vmain.h>
-#include <include/subsys/twanvisor/vsched/vpartition.h>
-#include <include/subsys/twanvisor/vsched/vsched_mcs.h>
-#include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
-#include <include/subsys/twanvisor/vemulate/verror.h>
-#include <include/subsys/twanvisor/vemulate/vtrap.h>
-#include <include/subsys/twanvisor/visr/visr_index.h>
-#include <include/subsys/twanvisor/vportal/vexit.h>
-#include <include/subsys/time/counter.h>
-#include <include/subsys/mem/vma.h>
-#include <include/kernel/kapi.h>
-#include <include/kernel/extern.h>
-#include <include/kernel/apic/apic.h>
+#include <subsys/twanvisor/vmain.h>
+#include <subsys/twanvisor/vsched/vpartition.h>
+#include <subsys/twanvisor/vsched/vsched_mcs.h>
+#include <subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/twanvisor/vemulate/verror.h>
+#include <subsys/twanvisor/vemulate/vtrap.h>
+#include <subsys/twanvisor/visr/visr_index.h>
+#include <subsys/twanvisor/vportal/vexit.h>
+#include <subsys/time/counter.h>
+#include <subsys/mem/vma.h>
+#include <kernel/kapi.h>
+#include <kernel/extern.h>
+#include <kernel/apic/apic.h>
 
 extern void __virtualise_core(u64 vprocessor_id);
 
@@ -756,8 +756,8 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
     cr3_t cr3 = __read_cr3();
     cr4_t cr4 = __read_cr4();
 
-    cr0 = adjust_cr0(cr0);
-    cr4 = adjust_cr4(cr4);
+    cr0 = vadjust_cr0(cr0);
+    cr4 = vadjust_cr4(cr4);
     cr4.fields.vmxe = 1;
 
     __write_cr0(cr0);

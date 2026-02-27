@@ -1,7 +1,7 @@
 #ifndef _BMP256_H_
 #define _BMP256_H_
 
-#include <include/std.h>
+#include <std.h>
 
 struct bmp256 
 {

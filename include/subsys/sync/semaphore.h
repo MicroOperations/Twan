@@ -1,9 +1,9 @@
 #ifndef _SEMAPHORE_H_
 #define _SEMAPHORE_H_
 
-#include <include/subsys/sync/mcslock.h>
-#include <include/kernel/sched/sched.h>
-#include <include/kernel/sched/waitq.h>
+#include <subsys/sync/mcslock.h>
+#include <kernel/sched/sched.h>
+#include <kernel/sched/waitq.h>
 
 /* count must be protected by waitq.lock */
 

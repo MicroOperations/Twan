@@ -1,10 +1,10 @@
-#include <include/kernel/kapi.h>
-#include <include/kernel/isr/isr_dispatcher.h>
-#include <include/kernel/isr/base_isrs.h>
-#include <include/kernel/apic/apic.h>
-#include <include/lib/libtwanvisor/libvcalls.h>
-#include <include/errno.h>
-#include <include/std.h>
+#include <kernel/kapi.h>
+#include <kernel/isr/isr_dispatcher.h>
+#include <kernel/isr/base_isrs.h>
+#include <kernel/apic/apic.h>
+#include <lib/libtwanvisor/libvcalls.h>
+#include <errno.h>
+#include <std.h>
 
 extern void __emulate_interrupt(u64 rsp, u8 vector, u64 errcode);
 

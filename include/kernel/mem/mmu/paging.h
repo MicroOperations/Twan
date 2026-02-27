@@ -1,9 +1,9 @@
 #ifndef _PAGING_H_
 #define _PAGING_H_
 
-#include <include/kernel/kernel.h>
-#include <include/lib/dsa/bmp512.h>
-#include <include/subsys/sync/mcslock.h>
+#include <kernel/kernel.h>
+#include <lib/dsa/bmp512.h>
+#include <subsys/sync/mcslock.h>
 
 struct mapper
 {

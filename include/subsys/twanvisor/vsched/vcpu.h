@@ -1,13 +1,13 @@
 #ifndef _VCPU_H_
 #define _VCPU_H_
 
-#include <include/subsys/twanvisor/vsched/vsched_conf.h>
-#include <include/subsys/twanvisor/vsched/vsync.h>
-#include <include/subsys/twanvisor/varch.h>
-#include <include/lib/dsa/dq.h>
-#include <include/lib/dsa/bmp256.h>
-#include <include/lib/dsa/delta_chain.h>
-#include <include/kernel/isr/isr_index.h>
+#include <subsys/twanvisor/vsched/vsched_conf.h>
+#include <subsys/twanvisor/vsched/vsync.h>
+#include <subsys/twanvisor/varch.h>
+#include <lib/dsa/dq.h>
+#include <lib/dsa/bmp256.h>
+#include <lib/dsa/delta_chain.h>
+#include <kernel/isr/isr_index.h>
 
 #if TWANVISOR_ON
 

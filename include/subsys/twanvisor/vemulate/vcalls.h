@@ -1,7 +1,7 @@
 #ifndef _VCALLS_H_
 #define _VCALLS_H_
 
-#include <include/subsys/twanvisor/varch.h>
+#include <subsys/twanvisor/varch.h>
 
 typedef enum
 {

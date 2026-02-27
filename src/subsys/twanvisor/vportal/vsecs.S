@@ -1,9 +1,9 @@
 #define ASM_FILE 1
 
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/generated/autoconf.h>
+#include <generated/autoconf.h>
 
 /* spectre-rsb mitigation not needed if uarch implements rsb stuffing */
 #define SPECTRE_RSB_MITIGATION CONFIG_MITIGATION_SPECTRE_RSB

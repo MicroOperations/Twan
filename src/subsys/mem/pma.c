@@ -1,6 +1,6 @@
-#include <include/subsys/mem/pma.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/errno.h>
+#include <subsys/mem/pma.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <errno.h>
 
 static struct pma pma_global;
 

@@ -1,9 +1,9 @@
-#include <include/initcalls/early_initcalls_conf.h>
+#include <initcalls/early_initcalls_conf.h>
 #if EARLY_DEBUG_KDBG_UART
 
-#include <include/lib/uart.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/kernel/kapi.h>
+#include <lib/uart.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <kernel/kapi.h>
 
 /* ports */
 #define COM1_PORT 0x3F8

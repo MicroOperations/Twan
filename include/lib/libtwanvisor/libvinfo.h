@@ -1,8 +1,8 @@
 #ifndef _LIBVINFO_H_
 #define _LIBVINFO_H_
 
-#include <include/subsys/twanvisor/vemulate/vinfo.h>
-#include <include/lib/x86_index.h>
+#include <subsys/twanvisor/vemulate/vinfo.h>
+#include <lib/x86_index.h>
 
 inline bool tv_detect(void)
 {

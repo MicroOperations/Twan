@@ -1,8 +1,8 @@
 #ifndef _SCHED_TIMER_H_
 #define _SCHED_TIMER_H_
 
-#include <include/subsys/twanvisor/vsched/vcpu.h>
-#include <include/types.h>
+#include <subsys/twanvisor/vsched/vcpu.h>
+#include <types.h>
 
 #define PV_SCHED_TIMER 0
 STATIC_ASSERT(VNUM_VTIMERS >= 1);

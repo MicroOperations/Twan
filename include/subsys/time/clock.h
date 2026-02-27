@@ -1,7 +1,7 @@
 #ifndef _CLOCK_H_
 #define _CLOCK_H_
 
-#include <include/kernel/isr/isr_index.h>
+#include <kernel/isr/isr_index.h>
 
 struct clock_time
 {

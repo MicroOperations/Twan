@@ -1,14 +1,14 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/visr/visr_dispatcher.h>
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/subsys/twanvisor/visr/visr_index.h>
-#include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
-#include <include/subsys/twanvisor/vsched/vsched_timer.h>
-#include <include/subsys/twanvisor/vsched/vsched_yield.h>
-#include <include/kernel/isr/isr_dispatcher.h>
-#include <include/kernel/apic/apic.h>
+#include <subsys/twanvisor/visr/visr_dispatcher.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/visr/visr_index.h>
+#include <subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/twanvisor/vsched/vsched_timer.h>
+#include <subsys/twanvisor/vsched/vsched_yield.h>
+#include <kernel/isr/isr_dispatcher.h>
+#include <kernel/apic/apic.h>
 
 void vacknowledge_interrupt(u8 vector)
 {

@@ -1,7 +1,7 @@
 #ifndef _PMA_H_
 #define _PMA_H_
 
-#include <include/std.h>
+#include <std.h>
 
 #define PMA_BASE_ORDER PAGE_SHIFT
 #define PMA_NULL 0

@@ -1,9 +1,9 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vportal/vsecc.h>
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/generated/autoconf.h>
+#include <subsys/twanvisor/vportal/vsecc.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <generated/autoconf.h>
 
 void vexit_mitigations(void)
 {

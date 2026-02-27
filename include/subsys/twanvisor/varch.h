@@ -1,7 +1,7 @@
 #ifndef _VARCH_H_
 #define _VARCH_H_
 
-#include <include/arch.h>
+#include <arch.h>
 
 #ifdef ASM_FILE
 

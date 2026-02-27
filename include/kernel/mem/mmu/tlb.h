@@ -1,8 +1,8 @@
 #ifndef _TLB_H_
 #define _TLB_H_
 
-#include <include/std.h>
-#include <include/arch.h>
+#include <std.h>
+#include <arch.h>
 
 struct tlb_range
 {

@@ -13,7 +13,7 @@ Enables paravirtualised mcs locks, when this is enabled, vcpus within TwanRTOS w
 
 ## API's
 
-```<include/subsys/sync/mcslock.h>```
+```<subsys/sync/mcslock.h>```
 
 ---
 ```

@@ -1,11 +1,11 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vsched/vsched.h>
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/subsys/twanvisor/vsched/vsched_yield.h>
-#include <include/subsys/twanvisor/vsched/vsched_timer.h>
-#include <include/subsys/twanvisor/vportal/vrecovery.h>
+#include <subsys/twanvisor/vsched/vsched.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vsched/vsched_yield.h>
+#include <subsys/twanvisor/vsched/vsched_timer.h>
+#include <subsys/twanvisor/vportal/vrecovery.h>
 
 void __vsched_put(struct vcpu *vcpu, bool put_ctx, 
                  struct interrupt_info *ctx)

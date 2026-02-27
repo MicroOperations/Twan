@@ -1,7 +1,7 @@
 #ifndef _LISTQ_H_
 #define _LISTQ_H_
 
-#include <include/std.h>
+#include <std.h>
 
 struct listq
 {

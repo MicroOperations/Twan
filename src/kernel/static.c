@@ -1,6 +1,6 @@
-#include <include/kernel/static.h>
-#include <include/kernel/kernel.h>
-#include <include/lib/x86_index.h>
+#include <kernel/static.h>
+#include <kernel/kernel.h>
+#include <lib/x86_index.h>
 
 static struct twan_kernel kernel = {
     .this = &kernel,

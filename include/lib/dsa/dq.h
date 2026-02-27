@@ -1,7 +1,7 @@
 #ifndef _DQ_H_
 #define _DQ_H_
 
-#include <include/std.h>
+#include <std.h>
 
 #define PUSHFRONT true
 #define PUSHBACK false

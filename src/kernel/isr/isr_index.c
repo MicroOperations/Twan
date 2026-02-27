@@ -1,5 +1,5 @@
-#include <include/kernel/isr/isr_index.h>
-#include <include/kernel/kapi.h>
+#include <kernel/isr/isr_index.h>
+#include <kernel/kapi.h>
 
 bool critical_exceptions[] = 
 {

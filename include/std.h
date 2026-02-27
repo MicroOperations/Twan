@@ -1,10 +1,10 @@
 #ifndef _STD_H_
 #define _STD_H_
 
-#include <include/generated/autoconf.h>
+#include <generated/autoconf.h>
 #include <stddef.h>
-#include <include/types.h>
-#include <include/lib/x86_index.h>
+#include <types.h>
+#include <lib/x86_index.h>
 
 #define PAGE_SIZE PAGE_SIZE_2MB
 #define PAGE_SHIFT PAGE_SHIFT_2MB

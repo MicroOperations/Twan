@@ -6,9 +6,9 @@
 
 #ifndef ASM_FILE
 
-#include <include/lib/x86_index.h>
-#include <include/arch.h>
-#include <include/lib/atomic.h>
+#include <lib/x86_index.h>
+#include <arch.h>
+#include <lib/atomic.h>
 
 #define EXCEPTON_UNHANDLED -1
 #define EXCEPTION_HANDLED 0

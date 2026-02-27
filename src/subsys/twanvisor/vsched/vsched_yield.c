@@ -1,10 +1,10 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vsched/vsched_yield.h>
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/subsys/twanvisor/vsched/vsched.h>
-#include <include/subsys/twanvisor/vsched/vsched_timer.h>
+#include <subsys/twanvisor/vsched/vsched_yield.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vsched/vsched.h>
+#include <subsys/twanvisor/vsched/vsched_timer.h>
 
 bool __vsched_is_current_preemptible(struct vcpu *current)
 {

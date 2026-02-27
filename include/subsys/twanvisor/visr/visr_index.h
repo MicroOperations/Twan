@@ -1,9 +1,9 @@
 #ifndef _VISR_INDEX_H_
 #define _VISR_INDEX_H_
 
-#include <include/subsys/twanvisor/vsched/vcpu.h>
-#include <include/kernel/isr/base_isrs.h>
-#include <include/kernel/isr/isr_index.h>
+#include <subsys/twanvisor/vsched/vcpu.h>
+#include <kernel/isr/base_isrs.h>
+#include <kernel/isr/isr_index.h>
 
 #define VSCHED_TIMER_VECTOR 255
 #define VIPI_VECTOR 254

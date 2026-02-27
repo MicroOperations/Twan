@@ -1,6 +1,6 @@
-#include <include/subsys/mem/rtalloc.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/errno.h>
+#include <subsys/mem/rtalloc.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <errno.h>
 
 static struct rtalloc rtalloc_global;
 

@@ -1,7 +1,7 @@
 #ifndef _DELTA_CHAIN_H_
 #define _DELTA_CHAIN_H_
 
-#include <include/lib/dsa/dq.h>
+#include <lib/dsa/dq.h>
 
 struct delta_node
 {

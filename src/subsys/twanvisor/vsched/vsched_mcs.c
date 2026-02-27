@@ -1,8 +1,8 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vsched/vsched_mcs.h>
-#include <include/subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vsched/vsched_mcs.h>
+#include <subsys/twanvisor/twanvisor.h>
 
 u8 __vsched_mcs_read_criticality_level_local(void)
 {

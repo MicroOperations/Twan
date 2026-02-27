@@ -1,6 +1,6 @@
-#include <include/kernel/isr/base_isrs.h>
-#include <include/kernel/isr/isr_dispatcher.h>
-#include <include/kernel/kapi.h>
+#include <kernel/isr/base_isrs.h>
+#include <kernel/isr/isr_dispatcher.h>
+#include <kernel/kapi.h>
 
 int ipi_cmd_isr(void)
 {

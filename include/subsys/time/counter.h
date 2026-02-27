@@ -1,7 +1,7 @@
 #ifndef _COUNTER_H_
 #define _COUNTER_H_
 
-#include <include/std.h>
+#include <std.h>
 
 typedef u64 (*read_counter_t)(void);
 typedef u64 (*counter_period_fs_t)(void);

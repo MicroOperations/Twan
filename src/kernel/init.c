@@ -1,16 +1,16 @@
-#include <include/kernel/init.h>
-#include <include/kernel/mem/mmu/paging.h>
-#include <include/elf.h>
-#include <include/multiboot2.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/kernel/acpi_api/acpi_api.h>
-#include <include/kernel/extern.h>
-#include <include/errno.h>
-#include <include/subsys/sync/spinlock.h>
-#include <include/kernel/kernel.h>
-#include <include/lib/x86_index.h>
-#include <include/subsys/mem/pma.h>
-#include <include/elf.h>
+#include <kernel/init.h>
+#include <kernel/mem/mmu/paging.h>
+#include <elf.h>
+#include <multiboot2.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <kernel/acpi_api/acpi_api.h>
+#include <kernel/extern.h>
+#include <errno.h>
+#include <subsys/sync/spinlock.h>
+#include <kernel/kernel.h>
+#include <lib/x86_index.h>
+#include <subsys/mem/pma.h>
+#include <elf.h>
 
 u32 mxcsr_mask64(void)
 {

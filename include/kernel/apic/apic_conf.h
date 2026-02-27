@@ -1,7 +1,7 @@
 #ifndef _APIC_CONF_H_
 #define _APIC_CONF_H_
 
-#include <include/std.h>
+#include <std.h>
 
 #define NUM_IOAPICS CONFIG_NUM_IOAPICS
 

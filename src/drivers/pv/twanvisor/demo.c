@@ -1,13 +1,13 @@
-#include <include/generated/autoconf.h>
+#include <generated/autoconf.h>
 #if CONFIG_DEMO_PV_TWANVISOR
 
-#include <include/kernel/kapi.h>
-#include <include/subsys/mem/pma.h>
-#include <include/lib/libtwanvisor/libvcalls.h>
-#include <include/lib/libtwanvisor/libvc.h>
-#include <include/lib/x86_index.h>
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/subsys/mem/vma.h>
+#include <kernel/kapi.h>
+#include <subsys/mem/pma.h>
+#include <lib/libtwanvisor/libvcalls.h>
+#include <lib/libtwanvisor/libvc.h>
+#include <lib/x86_index.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <subsys/mem/vma.h>
 
 extern char pv_twanvisor_demo_guest_start[];
 extern char pv_shared_buf_start[64];

@@ -1,14 +1,14 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vportal/vexit.h>
-#include <include/subsys/twanvisor/vportal/venter.h>
-#include <include/subsys/twanvisor/vportal/vrecovery.h>
-#include <include/subsys/twanvisor/vemulate/vcalls.h>
-#include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
-#include <include/subsys/twanvisor/vemulate/vinfo.h>
-#include <include/subsys/twanvisor/visr/vshield.h>
-#include <include/subsys/twanvisor/visr/visr_dispatcher.h>
+#include <subsys/twanvisor/vportal/vexit.h>
+#include <subsys/twanvisor/vportal/venter.h>
+#include <subsys/twanvisor/vportal/vrecovery.h>
+#include <subsys/twanvisor/vemulate/vcalls.h>
+#include <subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/twanvisor/vemulate/vinfo.h>
+#include <subsys/twanvisor/visr/vshield.h>
+#include <subsys/twanvisor/visr/visr_dispatcher.h>
 
 static u32 msr_blocklist[] = {
 
@@ -150,7 +150,7 @@ static void vexit_nop(__unused struct vregs *vregs)
 static void vexit_nop_advance(__unused struct vregs *vregs)
 {   
     vcurrent_vcpu_enable_preemption();
-    queue_advance_guest();
+    vqueue_advance_guest();
 }
 
 static void vexit_failure_recover(__unused struct vregs *vregs)
@@ -162,13 +162,13 @@ static void vexit_failure_recover(__unused struct vregs *vregs)
 static void vexit_gp0(__unused struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
-    queue_inject_gp0();
+    vqueue_inject_gp0();
 }
 
 static void vexit_ud(__unused struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
-    queue_inject_ud();
+    vqueue_inject_ud();
 }
 
 static void vexit_exception(__unused struct vregs *vregs)
@@ -195,7 +195,7 @@ static void vexit_exception(__unused struct vregs *vregs)
     switch (vector) {
         
         case DEBUG_EXCEPTION:
-            queue_inject_db(int_type);
+            vqueue_inject_db(int_type);
             break;
 
         case ALIGNMENT_CHECK:
@@ -203,7 +203,7 @@ static void vexit_exception(__unused struct vregs *vregs)
             VBUG_ON(info.fields.errcode_delivered == 0);
             VBUG_ON(vmread(VMCS_RO_IDT_VECTORING_ERROR_CODE) != 0);
 
-            queue_inject_ac0();
+            vqueue_inject_ac0();
             break;
 
         default:
@@ -226,8 +226,10 @@ static void vexit_ext_intr(__unused struct vregs *vregs)
             .val = vmread32(VMCS_GUEST_INTERRUPTIBILITY_STATE)
         };
 
-        state.fields.nmi_blocking = 0;
-        __vmwrite(VMCS_GUEST_INTERRUPTIBILITY_STATE, state.val);
+        if (state.fields.nmi_blocking != 0) {
+            state.fields.nmi_blocking = 0;
+            __vmwrite(VMCS_GUEST_INTERRUPTIBILITY_STATE, state.val);
+        }
     }
     
     VBUG_ON(info.fields.vectored_event_type != INTERRUPT_TYPE_EXTERNAL);
@@ -242,7 +244,7 @@ static void vexit_nmi_window(__unused struct vregs *vregs)
     vcurrent_vcpu_enable_preemption();
 
     struct vcpu *current = vcurrent_vcpu();
-    out_nmi(current);
+    vout_nmi(current);
 }
 
 static void vexit_cpuid(struct vregs *vregs)
@@ -259,7 +261,7 @@ static void vexit_cpuid(struct vregs *vregs)
 
     if (leaf >= VCPUID_BASE && leaf <= VCPUID_MAX_LEAF) {
         vinfo_dispatcher(vregs);
-        queue_advance_guest();
+        vqueue_advance_guest();
         return;
     }
 
@@ -380,13 +382,13 @@ static void vexit_cpuid(struct vregs *vregs)
     vregs->regs.rcx = ecx;
     vregs->regs.rdx = edx;
 
-    queue_advance_guest();
+    vqueue_advance_guest();
 }
 
 static void vexit_vmcall(struct vregs *vregs)
 {
     vcall_dispatcher(vregs);
-    queue_advance_guest();
+    vqueue_advance_guest();
 }
 
 static void vexit_cr_access(struct vregs *vregs)
@@ -438,11 +440,11 @@ static void vexit_cr_access(struct vregs *vregs)
             valid &= cr4.fields.reserved3 == 0;
 
             if (valid == 0) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
-            queue_vmwrite_cr4(cr4);
+            vqueue_vmwrite_cr4(cr4);
             break;
 
         case 8:
@@ -450,21 +452,21 @@ static void vexit_cr_access(struct vregs *vregs)
             cr8_t val = {.val = vgpr_val(vregs, qual.fields.gpr)};
 
             if (val.fields.reserved0 != 0) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
             vregs->regs.cr8 = val.val;
             intl_t intl = {.val = val.val};
 
-            set_intl(current, intl);
+            vset_intl(current, intl);
             break;
 
         default:
             break;
     }
 
-    queue_advance_guest();
+    vqueue_advance_guest();
 }
 
 static void vexit_rdmsr(struct vregs *vregs)
@@ -497,7 +499,7 @@ static void vexit_rdmsr(struct vregs *vregs)
         case IA32_VIRTUAL_ENUMERATION:
 
             if (vcache->trap_cache.fields.ia32_arch_capabilities_r == 0) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
@@ -508,7 +510,7 @@ static void vexit_rdmsr(struct vregs *vregs)
         case IA32_VIRTUAL_MITIGATION_ENUM:
 
             if (vcache->trap_cache.fields.ia32_arch_capabilities_r == 0) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
@@ -519,7 +521,7 @@ static void vexit_rdmsr(struct vregs *vregs)
         case IA32_VIRTUAL_MITIGATION_CTRL:
 
             if (vcache->trap_cache.fields.ia32_arch_capabilities_r == 0) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
@@ -530,7 +532,7 @@ static void vexit_rdmsr(struct vregs *vregs)
         case IA32_FEATURE_CONTROL:
 
             if (vcache->trap_cache.fields.ia32_feature_control_rw == 0) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
@@ -541,7 +543,7 @@ static void vexit_rdmsr(struct vregs *vregs)
         default:
 
             if (!is_root || vis_msr_blocked(msr)) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
@@ -551,7 +553,7 @@ static void vexit_rdmsr(struct vregs *vregs)
             u64 val = __rdmsrl(msr);
             
             if (vexit_shield_local(flags)) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             } 
 
@@ -560,7 +562,7 @@ static void vexit_rdmsr(struct vregs *vregs)
             break;
     }
 
-    queue_advance_guest();
+    vqueue_advance_guest();
 }
 
 static void vexit_wrmsr(struct vregs *vregs)
@@ -583,7 +585,7 @@ static void vexit_wrmsr(struct vregs *vregs)
             if (vcache->trap_cache.fields.ia32_arch_capabilities_r == 0 || 
                 eax != 0 || edx != 0) {
 
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
@@ -592,14 +594,14 @@ static void vexit_wrmsr(struct vregs *vregs)
         case IA32_FEATURE_CONTROL:
 
             if (vcache->trap_cache.fields.ia32_feature_control_rw == 0) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
             if (eax != vcache->via32_feature_ctrl_low || 
                 edx != vcache->via32_feature_ctrl_high) {
 
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
@@ -608,7 +610,7 @@ static void vexit_wrmsr(struct vregs *vregs)
         default:
 
             if (!is_root || vis_msr_blocked(msr)) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
@@ -619,14 +621,14 @@ static void vexit_wrmsr(struct vregs *vregs)
             __wrmsrl(msr, val);
             
             if (vexit_shield_local(flags)) {
-                queue_inject_gp0();
+                vqueue_inject_gp0();
                 return;
             }
 
             break;
     }
 
-    queue_advance_guest();
+    vqueue_advance_guest();
     
 }
 

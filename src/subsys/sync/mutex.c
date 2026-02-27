@@ -1,7 +1,7 @@
-#include <include/subsys/sync/mutex.h>
+#include <subsys/sync/mutex.h>
 #if CONFIG_SUBSYS_MUTEX
 
-#include <include/kernel/kapi.h>
+#include <kernel/kapi.h>
 
 int mutex_ipcp_init(struct mutex_ipcp *mutex_ipcp, u8 priority_ceiling, 
                     u8 criticality_ceiling)

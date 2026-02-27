@@ -1,8 +1,8 @@
 #ifndef _WATCHDOG_H_
 #define _WATCHDOG_H_
 
-#include <include/generated/autoconf.h>
-#include <include/types.h>
+#include <generated/autoconf.h>
+#include <types.h>
 
 typedef void (*watchdog_pet_func_t)(void);
 typedef int (*watchdog_arm_func_t)(u32 ticks);

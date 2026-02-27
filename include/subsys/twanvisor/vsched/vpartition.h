@@ -1,8 +1,8 @@
 #ifndef _VPARTITION_H_
 #define _VPARTITION_H_
 
-#include <include/subsys/twanvisor/vsched/vcpu.h>
-#include <include/subsys/sync/mcslock.h>
+#include <subsys/twanvisor/vsched/vcpu.h>
+#include <subsys/sync/mcslock.h>
 
 struct vpartition;
 typedef void (*vdestroy_partition_func_t)(struct vpartition *vpartition);

@@ -1,8 +1,8 @@
 #ifndef _FLAT_PRIORITYQ_H_
 #define _FLAT_PRIORITYQ_H_
 
-#include <include/lib/dsa/listq.h>
-#include <include/lib/dsa/avl_tree.h>
+#include <lib/dsa/listq.h>
+#include <lib/dsa/avl_tree.h>
 
 struct flat_priorityq_node
 {

@@ -1,8 +1,8 @@
 #ifndef _VINFO_H_
 #define _VINFO_H_
 
-#include <include/subsys/twanvisor/varch.h>
-#include <include/lib/x86_index.h>
+#include <subsys/twanvisor/varch.h>
+#include <lib/x86_index.h>
 
 /* would probably have to do something similar to L4/re's Kip on architectures
    without hardware assisted virt */

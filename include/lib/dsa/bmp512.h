@@ -1,7 +1,7 @@
 #ifndef _BMP512_H_
 #define _BMP512_H_
 
-#include <include/lib/dsa/bmp256.h>
+#include <lib/dsa/bmp256.h>
 
 struct bmp512 
 {

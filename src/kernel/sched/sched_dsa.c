@@ -1,5 +1,5 @@
-#include <include/kernel/sched/sched_dsa.h>
-#include <include/kernel/kapi.h>
+#include <kernel/sched/sched_dsa.h>
+#include <kernel/kapi.h>
 
 void __sched_init(struct sched_priorityq *sched_priorityq)
 {

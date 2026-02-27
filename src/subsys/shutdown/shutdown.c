@@ -1,8 +1,8 @@
-#include <include/subsys/shutdown/shutdown.h>
+#include <subsys/shutdown/shutdown.h>
 #if CONFIG_SUBSYS_SHUTDOWN
 
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/errno.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <errno.h>
 
 static struct shutdown shutdown_global;
 

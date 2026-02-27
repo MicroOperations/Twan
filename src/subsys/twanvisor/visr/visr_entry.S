@@ -1,9 +1,9 @@
 #define ASM_FILE 1
 
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/arch.h>
+#include <arch.h>
 
 #define VISR_ENTRY_PREFIX __visr_entry_
 

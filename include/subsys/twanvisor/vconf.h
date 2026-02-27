@@ -1,7 +1,7 @@
 #ifndef _VCONF_H_
 #define _VCONF_H_
 
-#include <include/generated/autoconf.h>
+#include <generated/autoconf.h>
 
 #define TWANVISOR_ON CONFIG_SUBSYS_TWANVISOR
 #define TWANVISOR_VIPI_DRAIN_STRICT CONFIG_TWANVISOR_VIPI_DRAIN_STRICT

@@ -1,5 +1,5 @@
-#include <include/kernel/acpi_api/acpi_api.h>
-#include <include/kernel/mem/mmu/paging.h>
+#include <kernel/acpi_api/acpi_api.h>
+#include <kernel/mem/mmu/paging.h>
 
 void *__early_get_acpi_table(struct acpi_rsdt *rsdt_ptr, const char *sig)
 {

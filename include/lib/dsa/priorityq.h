@@ -1,8 +1,8 @@
 #ifndef _PRIORITYQ_H_
 #define _PRIORITYQ_H_
 
-#include <include/lib/dsa/dq.h>
-#include <include/lib/dsa/bmp256.h>
+#include <lib/dsa/dq.h>
+#include <lib/dsa/bmp256.h>
 
 #define MIN_PRIORITY 0
 #define MAX_PRIORITY 255

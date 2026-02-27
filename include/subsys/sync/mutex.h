@@ -1,7 +1,7 @@
 #ifndef _MUTEX_H_
 #define _MUTEX_H_
 
-#include <include/subsys/sync/semaphore.h>
+#include <subsys/sync/semaphore.h>
 
 struct mutex_ipcp
 {

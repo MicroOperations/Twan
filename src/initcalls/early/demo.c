@@ -1,8 +1,8 @@
-#include <include/generated/autoconf.h>
+#include <generated/autoconf.h>
 #if CONFIG_DEMO_EARLY_INITCALLS
 
-#include <include/kernel/kapi.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
+#include <kernel/kapi.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
 static __early_initcall void demo(void)
 {

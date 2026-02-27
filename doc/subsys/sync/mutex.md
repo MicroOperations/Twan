@@ -4,7 +4,7 @@ Mutexes can be leveraged to synchronise threads in a manner where waiters can bl
 
 ## API's
 
-```<include/subsys/sync/mutex.h>```
+```<subsys/sync/mutex.h>```
 
 ---
 ```

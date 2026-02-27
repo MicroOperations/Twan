@@ -1,10 +1,10 @@
 #ifndef _WAITQ_H_
 #define _WAITQ_H_
 
-#include <include/kernel/sched/task.h>
-#include <include/subsys/sync/mcslock.h>
-#include <include/subsys/time/timeout.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
+#include <kernel/sched/task.h>
+#include <subsys/sync/mcslock.h>
+#include <subsys/time/timeout.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
 struct waitq
 {

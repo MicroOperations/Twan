@@ -1,9 +1,9 @@
-#include <include/kernel/sched/sched_timer.h>
-#include <include/kernel/isr/base_isrs.h>
-#include <include/kernel/apic/apic.h>
-#include <include/subsys/twanvisor/vconf.h>
-#include <include/lib/libtwanvisor/libvcalls.h>
-#include <include/lib/libtwanvisor/libvc.h>
+#include <kernel/sched/sched_timer.h>
+#include <kernel/isr/base_isrs.h>
+#include <kernel/apic/apic.h>
+#include <subsys/twanvisor/vconf.h>
+#include <lib/libtwanvisor/libvcalls.h>
+#include <lib/libtwanvisor/libvc.h>
 
 void sched_timer_init(u32 time_slice_ms)
 {

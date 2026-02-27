@@ -1,8 +1,8 @@
 #ifndef _VSYNC_H_
 #define _VSYNC_H_
 
-#include <include/subsys/sync/mcslock.h>
-#include <include/subsys/sync/rwlock.h>
+#include <subsys/sync/mcslock.h>
+#include <subsys/sync/rwlock.h>
 
 void vmcs_lock_isr_save(struct mcslock_isr *lock, struct mcsnode *node);
 void vmcs_unlock_isr_restore(struct mcslock_isr *lock, struct mcsnode *node);

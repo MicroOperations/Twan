@@ -1,16 +1,16 @@
-#include <include/initcalls/late_initcalls_conf.h>
+#include <initcalls/late_initcalls_conf.h>
 #if LATE_TIME_HPET
 
-#include <include/kernel/kapi.h>
-#include <include/subsys/time/counter.h>
-#include <include/subsys/time/sleep.h>
-#include <include/subsys/time/timeout.h>
-#include <include/subsys/twanvisor/vconf.h>
-#include <include/kernel/mem/mmu/paging.h>
-#include <include/kernel/apic/apic.h>
-#include <include/kernel/acpi_api/acpi_api.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/lib/x86_index.h>
+#include <kernel/kapi.h>
+#include <subsys/time/counter.h>
+#include <subsys/time/sleep.h>
+#include <subsys/time/timeout.h>
+#include <subsys/twanvisor/vconf.h>
+#include <kernel/mem/mmu/paging.h>
+#include <kernel/apic/apic.h>
+#include <kernel/acpi_api/acpi_api.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <lib/x86_index.h>
 
 /* configs */
 

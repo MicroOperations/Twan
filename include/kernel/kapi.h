@@ -1,8 +1,8 @@
 #ifndef _KAPI_H_
 #define _KAPI_H_
 
-#include <include/kernel/kernel.h>
-#include <include/subsys/sync/spinlock.h>
+#include <kernel/kernel.h>
+#include <subsys/sync/spinlock.h>
 
 /* driver registration */
 

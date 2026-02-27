@@ -1,9 +1,9 @@
 #ifndef _VDBG_H_
 #define _VDBG_H_
 
-#include <include/subsys/twanvisor/visr/visr_index.h>
-#include <include/subsys/twanvisor/vdbg/vdbg_conf.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
+#include <subsys/twanvisor/visr/visr_index.h>
+#include <subsys/twanvisor/vdbg/vdbg_conf.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
 #define vpanicf_local(fmt, ...) do {                                        \
     vdbgf("[VPANIC ON CPU %u] " fmt, vthis_vprocessor_id(), ##__VA_ARGS__); \

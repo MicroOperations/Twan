@@ -1,8 +1,8 @@
 #ifndef _VRECOVERY_H_
 #define _VRECOVERY_H_
 
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/subsys/twanvisor/vsched/vpartition.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vsched/vpartition.h>
 
 void vdispatcher_dequeue(struct vper_cpu *target, struct vcpu *vcpu);
 void vipi_ack_dequeue_all(struct vcpu *vcpu);

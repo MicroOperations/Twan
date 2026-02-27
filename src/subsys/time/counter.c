@@ -1,6 +1,6 @@
-#include <include/subsys/time/counter.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/errno.h>
+#include <subsys/time/counter.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <errno.h>
 
 static struct counter counter_global;
 

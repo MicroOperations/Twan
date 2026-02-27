@@ -1,9 +1,9 @@
 #ifndef _VMA_H_
 #define _VMA_H_
 
-#include <include/subsys/debug/kdbg//kdbg.h>
-#include <include/std.h>
-#include <include/lib/x86_index.h>
+#include <subsys/debug/kdbg//kdbg.h>
+#include <std.h>
+#include <lib/x86_index.h>
 
 #define VMA_PARTITION_REGISTRY ".vma_partition_registry"
 

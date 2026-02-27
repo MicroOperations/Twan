@@ -1,12 +1,12 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/visr/visr_dispatcher.h>
-#include <include/subsys/twanvisor/visr/visr_index.h>
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
-#include <include/subsys/twanvisor/vsched/vsched_timer.h>
-#include <include/kernel/kapi.h>
+#include <subsys/twanvisor/visr/visr_dispatcher.h>
+#include <subsys/twanvisor/visr/visr_index.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/twanvisor/vsched/vsched_timer.h>
+#include <kernel/kapi.h>
 
 extern void __vemulate_interrupt(u64 rsp, u8 vector, u64 errcode);
 

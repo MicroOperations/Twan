@@ -1,12 +1,12 @@
-#include <include/kernel/apic/apic.h>
-#include <include/kernel/isr/isr_index.h>
+#include <kernel/apic/apic.h>
+#include <kernel/isr/isr_index.h>
 #include <uacpi/acpi.h>
-#include <include/lib/x86_index.h>
-#include <include/subsys/time/sleep.h>
-#include <include/subsys/time/counter.h>
-#include <include/kernel/kapi.h>
-#include <include/kernel/acpi_api/acpi_api.h>
-#include <include/kernel/isr/base_isrs.h>
+#include <lib/x86_index.h>
+#include <subsys/time/sleep.h>
+#include <subsys/time/counter.h>
+#include <kernel/kapi.h>
+#include <kernel/acpi_api/acpi_api.h>
+#include <kernel/isr/base_isrs.h>
 
 static struct irq_line low_irq_map[16] = {
     INITIALIZE_IRQ_LINE_ISA(0, DM_NORMAL),

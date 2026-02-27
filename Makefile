@@ -12,6 +12,7 @@ GEN_DIR = include/generated
 GENCONFIG_SRC = $(SCRIPTS_DIR)/genconfig.py
 AUTOCONF_H = $(GEN_DIR)/autoconf.h
 
+INCLUDE_DIR = include/
 SRC_DIR = src
 BOOT_CONF_DIR = boot
 GRUB_DIR = $(BOOT_CONF_DIR)/grub
@@ -32,7 +33,8 @@ OBJS = $(patsubst %.S, $(BUILD_DIR)/%.o, $(ASM_SOURCES)) \
 	    $(patsubst %.c, $(BUILD_DIR)/%.o, $(UACPI_SOURCES))
 
 UACPI_CFLAGS = -I$(UACPI_DIR)/include/
-CFLAGS = -O2 -mstackrealign -ffreestanding -Wall -Wextra -fno-stack-protector -m64 -I. $(UACPI_CFLAGS)
+CFLAGS = -O2 -mstackrealign -ffreestanding -Wall -Wextra -fno-stack-protector -m64 \
+		-I$(INCLUDE_DIR) $(UACPI_CFLAGS)
 LDFLAGS = -T linker.ld -nostdlib
 
 # default

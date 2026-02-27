@@ -1,17 +1,16 @@
 #ifndef _VSCHED_DSA_H_
 #define _VSCHED_DSA_H_
 
-#include <include/lib/dsa/dq.h>
-#include <include/subsys/twanvisor/vsched/vsched_conf.h>
-#include <include/subsys/twanvisor/vsched/vsched_dsa.h>
-#include <include/subsys/twanvisor/vsched/vcpu.h>
-#include <include/subsys/sync/mcslock.h>
+#include <lib/dsa/dq.h>
+#include <subsys/twanvisor/vsched/vsched_conf.h>
+#include <subsys/twanvisor/vsched/vcpu.h>
+#include <subsys/sync/mcslock.h>
 
 struct vscheduler
 {
     u8 vcriticality_level;
     struct dq queues[VSCHED_NUM_CRITICALITIES];
-    struct dq paused_queues[VSCHED_NUM_CRITICALITIES];
+    struct dq paused_queue;
     struct mcslock_isr lock;
 };
 

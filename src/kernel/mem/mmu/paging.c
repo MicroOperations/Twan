@@ -1,15 +1,15 @@
-#include <include/kernel/mem/mmu/paging.h>
-#include <include/kernel/mem/mmu/tlb.h>
-#include <include/lib/x86_index.h>
-#include <include/kernel/kernel.h>
-#include <include/subsys/sync/spinlock.h>
-#include <include/kernel/extern.h>
-#include <include/errno.h>
-#include <include/std.h>
-#include <include/kernel/kapi.h>
-#include <include/multiboot2.h>
-#include <include/subsys/mem/pma.h>
-#include <include/subsys/mem/vma.h>
+#include <kernel/mem/mmu/paging.h>
+#include <kernel/mem/mmu/tlb.h>
+#include <lib/x86_index.h>
+#include <kernel/kernel.h>
+#include <subsys/sync/spinlock.h>
+#include <kernel/extern.h>
+#include <errno.h>
+#include <std.h>
+#include <kernel/kapi.h>
+#include <multiboot2.h>
+#include <subsys/mem/pma.h>
+#include <subsys/mem/vma.h>
 
 /* routines for vma remapping into kernel reserved vma descriptors (fine to use
    by initcalls and initialization code) */

@@ -1,8 +1,8 @@
-#include <include/kernel/sched/sched_yield.h>
-#include <include/kernel/kapi.h>
-#include <include/kernel/sched/sched_timer.h>
-#include <include/kernel/sched/sched_dsa.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
+#include <kernel/sched/sched_yield.h>
+#include <kernel/kapi.h>
+#include <kernel/sched/sched_timer.h>
+#include <kernel/sched/sched_dsa.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
 bool sched_try_answer_yield_request(void)
 {

@@ -1,10 +1,10 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vdbg/vdbg.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/kernel/kernel.h>
-#include <include/lib/twanprintf.h>
+#include <subsys/twanvisor/vdbg/vdbg.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <kernel/kernel.h>
+#include <lib/twanprintf.h>
 
 static struct mcslock_isr vdbg_lock;
 

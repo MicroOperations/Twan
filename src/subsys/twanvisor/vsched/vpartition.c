@@ -1,11 +1,11 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vsched/vpartition.h>
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
-#include <include/subsys/sync/rwlock.h>
-#include <include/lib/dsa/bmp256.h>
+#include <subsys/twanvisor/vsched/vpartition.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/sync/rwlock.h>
+#include <lib/dsa/bmp256.h>
 
 static struct vpartition_table_entry vpartition_table[256];
 static struct rwlock_isr vpartition_table_rwlock = INITIALIZE_RWLOCK_ISR();

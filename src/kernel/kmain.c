@@ -1,23 +1,23 @@
-#include <include/subsys/mem/vma.h>
-#include <include/kernel/static.h>
-#include <include/lib/x86_index.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/kernel/kernel.h>
-#include <include/kernel/apic/apic.h>
-#include <include/multiboot2.h>
-#include <include/kernel/mem/mmu/paging.h>
-#include <include/kernel/extern.h>
-#include <include/elf.h>
-#include <include/kernel/acpi_api/acpi_api.h>
-#include <include/kernel/isr/isr_index.h>
-#include <include/kernel/init.h>
-#include <include/kernel/kapi.h>
-#include <include/errno.h>
-#include <include/kernel/sched/sched.h>
-#include <include/subsys/time/counter.h>
-#include <include/subsys/time/sleep.h>
-#include <include/subsys/time/timeout.h>
-#include <include/kernel/isr/base_isrs.h>
+#include <subsys/mem/vma.h>
+#include <kernel/static.h>
+#include <lib/x86_index.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <kernel/kernel.h>
+#include <kernel/apic/apic.h>
+#include <multiboot2.h>
+#include <kernel/mem/mmu/paging.h>
+#include <kernel/extern.h>
+#include <elf.h>
+#include <kernel/acpi_api/acpi_api.h>
+#include <kernel/isr/isr_index.h>
+#include <kernel/init.h>
+#include <kernel/kapi.h>
+#include <errno.h>
+#include <kernel/sched/sched.h>
+#include <subsys/time/counter.h>
+#include <subsys/time/sleep.h>
+#include <subsys/time/timeout.h>
+#include <kernel/isr/base_isrs.h>
 
 static __noreturn void __setup_ap(u32 lapic_id, u32 thread_id,
                                   u32 core_id, u32 pkg_id)

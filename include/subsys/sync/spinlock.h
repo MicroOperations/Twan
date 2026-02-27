@@ -1,8 +1,8 @@
 #ifndef _SPINLOCK_H_
 #define _SPINLOCK_H_
 
-#include <include/lib/x86_index.h>
-#include <include/lib/atomic.h>
+#include <lib/x86_index.h>
+#include <lib/atomic.h>
 
 struct spinlock 
 {

@@ -1,8 +1,8 @@
 #ifndef _VMAIN_H_
 #define _VMAIN_H_
 
-#include <include/subsys/twanvisor/twanvisor.h>
-#include <include/subsys/twanvisor/vextern.h>
+#include <subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vextern.h>
 
 void lapic_reconfig(struct vper_cpu *vthis_cpu);
 void lapic_reconfig_undo(struct vper_cpu *vthis_cpu);

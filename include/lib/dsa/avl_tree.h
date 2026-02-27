@@ -1,7 +1,7 @@
 #ifndef _AVL_TREE_H_
 #define _AVL_TREE_H_
 
-#include <include/lib/dsa/linked_tree.h>
+#include <lib/dsa/linked_tree.h>
 
 typedef void (*avl_tree_remove_func_t)(struct tree_node *node, void *data);
 

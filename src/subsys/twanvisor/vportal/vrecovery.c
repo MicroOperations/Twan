@@ -1,10 +1,10 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vportal/vrecovery.h>
-#include <include/subsys/twanvisor/vsched/vsched_yield.h>
-#include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
-#include <include/subsys/twanvisor/vemulate/verror.h>
+#include <subsys/twanvisor/vportal/vrecovery.h>
+#include <subsys/twanvisor/vsched/vsched_yield.h>
+#include <subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/twanvisor/vemulate/verror.h>
 
 void vdispatcher_dequeue(struct vper_cpu *target, struct vcpu *vcpu)
 {

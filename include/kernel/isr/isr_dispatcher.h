@@ -1,8 +1,8 @@
 #ifndef _ISR_DISPATCHER_H_
 #define _ISR_DISPATCHER_H_
 
-#include <include/kernel/isr/isr_index.h>
-#include <include/kernel/sched/sched.h>
+#include <kernel/isr/isr_index.h>
+#include <kernel/sched/sched.h>
 
 void __ipi_assert(struct ipi_data *data);
 void __ipi_ack(u32 sender_processor_id);

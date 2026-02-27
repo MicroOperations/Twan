@@ -1,9 +1,9 @@
-#include <include/subsys/sync/semaphore.h>
+#include <subsys/sync/semaphore.h>
 #if CONFIG_SUBSYS_SEMAPHORE
 
-#include <include/kernel/kapi.h>
-#include <include/kernel/sched/sched.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
+#include <kernel/kapi.h>
+#include <kernel/sched/sched.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
 void semaphore_init(struct semaphore *sem, u64 count)
 {

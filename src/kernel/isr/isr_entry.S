@@ -1,6 +1,6 @@
 #define ASM_FILE 1
-#include <include/kernel/isr/isr_index.h>
-#include <include/arch.h>
+#include <kernel/isr/isr_index.h>
+#include <arch.h>
 
 #define ISR_ENTRY_PREFIX __isr_entry_
 

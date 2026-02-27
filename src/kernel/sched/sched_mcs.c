@@ -1,6 +1,6 @@
-#include <include/kernel/sched/sched_mcs.h>
-#include <include/kernel/sched/sched.h>
-#include <include/kernel/kapi.h>
+#include <kernel/sched/sched_mcs.h>
+#include <kernel/sched/sched.h>
+#include <kernel/kapi.h>
 
 u8 __sched_mcs_read_criticality_level(void)
 {

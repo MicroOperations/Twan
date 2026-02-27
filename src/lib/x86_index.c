@@ -1,4 +1,4 @@
-#include <include/lib/x86_index.h>
+#include <lib/x86_index.h>
 
 bool __this_topology_0x1f(u32 *lapic_id, u32 *thread_id,
                           u32 *core_id, u32 *pkg_id)

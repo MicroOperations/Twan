@@ -1,6 +1,6 @@
-#include <include/kernel/sched/sched_queue.h>
-#include <include/kernel/kernel.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
+#include <kernel/sched/sched_queue.h>
+#include <kernel/kernel.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
 void sched_do_push(struct task *task, u32 processor_id)
 {

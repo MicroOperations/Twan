@@ -1,8 +1,8 @@
 #ifndef _TIMEOUT_H_
 #define _TIMEOUT_H_
 
-#include <include/subsys/sync/mcslock.h>
-#include <include/kernel/sched/task.h>
+#include <subsys/sync/mcslock.h>
+#include <kernel/sched/task.h>
 
 typedef void (*timeout_lock_t)(struct mcsnode *node);
 typedef void (*timeout_unlock_t)(struct mcsnode *node);

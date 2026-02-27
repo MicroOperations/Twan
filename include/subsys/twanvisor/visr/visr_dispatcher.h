@@ -1,7 +1,7 @@
 #ifndef _VISR_DISPATCHER_H_
 #define _VISR_DISPATCHER_H_
 
-#include <include/subsys/twanvisor/visr/visr_index.h>
+#include <subsys/twanvisor/visr/visr_index.h>
 
 void vacknowledge_interrupt(u8 vector);
 

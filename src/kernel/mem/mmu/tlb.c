@@ -1,7 +1,7 @@
-#include <include/kernel/mem/mmu/tlb.h>
-#include <include/kernel/kapi.h>
-#include <include/subsys/twanvisor/vconf.h>
-#include <include/lib/libtwanvisor/libvcalls.h>
+#include <kernel/mem/mmu/tlb.h>
+#include <kernel/kapi.h>
+#include <subsys/twanvisor/vconf.h>
+#include <lib/libtwanvisor/libvcalls.h>
 
 void flush_tlb_local(void)
 {

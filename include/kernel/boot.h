@@ -1,7 +1,7 @@
 #ifndef _BOOT_H_
 #define _BOOT_H_
 
-#include <include/generated/autoconf.h>
+#include <generated/autoconf.h>
 
 #define NUM_CPUS CONFIG_NUM_CPUS
 
@@ -47,7 +47,7 @@
 
 #ifndef ASM_FILE
 
-#include <include/compiler.h>
+#include <compiler.h>
 
 STATIC_ASSERT(NUM_CPUS > 0);
 

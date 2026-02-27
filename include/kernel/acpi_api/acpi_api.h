@@ -2,7 +2,7 @@
 #define _ACPI_API_H_
 
 #include <uacpi/acpi.h>
-#include <include/kernel/kernel.h>
+#include <kernel/kernel.h>
 
 void *__early_get_acpi_table(struct acpi_rsdt *rsdt_ptr, const char *sig);
 

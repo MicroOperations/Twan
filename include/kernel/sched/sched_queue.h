@@ -1,7 +1,7 @@
 #ifndef _SCHED_QUEUE_H_
 #define _SCHED_QUEUE_H_
 
-#include <include/kernel/sched/sched_dsa.h>
+#include <kernel/sched/sched_dsa.h>
 
 #define sched_push_on_cpu(task, processor_id) \
     sched_do_push((task), (processor_id))

@@ -1,7 +1,7 @@
 #ifndef _BUDDY_ALLOC_H_
 #define _BUDDY_ALLOC_H_
 
-#include <include/subsys/mem/pma.h>
+#include <subsys/mem/pma.h>
 
 #define BUDDY_32GB_SHIFT 35
 

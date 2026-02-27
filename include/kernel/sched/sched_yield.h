@@ -1,8 +1,8 @@
 #ifndef _SCHED_YIELD_H_
 #define _SCHED_YIELD_H_
 
-#include <include/kernel/sched/task.h>
-#include <include/subsys/sync/mcslock.h>
+#include <kernel/sched/task.h>
+#include <subsys/sync/mcslock.h>
 
 struct yield_wait_arg
 {

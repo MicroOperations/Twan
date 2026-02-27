@@ -1,7 +1,7 @@
 #ifndef _RTALLOC_H_
 #define _RTALLOC_H_
 
-#include <include/std.h>
+#include <std.h>
 
 typedef void *(*rtalloc_t)(size_t size);
 typedef void (*rtfree_t)(void *addr);

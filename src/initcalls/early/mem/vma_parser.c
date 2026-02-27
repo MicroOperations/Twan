@@ -1,14 +1,14 @@
-#include <include/initcalls/early_initcalls_conf.h>
+#include <initcalls/early_initcalls_conf.h>
 #if EARLY_MEM_VMA_PARSER
 
-#include <include/kernel/mem/mmu/paging.h>
-#include <include/kernel/kapi.h>
-#include <include/subsys/mem/vma.h>
-#include <include/subsys/sync//mcslock.h>
-#include <include/lib/x86_index.h>
-#include <include/kernel/boot.h>
-#include <include/kernel/extern.h>
-#include <include/generated/autoconf.h>
+#include <kernel/mem/mmu/paging.h>
+#include <kernel/kapi.h>
+#include <subsys/mem/vma.h>
+#include <subsys/sync//mcslock.h>
+#include <lib/x86_index.h>
+#include <kernel/boot.h>
+#include <kernel/extern.h>
+#include <generated/autoconf.h>
 
 #define NUM_PDPTS (CONFIG_KERNEL_MAX_VMA_PARTITIONS / 512)
 STATIC_ASSERT(NUM_PDPTS > 0);

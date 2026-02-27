@@ -1,11 +1,11 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vportal/venter.h>
-#include <include/subsys/twanvisor/vportal/vrecovery.h>
-#include <include/subsys/twanvisor/vsched/vsched_timer.h>
-#include <include/subsys/twanvisor/visr/visr_dispatcher.h>
-#include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/twanvisor/vportal/venter.h>
+#include <subsys/twanvisor/vportal/vrecovery.h>
+#include <subsys/twanvisor/vsched/vsched_timer.h>
+#include <subsys/twanvisor/visr/visr_dispatcher.h>
+#include <subsys/twanvisor/vemulate/vemulate_utils.h>
 
 void __venter(void)
 {
@@ -63,7 +63,7 @@ void __venter(void)
         __vmwrite(VMCS_GUEST_CR4, current->voperation_queue.cr4.val);
 
     if (current->voperation_queue.pending.fields.should_advance != 0)
-        advance_guest_rip();
+        vadvance_guest_rip();
 
     current->voperation_queue.pending.val = 0;
 
@@ -98,13 +98,13 @@ void __venter(void)
     bool injected = false;
     if (gp0_pending) {
 
-        inject_gp(0);
+        vinject_gp(0);
         current->visr_pending.delivery.fields.gp0_pending = 0;
         injected = true;
 
     } else if (ud_pending) {
 
-        inject_ud();
+        vinject_ud();
         current->visr_pending.delivery.fields.ud_pending = 0;
         injected = true;
 
@@ -116,7 +116,7 @@ void __venter(void)
         
             case INTERRUPT_TYPE_HARDWARE_EXCEPTION:
 
-                inject_db(int_type, false, 0);
+                vinject_db(int_type, false, 0);
                 break;
 
             case INTERRUPT_TYPE_SOFTWARE_INT:
@@ -124,7 +124,7 @@ void __venter(void)
             case INTERRUPT_TYPE_SOFTWARE_EXCEPTION:
 
                 u32 len = vmread(VMCS_RO_VMEXIT_INSTRUCTION_LENGTH);
-                inject_db(int_type, true, len);
+                vinject_db(int_type, true, len);
                 break;
 
             default:
@@ -137,7 +137,7 @@ void __venter(void)
 
     } else if (ac0_pending) {
 
-        inject_ac(0);
+        vinject_ac(0);
         current->visr_pending.delivery.fields.ac0_pending = 0;
         injected = true;
 

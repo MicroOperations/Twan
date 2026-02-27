@@ -1,13 +1,13 @@
 #ifndef _SCHED_H_
 #define _SCHED_H_
 
-#include <include/kernel/sched/task.h>
-#include <include/kernel/sched/sched_ctx.h>
-#include <include/kernel/sched/sched_yield.h>
-#include <include/kernel/sched/sched_timer.h>
-#include <include/kernel/sched/sched_queue.h>
-#include <include/subsys/sync/semaphore.h>
-#include <include/subsys/sync/mcslock.h>
+#include <kernel/sched/task.h>
+#include <kernel/sched/sched_ctx.h>
+#include <kernel/sched/sched_yield.h>
+#include <kernel/sched/sched_timer.h>
+#include <kernel/sched/sched_queue.h>
+#include <subsys/sync/semaphore.h>
+#include <subsys/sync/mcslock.h>
 
 #if !SCHED_GLOBAL_QUEUE
 

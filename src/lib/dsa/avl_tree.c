@@ -1,4 +1,4 @@
-#include <include/lib/dsa/avl_tree.h>
+#include <lib/dsa/avl_tree.h>
 
 bool avl_insert(struct avl_tree *tree, struct tree_node *node, u32 key,
                 struct tree_node **duplicate)

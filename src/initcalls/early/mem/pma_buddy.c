@@ -1,10 +1,10 @@
-#include <include/initcalls/early_initcalls_conf.h>
+#include <initcalls/early_initcalls_conf.h>
 #if EARLY_MEM_PMA_BUDDY
 
-#include <include/kernel/kapi.h>
-#include <include/subsys/mem/pma.h>
-#include <include/lib/buddy_alloc.h>
-#include <include/errno.h>
+#include <kernel/kapi.h>
+#include <subsys/mem/pma.h>
+#include <lib/buddy_alloc.h>
+#include <errno.h>
 
 #define PMA_NUM_ARENAS 5
 STATIC_ASSERT(PMA_NUM_ARENAS <= UINT32_MAX);

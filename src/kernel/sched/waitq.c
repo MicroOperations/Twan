@@ -1,8 +1,8 @@
-#include <include/kernel/sched/waitq.h>
-#include <include/kernel/sched/task.h>
-#include <include/kernel/kernel.h>
-#include <include/subsys/time/timeout.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
+#include <kernel/sched/waitq.h>
+#include <kernel/sched/task.h>
+#include <kernel/kernel.h>
+#include <subsys/time/timeout.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
 /* waitq's are priority ordered and do not account for criticality levels for 
    simplicity and performance */

@@ -1,8 +1,8 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vsched/vsched_ctx.h>
-#include <include/subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vsched/vsched_ctx.h>
+#include <subsys/twanvisor/twanvisor.h>
 
 void vsched_put_ctx(struct vcpu *vcpu, struct interrupt_info *ctx)
 {

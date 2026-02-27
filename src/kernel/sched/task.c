@@ -1,8 +1,8 @@
-#include <include/kernel/sched/task.h>
-#include <include/kernel/sched/sched.h>
-#include <include/kernel/kapi.h>
-#include <include/kernel/kernel.h>
-#include <include/subsys/mem/rtalloc.h>
+#include <kernel/sched/task.h>
+#include <kernel/sched/sched.h>
+#include <kernel/kapi.h>
+#include <kernel/kernel.h>
+#include <subsys/mem/rtalloc.h>
 
 #if SCHED_GLOBAL_QUEUE
 

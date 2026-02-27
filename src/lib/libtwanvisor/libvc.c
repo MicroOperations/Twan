@@ -1,5 +1,5 @@
-#include <include/lib/libtwanvisor/libvc.h>
-#include <include/kernel/kapi.h>
+#include <lib/libtwanvisor/libvc.h>
+#include <kernel/kapi.h>
 
 void vsubscribe_ipi(u64 arg)
 {

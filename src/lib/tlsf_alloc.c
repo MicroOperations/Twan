@@ -1,4 +1,4 @@
-#include <include/lib/tlsf_alloc.h>
+#include <lib/tlsf_alloc.h>
 
 void __tlsf_map(size_t size, u32 *fli_ptr, u32 *sli_ptr)
 {

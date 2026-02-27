@@ -1,16 +1,16 @@
 #ifndef _KERNEL_H_
 #define _KERNEL_H_
 
-#include <include/types.h>
-#include <include/multiboot2.h>
-#include <include/lib/x86_index.h>
-#include <include/kernel/boot.h>
-#include <include/subsys/sync/spinlock.h>
-#include <include/subsys/twanvisor/vconf.h>
+#include <types.h>
+#include <multiboot2.h>
+#include <lib/x86_index.h>
+#include <kernel/boot.h>
+#include <subsys/sync/spinlock.h>
+#include <subsys/twanvisor/vconf.h>
 #include <uacpi/acpi.h>
-#include <include/kernel/sched/sched.h>
-#include <include/kernel/isr/isr_index.h>
-#include <include/kernel/apic/apic_conf.h>
+#include <kernel/sched/sched.h>
+#include <kernel/isr/isr_index.h>
+#include <kernel/apic/apic_conf.h>
 
 #define BUF_SIZE 256
 

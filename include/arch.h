@@ -1,7 +1,7 @@
 #ifndef _ARCH_H_
 #define _ARCH_H_
 
-#include <include/kernel/boot.h>
+#include <kernel/boot.h>
 
 #ifdef ASM_FILE
 
@@ -132,7 +132,7 @@
 
 #else 
 
-#include <include/lib/x86_index.h>
+#include <lib/x86_index.h>
 
 typedef union
 {

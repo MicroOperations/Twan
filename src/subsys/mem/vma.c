@@ -1,6 +1,6 @@
-#include <include/subsys/mem/vma.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/errno.h>
+#include <subsys/mem/vma.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <errno.h>
 
 static struct vma vma_global;
 

@@ -1,7 +1,7 @@
 #ifndef _ELF_H_
 #define _ELF_H_
 
-#include <include/types.h>
+#include <types.h>
 
 /* 32-bit ELF base types. */
 typedef u32 Elf32_Addr;
@@ -1694,7 +1694,7 @@ typedef struct elf64_shdr
 #define NT_PRPSINFO 3
 #define NT_TASKSTRUCT 4
 #define NT_AUXV 6
-#define NT_PRXFPREG 0x46e62b7f    /* copied from gdb5.1/include/elf/common.h */
+#define NT_PRXFPREG 0x46e62b7f    /* copied from gdb5.1/elf/common.h */
 #define NT_S390_PV_CPU_DATA 0x30e /* s390 protvirt cpu dump data */
 #define NT_S390_RI_CB 0x30d       /* s390 runtime instrumentation */
 #define NT_S390_GS_CB 0x30b       /* s390 guarded storage registers */
@@ -1740,7 +1740,7 @@ typedef struct elf64_shdr
  * guest kernel, use this entry point to launch the guest in 32-bit
  * protected mode with paging disabled.
  *
- * [ Corresponding definition in Linux kernel: include/xen/interface/elfnote.h ]
+ * [ Corresponding definition in Linux kernel: xen/interface/elfnote.h ]
  */
 #define XEN_ELFNOTE_PHYS32_ENTRY 18 /* 0x12 */
 

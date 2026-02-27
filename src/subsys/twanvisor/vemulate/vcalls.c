@@ -1,11 +1,11 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vemulate/vcalls.h>
-#include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
-#include <include/subsys/twanvisor/vsched/vsched_yield.h>
-#include <include/subsys/twanvisor/vportal/vrecovery.h>
-#include <include/subsys/twanvisor/vportal/vcreate.h>
+#include <subsys/twanvisor/vemulate/vcalls.h>
+#include <subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/twanvisor/vsched/vsched_yield.h>
+#include <subsys/twanvisor/vportal/vrecovery.h>
+#include <subsys/twanvisor/vportal/vcreate.h>
 
 /* 
     vcalls follow sysv 
@@ -687,10 +687,10 @@ static vcall_func_t vcall_table[] = {
 void vcall_dispatcher(struct vregs *vregs)
 {
     int mode;
-    if (!is_guest_cpl0(&mode)) {
+    if (!vis_guest_cpl0(&mode)) {
 
         vcurrent_vcpu_enable_preemption();
-        queue_inject_gp0();
+        vqueue_inject_gp0();
         return;
     }
 

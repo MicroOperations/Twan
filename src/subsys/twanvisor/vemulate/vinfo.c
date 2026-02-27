@@ -1,8 +1,8 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vemulate/vinfo.h>
-#include <include/subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vemulate/vinfo.h>
+#include <subsys/twanvisor/twanvisor.h>
 
 void vinfo_dispatcher(struct vregs *vregs)
 {

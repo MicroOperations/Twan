@@ -1,7 +1,7 @@
 #ifndef _ATOMIC_H_
 #define _ATOMIC_H_
 
-#include <include/std.h>
+#include <std.h>
 
 typedef struct 
 {

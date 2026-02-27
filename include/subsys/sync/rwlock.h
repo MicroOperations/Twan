@@ -1,7 +1,7 @@
 #ifndef _RWLOCK_H_
 #define _RWLOCK_H_
 
-#include <include/subsys/sync/spinlock.h>
+#include <subsys/sync/spinlock.h>
 
 #define PF_LSB  0xFFFFFFF0
 #define PF_READER_INC 0x100

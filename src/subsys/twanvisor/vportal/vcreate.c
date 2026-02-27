@@ -1,15 +1,15 @@
-#include <include/subsys/twanvisor/vconf.h>
+#include <subsys/twanvisor/vconf.h>
 #if TWANVISOR_ON
 
-#include <include/subsys/twanvisor/vportal/vcreate.h>
-#include <include/subsys/twanvisor/vportal/vexit.h>
-#include <include/subsys/twanvisor/vportal/venter.h>
-#include <include/subsys/twanvisor/vportal/vrecovery.h>
-#include <include/subsys/twanvisor/vemulate/vemulate_utils.h>
-#include <include/subsys/twanvisor/vemulate/vtrap.h>
-#include <include/subsys/twanvisor/vemulate/verror.h>
-#include <include/subsys/twanvisor/vsched/vsched_mcs.h>
-#include <include/subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vportal/vcreate.h>
+#include <subsys/twanvisor/vportal/vexit.h>
+#include <subsys/twanvisor/vportal/venter.h>
+#include <subsys/twanvisor/vportal/vrecovery.h>
+#include <subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/twanvisor/vemulate/vtrap.h>
+#include <subsys/twanvisor/vemulate/verror.h>
+#include <subsys/twanvisor/vsched/vsched_mcs.h>
+#include <subsys/twanvisor/twanvisor.h>
 
 extern void __vexit(void);
 extern void __vlaunch(void);

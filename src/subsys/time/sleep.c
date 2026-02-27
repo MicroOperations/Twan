@@ -1,9 +1,9 @@
-#include <include/subsys/time/sleep.h>
+#include <subsys/time/sleep.h>
 #if CONFIG_SUBSYS_SLEEP
 
-#include <include/kernel/kernel.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
-#include <include/errno.h>
+#include <kernel/kernel.h>
+#include <subsys/debug/kdbg/kdbg.h>
+#include <errno.h>
 
 static struct sleep sleep_global;
 

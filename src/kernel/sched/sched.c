@@ -1,6 +1,6 @@
-#include <include/kernel/sched/sched.h>
-#include <include/kernel/kapi.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
+#include <kernel/sched/sched.h>
+#include <kernel/kapi.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
 void sched_worker(__unused void *unused)
 {

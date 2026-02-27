@@ -1,18 +1,18 @@
 #ifndef _TASK_H_
 #define _TASK_H_
 
-#include <include/lib/x86_index.h>
-#include <include/std.h>
-#include <include/kernel/isr/isr_index.h>
-#include <include/kernel/boot.h>
-#include <include/lib/dsa/flat_priorityq.h>
-#include <include/lib/dsa/dq.h>
-#include <include/lib/dsa/delta_chain.h>
-#include <include/errno.h>
-#include <include/kernel/sched/sched_conf.h>
-#include <include/kernel/sched/sched_mcs.h>
-#include <include/subsys/sync/mcslock.h>
-#include <include/subsys/debug/kdbg/kdbg.h>
+#include <lib/x86_index.h>
+#include <std.h>
+#include <kernel/isr/isr_index.h>
+#include <kernel/boot.h>
+#include <lib/dsa/flat_priorityq.h>
+#include <lib/dsa/dq.h>
+#include <lib/dsa/delta_chain.h>
+#include <errno.h>
+#include <kernel/sched/sched_conf.h>
+#include <kernel/sched/sched_mcs.h>
+#include <subsys/sync/mcslock.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
 typedef void (*task_func_t)(void *arg);
 

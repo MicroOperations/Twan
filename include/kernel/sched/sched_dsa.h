@@ -1,8 +1,8 @@
 #ifndef _SCHED_DSA_H_
 #define _SCHED_DSA_H_
 
-#include <include/kernel/sched/task.h>
-#include <include/lib/dsa/priorityq.h>
+#include <kernel/sched/task.h>
+#include <lib/dsa/priorityq.h>
 
 #define SCHED_MIN_CRITICALITY 0
 #define SCHED_MAX_CRITICALITY (SCHED_NUM_CRITICALITIES - 1)

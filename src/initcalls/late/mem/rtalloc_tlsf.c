@@ -1,13 +1,13 @@
-#include <include/initcalls/late_initcalls_conf.h>
+#include <initcalls/late_initcalls_conf.h>
 #if LATE_MEM_RTALLOC_TLSF
 
-#include <include/kernel/kapi.h>
-#include <include/kernel/mem/mmu/tlb.h>
-#include <include/lib/tlsf_alloc.h>
-#include <include/subsys/mem/rtalloc.h>
-#include <include/subsys/mem/vma.h>
-#include <include/subsys/mem/pma.h>
-#include <include/generated/autoconf.h>
+#include <kernel/kapi.h>
+#include <kernel/mem/mmu/tlb.h>
+#include <lib/tlsf_alloc.h>
+#include <subsys/mem/rtalloc.h>
+#include <subsys/mem/vma.h>
+#include <subsys/mem/pma.h>
+#include <generated/autoconf.h>
 
 /* TODO: alter tlsf library and this to use more fine grained locks, global lock
    on the allocator wouldn't scale very well */
