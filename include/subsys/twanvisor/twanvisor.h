@@ -182,12 +182,7 @@ typedef union
         u64 xapic_disable_status : 1;
         u64 tsc_aux : 1;
         u64 lmce : 1;
-        u64 reserved0 : 51;
-        u64 lint0 : 1;
-        u64 lint1 : 1;
-        u64 cmci : 1;
-        u64 tsr : 1;
-        u64 pmcr : 1;
+        u64 reserved0 : 56;
     } fields;
 } vper_cpu_trap_cache_t;
 

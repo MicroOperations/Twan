@@ -66,7 +66,6 @@ void lapic_reconfig(struct vper_cpu *vthis_cpu)
         lint0.fields.delivery_mode = DM_NORMAL;
         lint0.fields.vector = NMI;
         lapic_write(LAPIC_LINT0_OFFSET, lint0.val);
-        vthis_cpu->vcache.trap_cache.fields.lint0 = 1;
     }
 
     if (lint1.fields.delivery_mode == DM_NMI) {
@@ -74,7 +73,6 @@ void lapic_reconfig(struct vper_cpu *vthis_cpu)
         lint1.fields.delivery_mode = DM_NORMAL;
         lint1.fields.vector = NMI;
         lapic_write(LAPIC_LINT1_OFFSET, lint1.val);
-        vthis_cpu->vcache.trap_cache.fields.lint1 = 1;
     }
     
     if (feature_bits_d.fields.mca != 0) {
@@ -90,12 +88,11 @@ void lapic_reconfig(struct vper_cpu *vthis_cpu)
                 .val = lapic_read(LAPIC_CMCI_OFFSET)
             };
 
-            if (cmci.fields.delivery_mode == DM_NMI) {
+            if (KBUG_ON(cmci.fields.delivery_mode == DM_NMI)) {
 
                 cmci.fields.delivery_mode = DM_NORMAL;
                 cmci.fields.vector = NMI;
                 lapic_write(LAPIC_CMCI_OFFSET, cmci.val);
-                vthis_cpu->vcache.trap_cache.fields.cmci = 1;
             }
         }
     }
@@ -109,12 +106,11 @@ void lapic_reconfig(struct vper_cpu *vthis_cpu)
             .val = lapic_read(LAPIC_TSR_OFFSET)
         };
 
-        if (tsr.fields.delivery_mode == DM_NMI) {
+        if (KBUG_ON(tsr.fields.delivery_mode == DM_NMI)) {
         
             tsr.fields.delivery_mode = DM_NORMAL;
             tsr.fields.vector = NMI;
             lapic_write(LAPIC_TSR_OFFSET, tsr.val);
-            vthis_cpu->vcache.trap_cache.fields.tsr = 1;
         }
     }
 
@@ -126,66 +122,12 @@ void lapic_reconfig(struct vper_cpu *vthis_cpu)
             .val = lapic_read(LAPIC_PMCR_OFFSET)
         };
 
-        if (pmcr.fields.delivery_mode == DM_NMI) {
+        if (KBUG_ON(pmcr.fields.delivery_mode == DM_NMI)) {
         
             pmcr.fields.delivery_mode = DM_NORMAL;
             pmcr.fields.vector = NMI;
             lapic_write(LAPIC_PMCR_OFFSET, pmcr.val);
-            vthis_cpu->vcache.trap_cache.fields.pmcr = 1;
         }
-    }
-}
-
-void lapic_reconfig_undo(struct vper_cpu *vthis_cpu)
-{
-    if (vthis_cpu->vcache.trap_cache.fields.lint0 != 0) {
-
-        lapic_lint_t lint0 = {
-            .val = lapic_read(LAPIC_LINT0_OFFSET)
-        };
-
-        lint0.fields.delivery_mode = DM_NMI;
-        lapic_write(LAPIC_LINT0_OFFSET, lint0.val);
-    }
-
-    if (vthis_cpu->vcache.trap_cache.fields.lint1 != 0) {
-
-        lapic_lint_t lint1 = {
-            .val = lapic_read(LAPIC_LINT1_OFFSET)
-        };
-
-        lint1.fields.delivery_mode = DM_NMI;
-        lapic_write(LAPIC_LINT1_OFFSET, lint1.val);
-    }
-
-    if (vthis_cpu->vcache.trap_cache.fields.cmci != 0) {
-
-        lapic_cmci_t cmci = {
-            .val = lapic_read(LAPIC_CMCI_OFFSET)
-        };
-
-        cmci.fields.delivery_mode = DM_NMI;
-        lapic_write(LAPIC_CMCI_OFFSET, cmci.val);   
-    }
-
-    if (vthis_cpu->vcache.trap_cache.fields.tsr != 0) {
-        
-        lapic_tsr_t tsr = {
-            .val = lapic_read(LAPIC_TSR_OFFSET)
-        };
-
-        tsr.fields.delivery_mode = DM_NMI;
-        lapic_write(LAPIC_TSR_OFFSET, tsr.val);
-    }
-
-    if (vthis_cpu->vcache.trap_cache.fields.pmcr != 0) {
-        
-        lapic_pmcr_t pmcr = {
-            .val = lapic_read(LAPIC_PMCR_OFFSET)
-        };
-
-        pmcr.fields.delivery_mode = DM_NMI;
-        lapic_write(LAPIC_PMCR_OFFSET, pmcr.val);
     }
 }
 
@@ -437,6 +379,7 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
 
 int vper_cpu_data_init(struct vper_cpu *vthis_cpu, u32 vprocessor_id)
 {
+    lapic_reconfig(vthis_cpu);
     vset_available_vectors(&vthis_cpu->available_vectors);
 
     vthis_cpu->this = vthis_cpu;
@@ -1043,17 +986,8 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
     u64 flags = read_flags_and_disable_interrupts();
     vcpu->visr_pending.delivery.fields.intl = __read_cr8().fields.tpr;
 
-    /* reconfiguring here is kinda dirty, if vmlaunch fails, then any interrupts
-       set to fire from the reconfigured lvt entries will stay pending in the 
-       irr rather than fire straight away as nmi's 
-       
-       - this is fine aslong as we are not routing any nmi's before twanvisor
-         initializes, which we should not be doing anyway */
-    lapic_reconfig(vthis_cpu);
-
     if (!__vmlaunch()) {
         
-        lapic_reconfig_undo(vthis_cpu);
         write_flags(flags);
 
         kdbgf("vmlaunch failed on processor %d, err %s\n", 

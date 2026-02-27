@@ -5,7 +5,6 @@
 #include <subsys/twanvisor/vextern.h>
 
 void lapic_reconfig(struct vper_cpu *vthis_cpu);
-void lapic_reconfig_undo(struct vper_cpu *vthis_cpu);
 
 void vper_cpu_flags_init(struct vper_cpu *vthis_cpu);
 int vper_cpu_data_init(struct vper_cpu *vthis_cpu, u32 vprocessor_id);
