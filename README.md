@@ -1,10 +1,10 @@
 # Twan Separation Kernel
 
-A lightweight separation kernel with dynamic routing capabilities
+A lightweight separation kernel designed specifically for adaptability, real-time computing, and mixed-criticality workloads.
 
 ## Overview
 
-Twan is a Separation Kernel designed specifically for adaptability, real-time computing, and mixed-criticality workloads. It consists of two distinct components:
+Twan is intended to serve as foundational infrastructure for building specialized systems rather than as a complete end-user environment. It is designed to be adapted and extended according to specific deployment requirements. It consists of two distinct components:
 
 - **Twanvisor**: A hypervisor that leverages hardware assisted virtualisation to isolate partitions. Guests are paravirtualised and use API's provided by Twanvisor.
 - **TwanRTOS**: Root partition operating system that initializes Twanvisor, manages resources, and controls partition policies.
