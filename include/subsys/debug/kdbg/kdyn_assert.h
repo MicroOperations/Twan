@@ -5,8 +5,10 @@
 
 #if CONFIG_KDBG_KDYNAMIC_ASSERT
 
-#define KDYNAMIC_ASSERT(cond) \
-    ((void)KBUG_ON(!(cond)))
+#define KDYNAMIC_ASSERT(cond)                                           \
+    ((void)KBUG_ON_RAW(!(cond),                                         \
+                        "assertation failed: %s, file: %s, line: %d\n", \
+                        #cond, __FILE__, __LINE__))
 
 #else
 
