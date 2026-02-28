@@ -470,22 +470,19 @@ int vper_cpu_data_init(struct vper_cpu *vthis_cpu, u32 vprocessor_id)
     } else {
 
         u32 regs2[4] = {CPUID_CORE_FREQUENCY, 0, 0, 0};
-        __cpuid(&regs2[0], &regs2[1], &regs2[2], &regs2[3]);
+            __cpuid(&regs2[0], &regs2[1], &regs2[2], &regs2[3]);
 
         core_frequency_a_t eax = {.val = regs2[0]};
         u64 frequency_mhz = eax.fields.processor_base_freq_mhz;
 
-        if (frequency_mhz != 0) {
+        if (frequency_mhz == 0) {
 
-            tsc_frequency_hz = frequency_mhz * 1000000;
+            if (is_counter_initialized()) { 
 
-        } else if (is_counter_initialized()) {
+                /* fallback will obviously have a fair bit of variance to it */
 
-            /* fallback will obviously have a fair bit of variance to it */
-
-            u64 counter_frequency = counter_frequency_hz();
-
-            if (counter_frequency > 0) { 
+                u64 counter_frequency = counter_frequency_hz();
+                KDYNAMIC_ASSERT(counter_frequency != 0);
 
                 u64 tsc_start = __rdtsc64();
                 u64 counter_start = read_counter();
@@ -500,13 +497,16 @@ int vper_cpu_data_init(struct vper_cpu *vthis_cpu, u32 vprocessor_id)
                 u64 counter_delta = counter_end - counter_start;
 
                 tsc_frequency_hz = (tsc_delta * counter_frequency) / counter_delta;
-                
-                struct lapic_calibration cal = calibrate_lapic_timer(
-                        VSPURIOUS_INT_VECTOR, 10, VSCHED_LAPIC_DCR);
+            } 
 
-                lapic_frequency_hz = cal.lapic_frequency_hz;
-            }
+        } else {
+            tsc_frequency_hz = frequency_mhz * 1000000;
         }
+
+        struct lapic_calibration cal = calibrate_lapic_timer(
+                VSPURIOUS_INT_VECTOR, 10, VSCHED_LAPIC_DCR);
+
+        lapic_frequency_hz = cal.lapic_frequency_hz;
     }
 
     /* their cpu is fucked */

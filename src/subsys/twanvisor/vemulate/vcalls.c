@@ -6,6 +6,7 @@
 #include <subsys/twanvisor/vsched/vsched_yield.h>
 #include <subsys/twanvisor/vportal/vrecovery.h>
 #include <subsys/twanvisor/vportal/vcreate.h>
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 
 /* 
     vcalls follow sysv 
@@ -705,7 +706,7 @@ void vcall_dispatcher(struct vregs *vregs)
     } else {
 
         vcall_func_t func = vcall_table[id];
-        VBUG_ON(!func);
+        VDYNAMIC_ASSERT(func);
 
         ret = INDIRECT_BRANCH_SAFE(func(vregs));
     }
@@ -724,7 +725,7 @@ void vcall_dispatcher(struct vregs *vregs)
             break;
 
         default:
-            VBUG_ON(true);
+            VDYNAMIC_ASSERT(false);
             break;
     }
 

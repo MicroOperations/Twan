@@ -4,6 +4,7 @@
 #include <kernel/kernel.h>
 #include <subsys/mem/rtalloc.h>
 #include <subsys/debug/kdbg/kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 
 #if CONFIG_KERNEL_SCHED_GLOBAL_QUEUE
 
@@ -107,8 +108,8 @@ void current_task_destroy_ipi( __unused u64 unused)
 
     struct task *current = current_task();
     struct interrupt_info *ctx = task_ctx();
-    KBUG_ON(!current);
-    KBUG_ON(!ctx);
+    KDYNAMIC_ASSERT(current);
+    KDYNAMIC_ASSERT(ctx);
 
     set_current_task(NULL);
 
@@ -127,8 +128,8 @@ void current_task_destroy_ipi( __unused u64 unused)
 
 void current_task_destroy(void)
 {
-    KBUG_ON(!current_task()); 
-    KBUG_ON(this_cpu_data()->handling_isr); 
+    KDYNAMIC_ASSERT(current_task()); 
+    KDYNAMIC_ASSERT(!this_cpu_data()->handling_isr); 
 
     emulate_self_ipi(current_task_destroy_ipi, 0);
 }
@@ -136,8 +137,9 @@ void current_task_destroy(void)
 u8 __current_task_priority(void)
 {
     struct task *current = current_task();
-    KBUG_ON(!current);
-    KBUG_ON(current_task_is_preemption_enabled());
+    KDYNAMIC_ASSERT(current);
+    KDYNAMIC_ASSERT(!current_task_is_preemption_enabled() || 
+                    !is_interrupts_enabled());
 
     return current->metadata.priority;
 }
@@ -145,8 +147,9 @@ u8 __current_task_priority(void)
 u8 __current_task_criticality(void)
 {
     struct task *current = current_task();
-    KBUG_ON(!current);
-    KBUG_ON(current_task_is_preemption_enabled());
+    KDYNAMIC_ASSERT(current);
+    KDYNAMIC_ASSERT(!current_task_is_preemption_enabled() || 
+                    !is_interrupts_enabled());
 
     return current->metadata.criticality;
 }
@@ -154,8 +157,8 @@ u8 __current_task_criticality(void)
 void current_task_write(u8 priority, u8 criticality)
 {
     struct task *current = current_task();
-    KBUG_ON(!current);
-    KBUG_ON(criticality > SCHED_MAX_CRITICALITY);
+    KDYNAMIC_ASSERT(current);
+    KDYNAMIC_ASSERT(criticality <= SCHED_MAX_CRITICALITY);
 
     u64 flags = read_flags_and_disable_interrupts();
     current->metadata.priority = priority;

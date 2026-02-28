@@ -121,6 +121,10 @@ config VDBG_PANIC_ON_BUG
     bool "Vpanic when VBUG checks flag a bug"
     default n
 
+config VDBG_VDYNAMIC_ASSERT
+    bool "Enable twanvisor dynamic assertations"
+    default y
+
 config MITIGATION_SPECTRE_RSB
     bool "Enable Spectre-RSB mitigations"
     default y
@@ -175,6 +179,16 @@ config DISABLE_BRANCH_PREDICTION_U
 
 endif # SUBSYS_TWANVISOR
 
+# Kdbg
+
+config KDBG_PANIC_ON_BUG
+    bool "Kpanic when KBUG checks flag a bug"
+    default n
+
+config KDBG_KDYNAMIC_ASSERT
+    bool "Enable kernel dynamic assertations"
+    default y
+
 # Demos
 
 config DEMO_EARLY_INITCALLS
@@ -192,10 +206,4 @@ config DEMO_DRIVERS
 config DEMO_PV_TWANVISOR
     depends on SUBSYS_TWANVISOR
     bool "Enable demo for twanvisor"
-    default n
-
-# Kdbg
-
-config KDBG_PANIC_ON_BUG
-    bool "Kpanic when KBUG checks flag a bug"
     default n

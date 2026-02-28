@@ -1,6 +1,7 @@
 #ifndef _VEMULATE_UTILS_H_
 #define _VEMULATE_UTILS_H_
 
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 #include <subsys/twanvisor/twanvisor.h>
 #include <subsys/twanvisor/vsched/vpartition.h>
 
@@ -242,7 +243,7 @@ inline void vadvance_guest_rip(void)
             break;
 
         default:
-            VBUG_ON(true);
+            VDYNAMIC_ASSERT(false);
             break;
 
     }
@@ -444,7 +445,7 @@ inline u64 vgpr_val(struct vregs *vregs, u32 gpr)
             break;
 
         default:
-            VBUG_ON(true);
+            VDYNAMIC_ASSERT(false);
             break;
     }
 

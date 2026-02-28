@@ -6,6 +6,7 @@
 #include <subsys/twanvisor/vsched/vsched_yield.h>
 #include <subsys/twanvisor/vsched/vsched_timer.h>
 #include <subsys/twanvisor/vportal/vrecovery.h>
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 
 void __vsched_put(struct vcpu *vcpu, bool put_ctx, 
                  struct interrupt_info *ctx)
@@ -89,7 +90,7 @@ bool vsched_put_paused(struct vcpu *vcpu, bool pv_spin, bool put_ctx,
                 break;
 
             default:
-                VBUG_ON(true);
+                VDYNAMIC_ASSERT(false);
                 break;
         }
 

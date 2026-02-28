@@ -1,5 +1,6 @@
 #include <subsys/mem/rtalloc.h>
 #include <subsys/debug/kdbg/kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 #include <errno.h>
 
 static struct rtalloc rtalloc_global;
@@ -28,8 +29,8 @@ void *rtalloc(size_t size)
     if (!rtalloc_global.initialized)
         return NULL;
 
-    KBUG_ON(!rtalloc_global.interface);
-    KBUG_ON(!rtalloc_global.interface->rtalloc_func);
+    KDYNAMIC_ASSERT(rtalloc_global.interface);
+    KDYNAMIC_ASSERT(rtalloc_global.interface->rtalloc_func);
 
     return INDIRECT_BRANCH_SAFE(rtalloc_global.interface->rtalloc_func(size));
 }
@@ -38,8 +39,8 @@ void rtfree(void *addr)
 {
     if (rtalloc_global.initialized) {
 
-        KBUG_ON(!rtalloc_global.interface);
-        KBUG_ON(!rtalloc_global.interface->rtfree_func);
+        KDYNAMIC_ASSERT(rtalloc_global.interface);
+        KDYNAMIC_ASSERT(rtalloc_global.interface->rtfree_func);
 
         INDIRECT_BRANCH_SAFE(rtalloc_global.interface->rtfree_func(addr));
     }
@@ -50,8 +51,8 @@ void *rtrealloc(void *addr, size_t size)
     if (!rtalloc_global.initialized)
         return NULL;
 
-    KBUG_ON(!rtalloc_global.interface);
-    KBUG_ON(!rtalloc_global.interface->rtrealloc_func);
+    KDYNAMIC_ASSERT(rtalloc_global.interface);
+    KDYNAMIC_ASSERT(rtalloc_global.interface->rtrealloc_func);
 
     return INDIRECT_BRANCH_SAFE(
             rtalloc_global.interface->rtrealloc_func(addr, size));
@@ -71,8 +72,8 @@ void *rtalloc_p2aligned(size_t size, u32 alignment)
     if (!rtalloc_global.initialized)
         return NULL;
 
-    KBUG_ON(!rtalloc_global.interface);
-    KBUG_ON(!rtalloc_global.interface->rtalloc_p2aligned_func);
+    KDYNAMIC_ASSERT(rtalloc_global.interface);
+    KDYNAMIC_ASSERT(rtalloc_global.interface->rtalloc_p2aligned_func);
 
     return INDIRECT_BRANCH_SAFE(
             rtalloc_global.interface->rtalloc_p2aligned_func(size, alignment));
@@ -82,8 +83,8 @@ void rtfree_p2aligned(void *addr)
 {
     if (rtalloc_global.initialized) {
 
-        KBUG_ON(!rtalloc_global.interface);
-        KBUG_ON(!rtalloc_global.interface->rtfree_func);
+        KDYNAMIC_ASSERT(rtalloc_global.interface);
+        KDYNAMIC_ASSERT(rtalloc_global.interface->rtfree_func);
 
         INDIRECT_BRANCH_SAFE(
             rtalloc_global.interface->rtfree_p2aligned_func(addr));
@@ -95,8 +96,8 @@ void *rtrealloc_p2aligned(void *addr, size_t size, u32 alignment)
     if (!rtalloc_global.initialized)
         return NULL;
 
-    KBUG_ON(!rtalloc_global.interface);
-    KBUG_ON(!rtalloc_global.interface->rtrealloc_func);
+    KDYNAMIC_ASSERT(rtalloc_global.interface);
+    KDYNAMIC_ASSERT(rtalloc_global.interface->rtrealloc_func);
 
     return INDIRECT_BRANCH_SAFE(
             rtalloc_global.interface->rtrealloc_p2aligned_func(

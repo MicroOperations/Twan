@@ -4,10 +4,11 @@
 #include <kernel/sched/sched_dsa.h>
 #include <kernel/sched/waitq.h>
 #include <subsys/debug/kdbg/kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 
 bool sched_try_answer_yield_request(void)
 {
-    KBUG_ON(this_cpu_data()->handling_isr); 
+    KDYNAMIC_ASSERT(!this_cpu_data()->handling_isr); 
 
     disable_preemption();
 
@@ -69,8 +70,8 @@ void sched_yield_ipi(__unused u64 unused)
 {   
     struct task *current = current_task();
     struct interrupt_info *ctx = task_ctx();
-    KBUG_ON(!current);
-    KBUG_ON(!ctx);
+    KDYNAMIC_ASSERT(current);
+    KDYNAMIC_ASSERT(ctx);
 
     clear_yield_request(current);
     clear_preempted_early(current);
@@ -91,7 +92,7 @@ void sched_yield_ipi(__unused u64 unused)
 
 void sched_yield(void)
 {
-    KBUG_ON(this_cpu_data()->handling_isr);
+    KDYNAMIC_ASSERT(!this_cpu_data()->handling_isr);
 
     emulate_self_ipi(sched_yield_ipi, 0);
 }
@@ -102,8 +103,8 @@ void sched_yield_wait_ipi(u64 _arg)
 
     struct task *current = current_task();
     struct interrupt_info *ctx = task_ctx();
-    KBUG_ON(!current);
-    KBUG_ON(!ctx);
+    KDYNAMIC_ASSERT(current);
+    KDYNAMIC_ASSERT(ctx);
 
     sched_timer_disable();
 
@@ -173,7 +174,7 @@ void sched_yield_wait_and_unlock(struct waitq *waitq, bool insert_real,
 
 #endif
 {
-    KBUG_ON(this_cpu_data()->handling_isr);
+    KDYNAMIC_ASSERT(!this_cpu_data()->handling_isr);
 
     struct yield_wait_arg arg = {
         .waitq = waitq,

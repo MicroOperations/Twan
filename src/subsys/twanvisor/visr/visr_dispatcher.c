@@ -7,6 +7,7 @@
 #include <subsys/twanvisor/vemulate/vemulate_utils.h>
 #include <subsys/twanvisor/vsched/vsched_timer.h>
 #include <subsys/twanvisor/vsched/vsched_yield.h>
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 #include <kernel/isr/isr_dispatcher.h>
 #include <kernel/apic/apic.h>
 
@@ -149,8 +150,8 @@ void __visr_dispatcher(struct interrupt_info *stack_trace)
             if (vis_lapic_isr_set(vector)) {
 
                 /* root should not route interrupts here */
-                VBUG_ON(vector == DOUBLE_FAULT);
-                VBUG_ON(vector == MACHINE_CHECK);
+                VDYNAMIC_ASSERT(vector != DOUBLE_FAULT);
+                VDYNAMIC_ASSERT(vector != MACHINE_CHECK);
 
                 should_dispatch = true;
                 break;
@@ -158,7 +159,7 @@ void __visr_dispatcher(struct interrupt_info *stack_trace)
             } else {
 
                 /* root should route nmi's as external */
-                VBUG_ON(vector == NMI);
+                VDYNAMIC_ASSERT(vector != NMI);
             }
 
             if (vis_exception_vector(vector)) {
@@ -229,8 +230,8 @@ void vexit_ext_dispatcher(u8 vector)
         default:
 
             /* root should not route interrupts to these vectors  */
-            VBUG_ON(vector == DOUBLE_FAULT);
-            VBUG_ON(vector == MACHINE_CHECK);
+            VDYNAMIC_ASSERT(vector != DOUBLE_FAULT);
+            VDYNAMIC_ASSERT(vector != MACHINE_CHECK);
 
             vdispatch_interrupt(vector);
             break;

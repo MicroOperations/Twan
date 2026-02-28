@@ -4,6 +4,7 @@
 #include <kernel/apic/apic.h>
 #include <lib/libtwanvisor/libvcalls.h>
 #include <subsys/debug/kdbg/kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 #include <errno.h>
 #include <std.h>
 
@@ -104,8 +105,8 @@ int ipi_run_func(u32 processor_id, ipi_func_t func, u64 arg, bool wait)
 {
     struct per_cpu *this_cpu = this_cpu_data();
 
-    KBUG_ON(this_cpu->handling_isr);
-    KBUG_ON(!is_interrupts_enabled());
+    KDYNAMIC_ASSERT(!this_cpu->handling_isr);
+    KDYNAMIC_ASSERT(is_interrupts_enabled());
 
     if (!cpu_valid(processor_id))
         return -EINVAL;

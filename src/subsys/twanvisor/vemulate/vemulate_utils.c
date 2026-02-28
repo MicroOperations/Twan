@@ -6,6 +6,7 @@
 #include <subsys/twanvisor/vsched/vpartition.h>
 #include <subsys/twanvisor/vsched/vsched_mcs.h>
 #include <subsys/twanvisor/vsched/vsched_yield.h>
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 
 u64 vlapic_read(u32 offset)
 {
@@ -338,7 +339,7 @@ int vemu_tlb_invalidate(u8 target_vid)
         bool was_pending = vcpu->vsched_metadata.tlb_flush_pending;
         vcpu->vsched_metadata.tlb_flush_pending = true;
 
-        VBUG_ON(vcpu == current && state != VTRANSITIONING);
+        VDYNAMIC_ASSERT(vcpu != current || state == VTRANSITIONING);
 
         if (state == VRUNNING) {
 
@@ -355,8 +356,8 @@ int vemu_tlb_invalidate(u8 target_vid)
 
     vpartition_put(target_vid, &node);
 
-    VBUG_ON(!vcurrent_vcpu_is_preemption_enabled());
-    VBUG_ON(!is_interrupts_enabled());
+    VDYNAMIC_ASSERT(vcurrent_vcpu_is_preemption_enabled());
+    VDYNAMIC_ASSERT(is_interrupts_enabled());
 
     /* second pass: wait for target processors to ack */
     for (u32 i = 0; i < num_enabled_cpus; i++) {
@@ -543,7 +544,7 @@ int vemu_set_route(u8 target_vid, u8 sender_vid, vroute_type_t route_type,
             break;
 
         default:
-            VBUG_ON(true);
+            VDYNAMIC_ASSERT(false);
             break;
     }
 
@@ -697,7 +698,7 @@ void __vemu_pv_spin_kick(struct vcpu *vcpu)
 
     if (state == VSPIN_PAUSED) {
 
-        VBUG_ON(vcpu->vsched_metadata.state != VPV_SPINNING);
+        VDYNAMIC_ASSERT(vcpu->vsched_metadata.state == VPV_SPINNING);
 
         __vsched_dequeue_paused(vcpu);
 

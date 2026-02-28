@@ -5,9 +5,11 @@
 #include <subsys/time/sleep.h>
 #include <subsys/time/counter.h>
 #include <subsys/debug/kdbg/kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 #include <kernel/kapi.h>
 #include <kernel/acpi_api/acpi_api.h>
 #include <kernel/isr/base_isrs.h>
+#include <std.h>
 
 static struct irq_line low_irq_map[16] = {
     INITIALIZE_IRQ_LINE_ISA(0, DM_NORMAL),
@@ -630,10 +632,9 @@ struct lapic_calibration calibrate_lapic_timer(u8 spurious_vector, u32 ms,
             break;
 
         default:
+            KDYNAMIC_ASSERT(false);
             break;
     }
-
-    KBUG_ON(divisor == 0);
 
     u64 lapic_frequency = (lapic_ticks * 1000 * divisor) / ms;
 
@@ -647,8 +648,22 @@ struct lapic_calibration calibrate_lapic_timer(u8 spurious_vector, u32 ms,
 
 u32 lapic_timer_init(u8 vector, u32 ms)
 {
-    struct lapic_calibration calibration = 
-        calibrate_lapic_timer(SPURIOUS_INT_VECTOR, ms, DIV_16);
+    u64 ticks;
+
+    u32 regs[4] = {CPUID_TSC_CORE_CRYSTAL, 0, 0, 0};
+    __cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
+
+    if (regs[0] == 0 || regs[1] == 0 || regs[2] == 0) {
+
+        struct lapic_calibration calibration = calibrate_lapic_timer(
+            SPURIOUS_INT_VECTOR, ms, DIV_16);
+
+        ticks = calibration.lapic_ms_count;
+
+    } else {
+        u64 freq = regs[2] / DIV_16;
+        ticks = ms_to_ticks(ms, freq);
+    }
 
     lapic_write(LAPIC_INITIAL_COUNT_OFFSET, 0);
     lapic_timer_t timer = {
@@ -660,9 +675,9 @@ u32 lapic_timer_init(u8 vector, u32 ms)
 
     lapic_write(LAPIC_DCR_OFFSET, DIV_16);
     lapic_write(LAPIC_TIMER_OFFSET, timer.val);
-    lapic_write(LAPIC_INITIAL_COUNT_OFFSET, calibration.lapic_ms_count);
+    lapic_write(LAPIC_INITIAL_COUNT_OFFSET, ticks);
 
-    return calibration.lapic_ms_count;
+    return ticks;
 }
 
 void set_lapic_oneshot(u8 vector, u64 ticks, lapic_dcr_config_t dcr)

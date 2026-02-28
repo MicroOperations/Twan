@@ -1,6 +1,7 @@
 #include <subsys/sync/semaphore.h>
 #if CONFIG_SUBSYS_SEMAPHORE
 
+#include <subsys/debug/kdbg/kdyn_assert.h>
 #include <kernel/kapi.h>
 #include <kernel/sched/sched.h>
 #include <subsys/debug/kdbg/kdbg.h>
@@ -59,8 +60,7 @@ bool semaphore_down_timeout(struct semaphore *sem, u32 ticks)
 
 void semaphore_up(struct semaphore *sem)
 {
-    u64 count = atomic64_read(&sem->count);
-    KBUG_ON(count == UINT64_MAX);
+    KDYNAMIC_ASSERT((u64)atomic64_read(&sem->count) < UINT64_MAX);
 
     atomic64_inc(&sem->count);
     waitq_wakeup_front(&sem->waitq, NULL);

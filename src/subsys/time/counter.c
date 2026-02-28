@@ -1,5 +1,5 @@
 #include <subsys/time/counter.h>
-#include <subsys/debug/kdbg/kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 #include <errno.h>
 
 static struct counter counter_global;
@@ -28,8 +28,8 @@ u64 read_counter(void)
     if (!counter_global.initialized)
         return 0;
 
-    KBUG_ON(!counter_global.interface);
-    KBUG_ON(!counter_global.interface->read_counter_func);
+    KDYNAMIC_ASSERT(counter_global.interface);
+    KDYNAMIC_ASSERT(counter_global.interface->read_counter_func);
 
     return INDIRECT_BRANCH_SAFE(counter_global.interface->read_counter_func());
 }
@@ -39,8 +39,8 @@ u64 counter_period_fs(void)
     if (!counter_global.initialized)
         return 0;
 
-    KBUG_ON(!counter_global.interface);
-    KBUG_ON(!counter_global.interface->counter_period_fs_func);
+    KDYNAMIC_ASSERT(counter_global.interface);
+    KDYNAMIC_ASSERT(counter_global.interface->counter_period_fs_func);
     
     return INDIRECT_BRANCH_SAFE(
             counter_global.interface->counter_period_fs_func());
@@ -51,8 +51,8 @@ u64 counter_frequency_hz(void)
     if (!counter_global.initialized)
         return 0;
 
-    KBUG_ON(!counter_global.interface);
-    KBUG_ON(!counter_global.interface->counter_frequency_hz_func);
+    KDYNAMIC_ASSERT(counter_global.interface);
+    KDYNAMIC_ASSERT(counter_global.interface->counter_frequency_hz_func);
 
     return INDIRECT_BRANCH_SAFE(
             counter_global.interface->counter_frequency_hz_func());

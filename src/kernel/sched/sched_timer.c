@@ -4,6 +4,7 @@
 #include <lib/libtwanvisor/libvcalls.h>
 #include <lib/libtwanvisor/libvc.h>
 #include <subsys/debug/kdbg/kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 
 void sched_timer_init(u32 time_slice_ms)
 {
@@ -48,8 +49,8 @@ void sched_timer_enable(void)
 
     if (twan()->flags.fields.twanvisor_on != 0) {
 
-        KBUG_ON(tv_varm_timern(SCHED_TIMER_VECTOR, PV_SCHED_TIMER, 
-                ticks, true, false) < 0);
+        KDYNAMIC_ASSERT(tv_varm_timern(SCHED_TIMER_VECTOR, PV_SCHED_TIMER,
+                                       ticks, true, false) == 0);
 
         return;
     }

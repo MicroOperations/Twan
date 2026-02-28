@@ -6,6 +6,7 @@
 #include <subsys/twanvisor/vsched/vsched_timer.h>
 #include <subsys/twanvisor/visr/visr_dispatcher.h>
 #include <subsys/twanvisor/vemulate/vemulate_utils.h>
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 
 void __venter(void)
 {
@@ -76,10 +77,8 @@ void __venter(void)
 
     vinterrupt_delivery_data_t data = current->visr_pending.delivery;
 
-    int exception_count = data.fields.gp0_pending + data.fields.ud_pending +
-                          data.fields.db_pending + data.fields.ac0_pending;
-
-    VBUG_ON(exception_count > 1);
+    VDYNAMIC_ASSERT((data.fields.gp0_pending + data.fields.ud_pending +
+                     data.fields.db_pending + data.fields.ac0_pending) <= 1);
 
     bool gp0_pending = data.fields.gp0_pending != 0;
     bool ud_pending = data.fields.ud_pending != 0;
@@ -128,7 +127,7 @@ void __venter(void)
                 break;
 
             default:
-                VBUG_ON(true);
+                VDYNAMIC_ASSERT(false);
                 break;
         }
 

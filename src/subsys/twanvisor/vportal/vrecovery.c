@@ -5,6 +5,7 @@
 #include <subsys/twanvisor/vsched/vsched_yield.h>
 #include <subsys/twanvisor/vemulate/vemulate_utils.h>
 #include <subsys/twanvisor/vemulate/verror.h>
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 
 void vdispatcher_dequeue(struct vper_cpu *target, struct vcpu *vcpu)
 {
@@ -49,7 +50,7 @@ void vdo_finalize_teardown(u8 vid)
     vpartition_start_exclusive();
 
     struct vpartition *vpartition = vpartition_get_exclusive(vid);
-    VBUG_ON(!vpartition);
+    VDYNAMIC_ASSERT(vpartition);
 
     /* unset the root partition here so we dont accidentally ruin its perms 
        during unwind */
@@ -68,7 +69,7 @@ void vdo_finalize_teardown(u8 vid)
     while ((pair_vid = bmp256_fls(&vpartition->ipi_senders)) != -1) {
 
         struct vpartition *pair = vpartition_get_exclusive(pair_vid);
-        VBUG_ON(!pair);
+        VDYNAMIC_ASSERT(pair);
 
         bmp256_unset(&pair->ipi_receivers, vid);
         bmp256_unset(&vpartition->ipi_senders, pair_vid);
@@ -77,7 +78,7 @@ void vdo_finalize_teardown(u8 vid)
     while ((pair_vid = bmp256_fls(&vpartition->ipi_senders)) != -1) {
 
         struct vpartition *pair = vpartition_get_exclusive(pair_vid);
-        VBUG_ON(!pair);
+        VDYNAMIC_ASSERT(pair);
 
         bmp256_unset(&pair->ipi_senders, vid);
         bmp256_unset(&vpartition->ipi_receivers, pair_vid);
@@ -87,7 +88,7 @@ void vdo_finalize_teardown(u8 vid)
     while ((pair_vid = bmp256_fls(&vpartition->tlb_shootdown_senders)) != -1) {
 
         struct vpartition *pair = vpartition_get_exclusive(pair_vid);
-        VBUG_ON(!pair);
+        VDYNAMIC_ASSERT(pair);
 
         bmp256_unset(&pair->tlb_shootdown_receivers, vid);
         bmp256_unset(&vpartition->tlb_shootdown_senders, pair_vid);
@@ -97,7 +98,7 @@ void vdo_finalize_teardown(u8 vid)
         (pair_vid = bmp256_fls(&vpartition->tlb_shootdown_receivers)) != -1) {
 
         struct vpartition *pair = vpartition_get_exclusive(pair_vid);
-        VBUG_ON(!pair);
+        VDYNAMIC_ASSERT(pair);
 
         bmp256_unset(&pair->tlb_shootdown_senders, vid);
         bmp256_unset(&vpartition->tlb_shootdown_receivers, pair_vid);
@@ -108,7 +109,7 @@ void vdo_finalize_teardown(u8 vid)
         (pair_vid = bmp256_fls(&vpartition->read_vcpu_state_senders)) != -1) {
 
         struct vpartition *pair = vpartition_get_exclusive(pair_vid);
-        VBUG_ON(!pair);
+        VDYNAMIC_ASSERT(pair);
 
         bmp256_unset(&pair->read_vcpu_state_receivers, vid);
         bmp256_unset(&vpartition->read_vcpu_state_senders, pair_vid);
@@ -118,7 +119,7 @@ void vdo_finalize_teardown(u8 vid)
         (pair_vid = bmp256_fls(&vpartition->read_vcpu_state_receivers)) != -1) {
 
         struct vpartition *pair = vpartition_get_exclusive(pair_vid);
-        VBUG_ON(!pair);
+        VDYNAMIC_ASSERT(pair);
 
         bmp256_unset(&pair->read_vcpu_state_senders, vid);
         bmp256_unset(&vpartition->read_vcpu_state_receivers, pair_vid);
@@ -129,7 +130,7 @@ void vdo_finalize_teardown(u8 vid)
         (pair_vid = bmp256_fls(&vpartition->pv_spin_kick_senders)) != -1) {
 
         struct vpartition *pair = vpartition_get_exclusive(pair_vid);
-        VBUG_ON(!pair);
+        VDYNAMIC_ASSERT(pair);
 
         bmp256_unset(&pair->pv_spin_kick_receivers, vid);
         bmp256_unset(&vpartition->pv_spin_kick_senders, pair_vid);
@@ -139,7 +140,7 @@ void vdo_finalize_teardown(u8 vid)
         (pair_vid = bmp256_fls(&vpartition->pv_spin_kick_receivers)) != -1) {
 
         struct vpartition *pair = vpartition_get_exclusive(pair_vid);
-        VBUG_ON(!pair);
+        VDYNAMIC_ASSERT(pair);
 
         bmp256_unset(&pair->pv_spin_kick_senders, vid);
         bmp256_unset(&vpartition->pv_spin_kick_receivers, pair_vid);
@@ -154,9 +155,9 @@ void vdo_finalize_teardown(u8 vid)
        teardown */
     struct mcsnode root_node = INITIALIZE_MCSNODE();
     struct vpartition *root = vpartition_get(root_vid, &root_node);
-    VBUG_ON(!root);
+    VDYNAMIC_ASSERT(root);
 
-    VBUG_ON(processor_id >= root->vcpu_count);
+    VDYNAMIC_ASSERT(processor_id < root->vcpu_count);
     struct vcpu *root_vcpu = &root->vcpus[processor_id];
 
     __vemu_inject_external_interrupt(root_vcpu, vector, nmi);
@@ -197,7 +198,7 @@ void vfailure_recover(void)
 
     struct mcsnode vpartition_node = INITIALIZE_MCSNODE();
     struct vpartition *vpartition = vpartition_get(vid, &vpartition_node);
-    VBUG_ON(!vpartition);
+    VDYNAMIC_ASSERT(vpartition);
 
     u32 terminated_count = 0;
     for (u32 i = 0; i < vpartition->vcpu_count; i++) {
@@ -281,7 +282,7 @@ void vfailure_recover(void)
 
 void vfailure_recover_running(void)
 {
-    VBUG_ON(is_interrupts_enabled());
+    VDYNAMIC_ASSERT(!is_interrupts_enabled());
 
     struct vcpu *current = vcurrent_vcpu();
     struct vscheduler *vsched = vscheduler_of(current);

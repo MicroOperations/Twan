@@ -4,11 +4,12 @@
 #include <subsys/twanvisor/visr/vshield.h>
 #include <subsys/twanvisor/twanvisor.h>
 #include <subsys/twanvisor/visr/visr_index.h>
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 
 int venter_shield_local(u64 *flags, u8 vector, u64 rip)
 {
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
-    VBUG_ON(vthis_cpu->handling_isr);
+    VDYNAMIC_ASSERT(!vthis_cpu->handling_isr);
 
     if (!vis_exception_vector(vector))
         return -EINVAL;
@@ -30,7 +31,7 @@ int venter_shield_local(u64 *flags, u8 vector, u64 rip)
 int venter_shield_local_length(u64 *flags, u8 vector, u8 length)
 {
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
-    VBUG_ON(vthis_cpu->handling_isr);
+    VDYNAMIC_ASSERT(!vthis_cpu->handling_isr);
 
     if (!vis_exception_vector(vector))
         return -EINVAL;
@@ -52,7 +53,7 @@ int venter_shield_local_length(u64 *flags, u8 vector, u8 length)
 bool vexit_shield_local(u64 flags)
 {
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
-    VBUG_ON(vthis_cpu->handling_isr);
+    VDYNAMIC_ASSERT(!vthis_cpu->handling_isr);
     
     bool ret = vthis_cpu->shield.ext.fields.faulted != 0;
     vthis_cpu->shield.ext.fields.active = 0;

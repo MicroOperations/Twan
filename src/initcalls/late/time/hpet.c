@@ -10,6 +10,7 @@
 #include <kernel/sched/waitq.h>
 #include <kernel/acpi_api/acpi_api.h>
 #include <subsys/debug/kdbg/kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 #include <lib/x86_index.h>
 
 /* configs */
@@ -198,8 +199,8 @@ static void hpet_sleep_ticks_ipi(u64 ticks)
 
     struct task *current = current_task();
     struct interrupt_info *ctx = task_ctx();
-    KBUG_ON(!current);
-    KBUG_ON(!ctx);
+    KDYNAMIC_ASSERT(current);
+    KDYNAMIC_ASSERT(ctx);
 
     clear_yield_request(current);
     clear_preempted_early(current);

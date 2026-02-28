@@ -4,7 +4,7 @@
 #include <kernel/sched/task.h>
 #include <subsys/sync/mcslock.h>
 #include <subsys/time/timeout.h>
-#include <subsys/debug/kdbg/kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 
 struct waitq
 {
@@ -28,7 +28,7 @@ struct waitq
 #define waitq_task_wait_until(waitq, insert_real, cond)                     \
 do {                                                                        \
                                                                             \
-    KBUG_ON(this_cpu_data()->handling_isr);                                 \
+    KDYNAMIC_ASSERT(!this_cpu_data()->handling_isr);                        \
                                                                             \
     u64 flags = read_flags_and_disable_interrupts();                        \
     while (1) {                                                             \
@@ -58,7 +58,7 @@ do {                                                                        \
 
 #define waitq_task_wait_until_timeout(waitq, insert_real, cond, ticks)      \
 ({                                                                          \
-    KBUG_ON(this_cpu_data()->handling_isr);                                 \
+    KDYNAMIC_ASSERT(!this_cpu_data()->handling_isr);                        \
                                                                             \
     u64 flags = read_flags_and_disable_interrupts();                        \
                                                                             \

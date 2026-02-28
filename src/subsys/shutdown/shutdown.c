@@ -1,7 +1,7 @@
 #include <subsys/shutdown/shutdown.h>
 #if CONFIG_SUBSYS_SHUTDOWN
 
-#include <subsys/debug/kdbg/kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 #include <errno.h>
 
 static struct shutdown shutdown_global;
@@ -29,8 +29,8 @@ void shutdown_system(void)
 {
     if (shutdown_global.initialized) {
 
-        KBUG_ON(!shutdown_global.interface);
-        KBUG_ON(!shutdown_global.interface->shutdown_system_func);
+        KDYNAMIC_ASSERT(shutdown_global.interface);
+        KDYNAMIC_ASSERT(shutdown_global.interface->shutdown_system_func);
 
         INDIRECT_BRANCH_SAFE(shutdown_global.interface->shutdown_system_func());
     }

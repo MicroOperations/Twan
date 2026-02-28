@@ -15,6 +15,8 @@
 .globl _guest_start
 .type _guest_start, @object
 
+#define VCPUID_VCPU_INFO 0x40000005
+
 .align 64
 .section .text
 
@@ -32,6 +34,11 @@ pv_shared_buf_end:
 
 .align 64
 _guest_start:
+
+    movl $VCPUID_VCPU_INFO, %eax
+    cpuid
+    test %ebx, %ebx
+    jnz .meow    
 
     xorw %bx, %bx
     

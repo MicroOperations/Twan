@@ -11,6 +11,7 @@
 #include <subsys/time/sleep.h>
 #include <subsys/time/timeout.h>
 #include <subsys/watchdog/watchdog.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 
 /* config */
 
@@ -55,8 +56,8 @@ static void gp_sleep_ticks_ipi(u64 ticks)
 
     struct task *current = current_task();
     struct interrupt_info *ctx = task_ctx();
-    KBUG_ON(!current);
-    KBUG_ON(!ctx);
+    KDYNAMIC_ASSERT(current);
+    KDYNAMIC_ASSERT(ctx);
 
     clear_yield_request(current);
     clear_preempted_early(current);
@@ -218,8 +219,9 @@ static __late_initcall void pv_twanvisor_init(void)
 
     if (register_isr(PV_GP_DEST_PROCESSOR_ID, PV_GP_VECTOR, gp_isr) == 0) {
 
-        KBUG_ON(tv_varm_timer_on_cpu(PV_GP_DEST_PROCESSOR_ID, PV_GP_VECTOR, 
-                                     PV_GP_TIMER, gp_ticks, true, false) < 0);
+        KDYNAMIC_ASSERT(tv_varm_timer_on_cpu(PV_GP_DEST_PROCESSOR_ID, PV_GP_VECTOR, 
+                                             PV_GP_TIMER, gp_ticks, true, 
+                                             false) == 0);
 
         int ret = 0;
 

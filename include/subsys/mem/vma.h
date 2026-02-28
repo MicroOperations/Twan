@@ -1,7 +1,7 @@
 #ifndef _VMA_H_
 #define _VMA_H_
 
-#include <subsys/debug/kdbg//kdbg.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 #include <std.h>
 #include <lib/x86_index.h>
 
@@ -71,14 +71,14 @@ extern struct vma_partition_ticket __vma_partition_registry_end[];
 
 #define vma_partition_unmap(partition, idx) do {        \
                                                         \
-    KBUG_ON(idx >= VMA_PARTITION_ENTRY_COUNT);          \
+    KDYNAMIC_ASSERT(idx < VMA_PARTITION_ENTRY_COUNT);   \
                                                         \
     WRITE_ONCE((partition)->pde[idx].val, 0);           \
 } while (0)
 
 #define vma_partition_remap(partition, idx, _pfn) do {  \
                                                         \
-    KBUG_ON(idx >= VMA_PARTITION_ENTRY_COUNT);          \
+    KDYNAMIC_ASSERT(idx < VMA_PARTITION_ENTRY_COUNT);   \
                                                         \
     pde_huge_t __pde = {                                \
         .fields = {                                     \
@@ -94,7 +94,7 @@ extern struct vma_partition_ticket __vma_partition_registry_end[];
 
 #define vma_partition_remap_mmio(partition, idx, _pfn) do { \
                                                             \
-    KBUG_ON(idx >= VMA_PARTITION_ENTRY_COUNT);              \
+    KDYNAMIC_ASSERT(idx < VMA_PARTITION_ENTRY_COUNT);       \
                                                             \
     pde_huge_t __pde = {                                    \
         .fields = {                                         \

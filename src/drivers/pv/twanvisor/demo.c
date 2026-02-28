@@ -8,6 +8,7 @@
 #include <lib/x86_index.h>
 #include <subsys/twanvisor/twanvisor.h>
 #include <subsys/mem/vma.h>
+#include <subsys/debug/kdbg/kdyn_assert.h>
 
 extern char pv_twanvisor_demo_guest_start[];
 extern char pv_shared_buf_start[64];
@@ -82,7 +83,7 @@ static void guest_init(void)
     }
 
     u32 num_physical_processors = twan()->num_physical_processors;
-    KBUG_ON(phys_id != num_physical_processors);
+    KDYNAMIC_ASSERT(phys_id == num_physical_processors);
 
     guest.vcpu_count = num_physical_processors;
     

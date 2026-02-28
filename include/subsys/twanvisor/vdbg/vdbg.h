@@ -1,8 +1,8 @@
 #ifndef _VDBG_H_
 #define _VDBG_H_
 
+#include <generated/autoconf.h>
 #include <subsys/twanvisor/visr/visr_index.h>
-#include <subsys/twanvisor/vdbg/vdbg_conf.h>
 #include <subsys/debug/kdbg/kdbg.h>
 
 #define vpanicf_local(fmt, ...) do {                                        \
@@ -16,7 +16,7 @@
     vdead_global();                                                         \
 } while (0)
 
-#if VDBG_PANIC_ON_BUG
+#if CONFIG_VDBG_PANIC_ON_BUG
 
 #define VBUG_RAW(fmt, ...) \
     vpanicf_global("[BUG] " fmt, ##__VA_ARGS__)

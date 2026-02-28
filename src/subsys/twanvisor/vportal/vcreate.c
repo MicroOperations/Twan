@@ -10,6 +10,7 @@
 #include <subsys/twanvisor/vemulate/verror.h>
 #include <subsys/twanvisor/vsched/vsched_mcs.h>
 #include <subsys/twanvisor/twanvisor.h>
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 
 extern void __vexit(void);
 extern void __vlaunch(void);
@@ -251,7 +252,7 @@ void vpartition_push(struct vpartition *vpartition)
                 break;
 
             default:
-                VBUG_ON(true);
+                VDYNAMIC_ASSERT(false);
                 break;
         }
     }

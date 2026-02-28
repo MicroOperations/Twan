@@ -5,6 +5,7 @@
 #include <subsys/twanvisor/vsched/vsched.h>
 #include <subsys/twanvisor/vsched/vsched_yield.h>
 #include <subsys/twanvisor/vdbg/vdbg.h>
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 #include <kernel/kernel.h>
 #include <lib/dsa/bmp512.h>
 
@@ -297,7 +298,7 @@ struct vtwan_kernel
 inline bool vcurrent_vcpu_is_preemption_enabled(void)
 {
     struct vcpu *current = vcurrent_vcpu();
-    VBUG_ON(!current);
+    VDYNAMIC_ASSERT(current);
 
     return current->preemption_count == 0;
 }
@@ -305,8 +306,8 @@ inline bool vcurrent_vcpu_is_preemption_enabled(void)
 inline void vcurrent_vcpu_disable_preemption(void)
 {
     struct vcpu *current = vcurrent_vcpu();
-    VBUG_ON(!current);
-    VBUG_ON(current->preemption_count == UINT32_MAX);
+    VDYNAMIC_ASSERT(current);
+    VDYNAMIC_ASSERT(current->preemption_count < UINT32_MAX);
 
     current->preemption_count++;
 }
@@ -314,8 +315,8 @@ inline void vcurrent_vcpu_disable_preemption(void)
 inline void vcurrent_vcpu_enable_preemption_no_yield(void)
 {
     struct vcpu *current = vcurrent_vcpu();
-    VBUG_ON(!current);
-    VBUG_ON(current->preemption_count == 0);
+    VDYNAMIC_ASSERT(current);
+    VDYNAMIC_ASSERT(current->preemption_count > 0);
 
     current->preemption_count--;
 }

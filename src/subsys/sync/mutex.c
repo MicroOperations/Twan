@@ -1,6 +1,7 @@
 #include <subsys/sync/mutex.h>
 #if CONFIG_SUBSYS_MUTEX
 
+#include <subsys/debug/kdbg/kdyn_assert.h>
 #include <kernel/kapi.h>
 
 int mutex_ipcp_init(struct mutex_ipcp *mutex_ipcp, u8 priority_ceiling, 
@@ -22,7 +23,7 @@ int mutex_ipcp_init(struct mutex_ipcp *mutex_ipcp, u8 priority_ceiling,
 
 bool mutex_ipcp_trylock(struct mutex_ipcp *mutex_ipcp)
 {
-    KBUG_ON(this_cpu_data()->handling_isr);
+    KDYNAMIC_ASSERT(!this_cpu_data()->handling_isr);
 
     struct task *current = current_task();
 
@@ -37,8 +38,8 @@ bool mutex_ipcp_trylock(struct mutex_ipcp *mutex_ipcp)
         u8 priority_ceiling = mutex_ipcp->priority_ceiling;
         u8 criticality_ceiling = mutex_ipcp->criticality_ceiling;
 
-        KBUG_ON(last_priority > priority_ceiling);
-        KBUG_ON(last_criticality > criticality_ceiling);
+        KDYNAMIC_ASSERT(last_priority <= priority_ceiling);
+        KDYNAMIC_ASSERT(last_criticality <= criticality_ceiling);
 
         mutex_ipcp->last_priority = last_priority;
         mutex_ipcp->last_criticality = last_criticality;
@@ -52,7 +53,7 @@ bool mutex_ipcp_trylock(struct mutex_ipcp *mutex_ipcp)
 
     bool ret = expected == current;
     if (ret) {
-        KBUG_ON(mutex_ipcp->count == UINT64_MAX);
+        KDYNAMIC_ASSERT(mutex_ipcp->count < UINT64_MAX);
         mutex_ipcp->count++;
     }
 
@@ -112,7 +113,7 @@ bool mutex_ipcp_lock_timeout(struct mutex_ipcp *mutex_ipcp, u32 ticks)
 
 void mutex_ipcp_unlock(struct mutex_ipcp *mutex_ipcp)
 {
-    KBUG_ON(atomic_ptr_read(&mutex_ipcp->holder) != current_task());
+    KDYNAMIC_ASSERT(atomic_ptr_read(&mutex_ipcp->holder) == current_task());
 
     mutex_ipcp->count--;
 

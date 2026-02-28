@@ -91,29 +91,29 @@ struct task
 
 #define preemption_count() ({                               \
                                                             \
-    KBUG_ON(!current_task());                               \
-    KBUG_ON(this_cpu_data()->handling_isr);                 \
+    KDYNAMIC_ASSERT(current_task());                        \
+    KDYNAMIC_ASSERT(!this_cpu_data()->handling_isr);        \
                                                             \
     atomic32_read(&preemption_count_raw());                 \
 })
 
-#define disable_preemption() do {                           \
-                                                            \
-    KBUG_ON(!current_task());                               \
-    KBUG_ON(this_cpu_data()->handling_isr);                 \
-    KBUG_ON(current_task_preemption_count() == UINT32_MAX); \
-                                                            \
-    atomic32_inc(&preemption_count_raw());                  \
+#define disable_preemption() do {                                   \
+                                                                    \
+    KDYNAMIC_ASSERT(current_task());                                \
+    KDYNAMIC_ASSERT(!this_cpu_data()->handling_isr);                \
+    KDYNAMIC_ASSERT(current_task_preemption_count() < UINT32_MAX);  \
+                                                                    \
+    atomic32_inc(&preemption_count_raw());                          \
 } while (0)
 
 
-#define enable_preemption() do {                    \
-                                                    \
-    KBUG_ON(!current_task());                       \
-    KBUG_ON(this_cpu_data()->handling_isr);         \
-    KBUG_ON(current_task_is_preemption_enabled());  \
-                                                    \
-    atomic32_dec(&preemption_count_raw());          \
+#define enable_preemption() do {                                \
+                                                                \
+    KDYNAMIC_ASSERT(current_task());                            \
+    KDYNAMIC_ASSERT(!this_cpu_data()->handling_isr);            \
+    KDYNAMIC_ASSERT(!current_task_is_preemption_enabled());     \
+                                                                \
+    atomic32_dec(&preemption_count_raw());                      \
 } while (0)
 
 #define task_create_on_cpu_callbacks(processor_id, func, arg, priority,     \

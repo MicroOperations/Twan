@@ -9,6 +9,7 @@
 #include <subsys/twanvisor/vemulate/vinfo.h>
 #include <subsys/twanvisor/visr/vshield.h>
 #include <subsys/twanvisor/visr/visr_dispatcher.h>
+#include <subsys/twanvisor/vdbg/vdyn_assert.h>
 
 static u32 msr_blocklist[] = {
 
@@ -200,14 +201,14 @@ static void vexit_exception(__unused struct vregs *vregs)
 
         case ALIGNMENT_CHECK:
             
-            VBUG_ON(info.fields.errcode_delivered == 0);
-            VBUG_ON(vmread(VMCS_RO_IDT_VECTORING_ERROR_CODE) != 0);
+            VDYNAMIC_ASSERT(info.fields.errcode_delivered != 0);
+            VDYNAMIC_ASSERT(vmread(VMCS_RO_IDT_VECTORING_ERROR_CODE) == 0);
 
             vqueue_inject_ac0();
             break;
 
         default:
-            VBUG_ON(true);
+            VDYNAMIC_ASSERT(false);
             break;
     }
     
@@ -232,7 +233,7 @@ static void vexit_ext_intr(__unused struct vregs *vregs)
         }
     }
     
-    VBUG_ON(info.fields.vectored_event_type != INTERRUPT_TYPE_EXTERNAL);
+    VDYNAMIC_ASSERT(info.fields.vectored_event_type == INTERRUPT_TYPE_EXTERNAL);
     
     vexit_ext_dispatcher(info.fields.vector);
     
@@ -775,7 +776,7 @@ void vexit_dispatcher(struct vregs *vregs)
     enable_interrupts();
     
     INDIRECT_BRANCH_SAFE(func(vregs));
-    VBUG_ON(!vcurrent_vcpu_is_preemption_enabled());
+    VDYNAMIC_ASSERT(vcurrent_vcpu_is_preemption_enabled());
 
     __venter();
 }
