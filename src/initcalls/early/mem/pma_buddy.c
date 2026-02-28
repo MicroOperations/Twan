@@ -2,6 +2,7 @@
 #if EARLY_MEM_PMA_BUDDY
 
 #include <kernel/kapi.h>
+#include <subsys/debug/kdbg/kdbg.h>
 #include <subsys/mem/pma.h>
 #include <lib/buddy_alloc.h>
 #include <errno.h>

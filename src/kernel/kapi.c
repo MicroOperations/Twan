@@ -3,6 +3,7 @@
 #include <kernel/isr/base_isrs.h>
 #include <kernel/apic/apic.h>
 #include <lib/libtwanvisor/libvcalls.h>
+#include <subsys/debug/kdbg/kdbg.h>
 #include <errno.h>
 #include <std.h>
 
@@ -75,7 +76,7 @@ int __ipi_run_func(u32 processor_id, ipi_func_t func, u64 arg, bool wait)
 
     __ipi_assert(data);
 
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
     if (kernel->flags.fields.twanvisor_on != 0) {
 

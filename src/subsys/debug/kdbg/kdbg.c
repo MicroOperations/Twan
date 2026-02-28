@@ -37,7 +37,7 @@ void __kdbg(const char *str)
 
 void kdbg(const char *str)
 {
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
     if (twan()->flags.fields.twanvisor_on != 0) {
         tv_vkdbg(str);

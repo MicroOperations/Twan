@@ -4,6 +4,7 @@
 #include <lib/x86_index.h>
 #include <subsys/time/sleep.h>
 #include <subsys/time/counter.h>
+#include <subsys/debug/kdbg/kdbg.h>
 #include <kernel/kapi.h>
 #include <kernel/acpi_api/acpi_api.h>
 #include <kernel/isr/base_isrs.h>

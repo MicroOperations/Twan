@@ -1,5 +1,5 @@
-#include <subsys/twanvisor/vconf.h>
-#if TWANVISOR_ON
+#include <generated/autoconf.h>
+#if CONFIG_SUBSYS_TWANVISOR
 
 #include <subsys/twanvisor/visr/visr_dispatcher.h>
 #include <subsys/twanvisor/twanvisor.h>
@@ -238,7 +238,7 @@ void vexit_ext_dispatcher(u8 vector)
 
     vacknowledge_interrupt(vector);
 
-#if TWANVISOR_VIPI_DRAIN_STRICT
+#if CONFIG_TWANVISOR_VIPI_DRAIN_STRICT
 
     /* external interrupts are treated as a special case in how we should 
        handle vipi draining */

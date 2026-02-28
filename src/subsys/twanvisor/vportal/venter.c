@@ -1,5 +1,5 @@
-#include <subsys/twanvisor/vconf.h>
-#if TWANVISOR_ON
+#include <generated/autoconf.h>
+#if CONFIG_SUBSYS_TWANVISOR
 
 #include <subsys/twanvisor/vportal/venter.h>
 #include <subsys/twanvisor/vportal/vrecovery.h>

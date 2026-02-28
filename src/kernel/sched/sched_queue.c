@@ -26,7 +26,7 @@ struct task *sched_pop_clean(void)
     struct mcsnode sched_node = INITIALIZE_MCSNODE();
     mcs_lock_isr_save(&sched_priorityq->lock, &sched_node);
 
-#if SCHED_AGING
+#if CONFIG_KERNEL_SCHED_AGING
 
     task = __sched_priorityq_pop_age(sched_priorityq);
 
@@ -59,7 +59,7 @@ struct task *sched_pop(struct task *current)
         u8 criticality = current->metadata.criticality;
         u8 criticality_level = __sched_mcs_read_criticality_level();
 
-#if SCHED_AGING
+#if CONFIG_KERNEL_SCHED_AGING
 
         if (next_criticality >= criticality_level) 
             new_task = __sched_priorityq_pop_age(sched_priorityq);

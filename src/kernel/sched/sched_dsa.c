@@ -5,7 +5,7 @@ void __sched_init(struct sched_priorityq *sched_priorityq)
 {
     mcslock_isr_init(&sched_priorityq->lock);
 
-#if SCHED_AGING
+#if CONFIG_KERNEL_SCHED_AGING
     __sched_reset_age(sched_priorityq);
 #endif
 }
@@ -86,7 +86,7 @@ struct task *__sched_priorityq_pop(struct sched_priorityq *sched_priorityq)
     return task;
 }
 
-#if SCHED_AGING
+#if CONFIG_KERNEL_SCHED_AGING
 
 void __sched_reset_age(struct sched_priorityq *sched_priorityq)
 {

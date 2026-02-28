@@ -1,7 +1,19 @@
 #ifndef _VSCHED_MCS_H_
 #define _VSCHED_MCS_H_
 
-#include <subsys/twanvisor/vsched/vsched_conf.h>
+#include <generated/autoconf.h>
+
+#include <types.h>
+
+#if CONFIG_SUBSYS_TWANVISOR
+
+#define VSCHED_NUM_CRITICALITIES CONFIG_TWANVISOR_VSCHED_NUM_CRITICALITIES
+
+#else
+
+#define VSCHED_NUM_CRITICALITIES 1
+
+#endif
 
 #define VSCHED_MIN_CRITICALITY 0
 #define VSCHED_MAX_CRITICALITY (VSCHED_NUM_CRITICALITIES - 1)

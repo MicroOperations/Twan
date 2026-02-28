@@ -4,8 +4,10 @@
 #include <kernel/sched/task.h>
 #include <lib/dsa/priorityq.h>
 
+#define SCHED_NUM_QUEUES (CONFIG_KERNEL_SCHED_GLOBAL_QUEUE ? 1 : NUM_CPUS)
+
 #define SCHED_MIN_CRITICALITY 0
-#define SCHED_MAX_CRITICALITY (SCHED_NUM_CRITICALITIES - 1)
+#define SCHED_MAX_CRITICALITY (CONFIG_KERNEL_SCHED_NUM_CRITICALITIES - 1)
 
 struct sched_priorityq_bin
 {
@@ -14,10 +16,10 @@ struct sched_priorityq_bin
 
 struct sched_priorityq
 {
-    struct sched_priorityq_bin bins[SCHED_NUM_CRITICALITIES];
+    struct sched_priorityq_bin bins[CONFIG_KERNEL_SCHED_NUM_CRITICALITIES];
     u8 criticality_level;
 
-#if SCHED_AGING
+#if CONFIG_KERNEL_SCHED_AGING
     struct bmp256 aging_bitmap;
     u32 iteration;
 #endif
@@ -30,8 +32,12 @@ struct scheduler
     struct sched_priorityq queues[SCHED_NUM_QUEUES];
 };
 
-#define cpu_to_queue_id(processor_id) (SCHED_GLOBAL_QUEUE ? 0 : (processor_id))
-#define queue_to_cpu_id(queue_id) (SCHED_GLOBAL_QUEUE ? 0 : (queue_id))
+#define cpu_to_queue_id(processor_id) \
+    (CONFIG_KERNEL_SCHED_GLOBAL_QUEUE ? 0 : (processor_id))
+
+#define queue_to_cpu_id(queue_id) \
+    (CONFIG_KERNEL_SCHED_GLOBAL_QUEUE ? 0 : (queue_id))
+    
 #define this_queue_id() (cpu_to_queue_id(this_processor_id()))
 
 #define cpu_to_sched_priorityq(processor_id) \
@@ -55,7 +61,7 @@ void __sched_priorityq_dequeue(struct task *task);
 
 struct task *__sched_priorityq_pop(struct sched_priorityq *sched_priorityq);
 
-#if SCHED_AGING
+#if CONFIG_KERNEL_SCHED_AGING
 
 void __sched_reset_age(struct sched_priorityq *sched_priorityq);
 void __sched_age(struct sched_priorityq *sched_priorityq, u8 last_priority);

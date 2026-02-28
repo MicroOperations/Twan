@@ -26,7 +26,7 @@ struct mutex_ipcp
     .count = 0,                                                             \
     .waitq = INITIALIZE_WAITQ()                                             \
 };                                                                          \
-STATIC_ASSERT((_criticality_ceiling) < SCHED_NUM_CRITICALITIES)
+STATIC_ASSERT((_criticality_ceiling) < CONFIG_KERNEL_SCHED_NUM_CRITICALITIES)
 
 int mutex_ipcp_init(struct mutex_ipcp *mutex_ipcp, u8 priority_ceiling, 
                     u8 criticality_ceiling);

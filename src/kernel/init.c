@@ -272,7 +272,7 @@ int parse_madt(struct acpi_rsdt *rsdt_ptr, u32 lapic_id, u32 thread_id,
 
             case ACPI_MADT_ENTRY_TYPE_IOAPIC:
 
-                if (num_ioapics == NUM_IOAPICS) {
+                if (num_ioapics == CONFIG_NUM_IOAPICS) {
                     err = -EFAULT;
                     __early_kerr("too many ioapics, likely bad config\n");
                     goto done;

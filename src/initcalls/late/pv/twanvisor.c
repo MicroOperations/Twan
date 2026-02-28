@@ -1,13 +1,13 @@
 #include <initcalls/late_initcalls_conf.h>
-#include <subsys/twanvisor/vconf.h>
-
-#if TWANVISOR_ON && (CONFIG_SUBSYS_SLEEP || CONFIG_SUBSYS_TIMEOUT)
+#include <generated/autoconf.h>
+#if CONFIG_SUBSYS_TWANVISOR && (CONFIG_SUBSYS_SLEEP || CONFIG_SUBSYS_TIMEOUT)
 
 #include <lib/libtwanvisor/libvinfo.h>
 #include <lib/libtwanvisor/libvcalls.h>
 #include <lib/libtwanvisor/libvc.h>
 #include <subsys/twanvisor/twanvisor.h>
 #include <kernel/kapi.h>
+#include <kernel/sched/waitq.h>
 #include <subsys/time/sleep.h>
 #include <subsys/time/timeout.h>
 #include <subsys/watchdog/watchdog.h>

@@ -3,7 +3,7 @@
 
 #include <lib/atomic.h>
 #include <lib/dsa/dq.h>
-#include <subsys/twanvisor/vsched/vsched_conf.h>
+#include <subsys/twanvisor/vsched/vsched_mcs.h>
 #include <subsys/twanvisor/vsched/vcpu.h>
 #include <subsys/sync/mcslock.h>
 

@@ -5,9 +5,9 @@
 #include <subsys/time/counter.h>
 #include <subsys/time/sleep.h>
 #include <subsys/time/timeout.h>
-#include <subsys/twanvisor/vconf.h>
 #include <kernel/mem/mmu/paging.h>
 #include <kernel/apic/apic.h>
+#include <kernel/sched/waitq.h>
 #include <kernel/acpi_api/acpi_api.h>
 #include <subsys/debug/kdbg/kdbg.h>
 #include <lib/x86_index.h>
@@ -114,7 +114,7 @@ static volatile u8 *mmio;
 static u64 hpet_counter_period_fs_v;
 static u64 hpet_counter_frequency_hz_v;
 
-#if !TWANVISOR_ON && (CONFIG_SUBSYS_SLEEP || CONFIG_SUBSYS_TIMEOUT)
+#if !CONFIG_SUBSYS_TWANVISOR && (CONFIG_SUBSYS_SLEEP || CONFIG_SUBSYS_TIMEOUT)
 
 static u64 hpet_timer_period_fs_v;
 static u64 hpet_timer_frequency_hz_v;
@@ -174,7 +174,7 @@ static struct counter_interface counter_interface = {
     .counter_frequency_hz_func = hpet_counter_frequency_hz,
 };
 
-#if !TWANVISOR_ON && (CONFIG_SUBSYS_SLEEP || CONFIG_SUBSYS_TIMEOUT)
+#if !CONFIG_SUBSYS_TWANVISOR && (CONFIG_SUBSYS_SLEEP || CONFIG_SUBSYS_TIMEOUT)
 
 /* sleep */
 
@@ -423,7 +423,7 @@ static __late_initcall void hpet_init(void)
     if (!initialized || counter_init(&counter_interface) < 0)
         hpet_disable_counter();
 
-#if !TWANVISOR_ON && (CONFIG_SUBSYS_SLEEP || CONFIG_SUBSYS_TIMEOUT)
+#if !CONFIG_SUBSYS_TWANVISOR && (CONFIG_SUBSYS_SLEEP || CONFIG_SUBSYS_TIMEOUT)
 
     /* setup the hpet timer0 */
     u64 timer_period_ticks = 

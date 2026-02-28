@@ -2,6 +2,7 @@
 #include <kernel/kapi.h>
 #include <kernel/sched/sched_timer.h>
 #include <kernel/sched/sched_dsa.h>
+#include <kernel/sched/waitq.h>
 #include <subsys/debug/kdbg/kdbg.h>
 
 bool sched_try_answer_yield_request(void)
@@ -37,7 +38,7 @@ bool sched_should_request_yield(struct task *task)
     u8 next_priority;
     if (__sched_priorityq_get_bin(sched_priorityq, &next_priority,
                                    &next_criticality)) {
-#if SCHED_AGING
+#if CONFIG_KERNEL_SCHED_AGING
 
         ret = next_criticality >= criticality_level || 
               criticality < criticality_level;

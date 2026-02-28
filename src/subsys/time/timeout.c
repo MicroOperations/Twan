@@ -1,6 +1,8 @@
 #include <subsys/time/timeout.h>
 #if CONFIG_SUBSYS_TIMEOUT
 
+#include <subsys/debug/kdbg/kdbg.h>
+
 static struct timeout timeout_global;
 
 int timeout_init(struct timeout_interface *interface)

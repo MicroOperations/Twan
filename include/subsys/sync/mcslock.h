@@ -3,14 +3,13 @@
 
 #include <std.h>
 #include <lib/atomic.h>
-#include <subsys/twanvisor/vconf.h>
 
 struct mcsnode
 {
     atomic_ptr_t next;
     atomic32_t state;
 
-#if TWANVISOR_PV_LOCKS
+#if CONFIG_TWANVISOR_PV_LOCKS
     atomic64_t processor_id;
 #endif
 };

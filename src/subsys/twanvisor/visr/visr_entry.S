@@ -1,7 +1,7 @@
 #define ASM_FILE 1
 
-#include <subsys/twanvisor/vconf.h>
-#if TWANVISOR_ON
+#include <generated/autoconf.h>
+#if CONFIG_SUBSYS_TWANVISOR
 
 #include <arch.h>
 

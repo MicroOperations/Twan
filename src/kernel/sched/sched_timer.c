@@ -1,13 +1,13 @@
 #include <kernel/sched/sched_timer.h>
 #include <kernel/isr/base_isrs.h>
 #include <kernel/apic/apic.h>
-#include <subsys/twanvisor/vconf.h>
 #include <lib/libtwanvisor/libvcalls.h>
 #include <lib/libtwanvisor/libvc.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
 void sched_timer_init(u32 time_slice_ms)
 {
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
     if (twan()->flags.fields.twanvisor_on != 0) {
 
@@ -28,7 +28,7 @@ void sched_timer_init(u32 time_slice_ms)
 
 void sched_timer_disable(void)
 {
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
     if (twan()->flags.fields.twanvisor_on != 0) {
         tv_vdisarm_timern(PV_SCHED_TIMER);
@@ -44,7 +44,7 @@ void sched_timer_enable(void)
 {
     u32 ticks = this_cpu_data()->sched_ticks;
 
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
     if (twan()->flags.fields.twanvisor_on != 0) {
 
@@ -61,7 +61,7 @@ void sched_timer_enable(void)
 
 bool sched_is_timer_pending(void)
 {
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
     if (twan()->flags.fields.twanvisor_on != 0)
         return tv_vintc_is_pending(SCHED_TIMER_VECTOR);

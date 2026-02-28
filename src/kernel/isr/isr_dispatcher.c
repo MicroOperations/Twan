@@ -5,7 +5,6 @@
 #include <kernel/apic/apic.h>
 #include <kernel/sched/sched.h>
 #include <kernel/kapi.h>
-#include <subsys/twanvisor/vconf.h>
 #include <subsys/watchdog/watchdog.h>
 #include <lib/x86_index.h>
 #include <lib/libtwanvisor/libvcalls.h>
@@ -35,7 +34,7 @@ void __ipi_wait(u32 target_processor_id)
     struct ipi_data *data = 
         &kernel->ipi_table[target_processor_id][processor_id];
 
-#if TWANVISOR_PV_IPIS
+#if CONFIG_TWANVISOR_PV_IPIS
 
     if (kernel->flags.fields.twanvisor_on != 0) {
 
@@ -67,7 +66,7 @@ void __ipi_wait(u32 target_processor_id)
 
 void __acknowledge_interrupt(void)
 {
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
     if (twan()->flags.fields.twanvisor_on != 0) {
         tv_vintc_eoi();
@@ -81,7 +80,7 @@ void __acknowledge_interrupt(void)
 
 bool __in_service(u8 vector)
 {
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
     if (twan()->flags.fields.twanvisor_on != 0)
         return tv_vintc_is_serviced(vector);

@@ -5,7 +5,6 @@
 
 #include <kernel/kapi.h>
 #include <subsys/time/clock.h>
-#include <subsys/twanvisor/vconf.h>
 #include <kernel/mem/mmu/paging.h>
 #include <kernel/acpi_api/acpi_api.h>
 #include <lib/libtwanvisor/libvcalls.h>
@@ -300,7 +299,7 @@ static __late_initcall void cmos_init(void)
         return;
     }
 
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
     if (twan()->flags.fields.twanvisor_on != 0) {
 

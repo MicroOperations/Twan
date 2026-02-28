@@ -6,11 +6,10 @@
 #include <lib/x86_index.h>
 #include <kernel/boot.h>
 #include <subsys/sync/spinlock.h>
-#include <subsys/twanvisor/vconf.h>
 #include <uacpi/acpi.h>
 #include <kernel/sched/sched.h>
 #include <kernel/isr/isr_index.h>
-#include <kernel/apic/apic_conf.h>
+#include <errno.h>
 
 #define BUF_SIZE 256
 
@@ -88,7 +87,7 @@ struct per_cpu
     u32 core_id;
     u32 pkg_id;
 
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
     u32 physical_processor_id;
 
@@ -149,7 +148,7 @@ struct twan_kernel
     struct twan_kernel *this;
     twan_flags_t flags;
 
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
     u32 num_physical_processors;
 #endif
 
@@ -171,7 +170,7 @@ struct twan_kernel
             void *ioapic_mmio;
             u64 ioapic_mmio_phys;
             u32 ioapic_gsi_base;
-        } ioapic[NUM_IOAPICS];
+        } ioapic[CONFIG_NUM_IOAPICS];
         u32 num_ioapics;
     } acpi;
 

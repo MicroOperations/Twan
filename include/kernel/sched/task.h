@@ -8,11 +8,8 @@
 #include <lib/dsa/flat_priorityq.h>
 #include <lib/dsa/dq.h>
 #include <lib/dsa/delta_chain.h>
-#include <errno.h>
-#include <kernel/sched/sched_conf.h>
 #include <kernel/sched/sched_mcs.h>
 #include <subsys/sync/mcslock.h>
-#include <subsys/debug/kdbg/kdbg.h>
 
 typedef void (*task_func_t)(void *arg);
 
@@ -36,7 +33,7 @@ struct task
     u8 *mempool;
     struct context context;
 
-    struct list_double nodes[SCHED_NUM_CRITICALITIES];
+    struct list_double nodes[CONFIG_KERNEL_SCHED_NUM_CRITICALITIES];
     struct flat_priorityq_node waiting_node;
 
     struct delta_node sleep_node;
@@ -139,7 +136,7 @@ struct task
     task_create_on_cpu(this_processor_id(), (func), (arg), (priority),  \
                        (criticality)) 
 
-#if SCHED_GLOBAL_QUEUE 
+#if CONFIG_KERNEL_SCHED_GLOBAL_QUEUE 
 
 int task_init(struct task *task, __unused u32 processor_id, void *mempool,
               u64 stack_top, task_func_t func, void *arg, u8 priority, 

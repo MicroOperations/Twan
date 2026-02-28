@@ -1,8 +1,8 @@
 #ifndef _KDBG_H_
 #define _KDBG_H_
 
-#include <subsys/debug/kdbg/kdbg_conf.h>
 #include <subsys/sync/mcslock.h>
+#include <kernel/kapi.h>
 
 typedef void (*__kdbg_t)(const char *str);
 
@@ -42,7 +42,7 @@ struct kdbg
     dead_global();                                                      \
 } while (0)
 
-#if KDBG_PANIC_ON_BUG
+#if CONFIG_KDBG_PANIC_ON_BUG
 
 #define KBUG_RAW(fmt, ...) \
     kpanicf_global("[BUG] " fmt, ##__VA_ARGS__)

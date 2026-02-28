@@ -1,5 +1,5 @@
-#include <subsys/twanvisor/vconf.h>
-#if TWANVISOR_ON
+#include <generated/autoconf.h>
+#if CONFIG_SUBSYS_TWANVISOR
 
 #include <subsys/twanvisor/vsched/vsched_ctx.h>
 #include <subsys/twanvisor/twanvisor.h>

@@ -1,15 +1,16 @@
 #ifndef _VCPU_H_
 #define _VCPU_H_
 
-#include <subsys/twanvisor/vsched/vsched_conf.h>
 #include <subsys/twanvisor/vsched/vsync.h>
 #include <subsys/twanvisor/varch.h>
+#include <subsys/twanvisor/vsched/vsched_mcs.h>
 #include <lib/dsa/dq.h>
 #include <lib/dsa/bmp256.h>
 #include <lib/dsa/delta_chain.h>
 #include <kernel/isr/isr_index.h>
+#include <stdint.h>
 
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
 
 #define VNUM_VTIMERS CONFIG_TWANVISOR_NUM_VTIMERS
 
@@ -18,6 +19,8 @@
 #define VNUM_VTIMERS 1
 
 #endif
+
+#define VEXIT_STACK_SIZE 2048
 
 STATIC_ASSERT(VNUM_VTIMERS <= UINT8_MAX);
 

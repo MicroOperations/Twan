@@ -3,8 +3,9 @@
 #include <kernel/kapi.h>
 #include <kernel/kernel.h>
 #include <subsys/mem/rtalloc.h>
+#include <subsys/debug/kdbg/kdbg.h>
 
-#if SCHED_GLOBAL_QUEUE
+#if CONFIG_KERNEL_SCHED_GLOBAL_QUEUE
 
 int task_init(struct task *task, __unused u32 processor_id, void *mempool, 
                u64 stack_top, task_func_t func, void *arg, u8 priority, 
@@ -21,8 +22,10 @@ int task_init(struct task *task, u32 processor_id, void *mempool,
 #endif
 {
     struct per_cpu *cpu = cpu_data(processor_id);
-    if (!cpu || !cpu_active(cpu->flags) || criticality >= SCHED_NUM_CRITICALITIES)
+    if (!cpu || !cpu_active(cpu->flags) || 
+        criticality >= CONFIG_KERNEL_SCHED_NUM_CRITICALITIES) {
         return -EINVAL;
+    }
 
     memset(task, 0, sizeof(struct task));
 
@@ -53,7 +56,7 @@ int task_init(struct task *task, u32 processor_id, void *mempool,
     return 0;
 }
 
-#if SCHED_GLOBAL_QUEUE
+#if CONFIG_KERNEL_SCHED_GLOBAL_QUEUE
 
 struct task *__task_create(__unused u32 processor_id, task_func_t func, 
                            void *arg, u8 priority, u8 criticality, 
@@ -70,7 +73,7 @@ struct task *__task_create(u32 processor_id, task_func_t func, void *arg,
 
 #endif 
 {
-    if (criticality >= SCHED_NUM_CRITICALITIES)
+    if (criticality >=  CONFIG_KERNEL_SCHED_NUM_CRITICALITIES)
         return ERR_PTR(-ENOMEM);
 
     struct per_cpu *cpu = cpu_data(processor_id);
@@ -78,12 +81,13 @@ struct task *__task_create(u32 processor_id, task_func_t func, void *arg,
         return ERR_PTR(-EINVAL);
 
     u8 *mempool = 
-        rtalloc_p2aligned(sizeof(struct task) + SCHED_TASK_STACK_SIZE, 16);
+        rtalloc_p2aligned(sizeof(struct task) + 
+                         CONFIG_KERNEL_SCHED_TASK_STACK_SIZE, 16);
 
     if (!mempool)
         return ERR_PTR(-ENOMEM);
 
-    u64 stack_top = (u64)(mempool + SCHED_TASK_STACK_SIZE);
+    u64 stack_top = (u64)(mempool + CONFIG_KERNEL_SCHED_TASK_STACK_SIZE);
     struct task *task = (void *)stack_top;
 
     u64 *stack_ptr = (u64 *)(stack_top - 8);

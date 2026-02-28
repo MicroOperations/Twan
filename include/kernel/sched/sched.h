@@ -6,10 +6,9 @@
 #include <kernel/sched/sched_yield.h>
 #include <kernel/sched/sched_timer.h>
 #include <kernel/sched/sched_queue.h>
-#include <subsys/sync/semaphore.h>
 #include <subsys/sync/mcslock.h>
 
-#if !SCHED_GLOBAL_QUEUE
+#if !CONFIG_KERNEL_SCHED_GLOBAL_QUEUE
 
 bool try_steal_task(u32 criticality_level);
 

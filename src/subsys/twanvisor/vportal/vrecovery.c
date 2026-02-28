@@ -1,5 +1,5 @@
-#include <subsys/twanvisor/vconf.h>
-#if TWANVISOR_ON
+#include <generated/autoconf.h>
+#if CONFIG_SUBSYS_TWANVISOR
 
 #include <subsys/twanvisor/vportal/vrecovery.h>
 #include <subsys/twanvisor/vsched/vsched_yield.h>
@@ -294,7 +294,7 @@ void vfailure_recover_running(void)
 
     vipi_ack();
 
-#if TWANVISOR_VIPI_DRAIN_STRICT
+#if CONFIG_TWANVISOR_VIPI_DRAIN_STRICT
 
     vipi_drain_no_yield();
     

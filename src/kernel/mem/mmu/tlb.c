@@ -1,6 +1,5 @@
 #include <kernel/mem/mmu/tlb.h>
 #include <kernel/kapi.h>
-#include <subsys/twanvisor/vconf.h>
 #include <lib/libtwanvisor/libvcalls.h>
 
 void flush_tlb_local(void)
@@ -42,7 +41,7 @@ void flush_tlb_global(bool wait)
 {
     struct twan_kernel *kernel = twan();
 
-#if TWANVISOR_ON
+#if CONFIG_SUBSYS_TWANVISOR
     
     if (kernel->flags.fields.twanvisor_on != 0) {
 
