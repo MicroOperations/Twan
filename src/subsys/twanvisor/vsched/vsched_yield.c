@@ -6,27 +6,15 @@
 #include <subsys/twanvisor/vsched/vsched.h>
 #include <subsys/twanvisor/vsched/vsched_timer.h>
 
-bool __vsched_is_current_preemptible(struct vcpu *current)
-{
-    u8 criticality_level = __sched_mcs_read_criticality_level();
-    u8 criticality = current->vsched_metadata.criticality;
-
-    u8 next_criticality;
-    return __vsched_get_bucket(&next_criticality) && 
-                (criticality < criticality_level || 
-                 next_criticality >= criticality_level);
-}
-
 bool vsched_should_request_yield(struct vcpu *current)
 {
     struct vscheduler *vsched = vthis_vscheduler();
-
     struct mcsnode node = INITIALIZE_MCSNODE();
+
     vmcs_lock_isr_save(&vsched->lock, &node);
-
     bool ret = __vsched_is_current_preemptible(current);
-
     vmcs_unlock_isr_restore(&vsched->lock, &node);
+
     return ret;
 }
 

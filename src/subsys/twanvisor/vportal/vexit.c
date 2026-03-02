@@ -52,6 +52,9 @@ static u32 msr_blocklist[] = {
     /* hide sr bios done */
     IA32_SR_BIOS_DONE,
 
+    /* need to explicitly hide mpx state */
+    IA32_BNDCFGS,
+
     /* hiding monitor/mwait as it can be easily abused */
     IA32_MONITOR_FILTER_SIZE,
 
@@ -268,6 +271,12 @@ static void vexit_cpuid(struct vregs *vregs)
 
     __cpuid(&eax, &ebx, &ecx, &edx);
 
+    /* if any isa extensions are xsave enabled we can get away with showing them
+       in cpuid, as the guest cannot enable them anyway (they should check for 
+       xsave/xrstor support beforehand), some extensions such as pkru although
+       saved via xsave(s), are not xsave enabled, and require us to emulate that
+       support for them does not exist at all */
+
     switch (leaf) {
 
         case CPUID_FEATURE_BITS:
@@ -307,16 +316,22 @@ static void vexit_cpuid(struct vregs *vregs)
 
                 case 0:
 
+                    extended_features0_b_t extended_features0_b = {.val = ebx};
                     extended_features0_c_t extended_features0_c = {.val = ecx};
                     extended_features0_d_t extended_features0_d = {.val = edx};
 
+                    extended_features0_b.fields.mpx = 0;
+
                     extended_features0_c.fields.waitpkg = 0;
                     extended_features0_c.fields.rdpid = 0;
-                    
+                    extended_features0_c.fields.pku = 0;
+                    extended_features0_c.fields.mawau = 0;
+
                     extended_features0_d.fields.uintr = 0;
                     extended_features0_d.fields.pconfig = 0;
                     extended_features0_d.fields.hybrid = 0;
 
+                    ebx = extended_features0_b.val;
                     ecx = extended_features0_c.val;
                     edx = extended_features0_d.val;
                     break;
@@ -428,7 +443,7 @@ static void vexit_cr_access(struct vregs *vregs)
             valid &= features.fields.kl != 0 || cr4.fields.kl == 0;
             valid &= features.fields.smep != 0 || cr4.fields.smep == 0;
             valid &= features.fields.smap != 0 || cr4.fields.smap == 0;
-            valid &= features.fields.pke != 0 || cr4.fields.pke == 0;
+            valid &= features.fields.pke == 0;
             valid &= features.fields.cet != 0 || cr4.fields.cet == 0;
             valid &= features.fields.pks != 0 || cr4.fields.pks == 0;
             valid &= cr4.fields.uintr == 0;

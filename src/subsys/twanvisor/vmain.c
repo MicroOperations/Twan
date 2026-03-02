@@ -274,6 +274,7 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
     vthis_cpu->feature_flags.fields.lass = ext_features1_a.fields.lass;
     vthis_cpu->feature_flags.fields.lam = ext_features1_a.fields.lam;
     vthis_cpu->feature_flags.fields.fred = ext_features1_a.fields.fred;
+    vthis_cpu->feature_flags.fields.mpx = ext_features0_b.fields.mpx;
 
     ia32_feature_control_t ia32_feature_control = {
         .val = __rdmsrl(IA32_FEATURE_CONTROL)
@@ -318,6 +319,33 @@ void vper_cpu_flags_init(struct vper_cpu *vthis_cpu)
     } else {
         vthis_cpu->vcache.trap_cache.fields.tsc_aux = 1;
     }
+
+    ia32_vmx_basic_t basic = {.val = __rdmsrl(IA32_VMX_BASIC)};
+    u32 ia32_vmx_pinbased_ctls;
+    u32 ia32_vmx_procbased_ctls;
+    u32 ia32_vmx_exit_ctls;
+    u32 ia32_vmx_entry_ctls;
+
+    if (basic.fields.defaults_to_one_clear != 0) {
+        
+        ia32_vmx_pinbased_ctls = IA32_VMX_TRUE_PINBASED_CTLS;
+        ia32_vmx_procbased_ctls = IA32_VMX_TRUE_PROCBASED_CTLS;
+        ia32_vmx_exit_ctls = IA32_VMX_TRUE_EXIT_CTLS;
+        ia32_vmx_entry_ctls = IA32_VMX_TRUE_ENTRY_CTLS;
+
+    } else {
+
+        ia32_vmx_pinbased_ctls = IA32_VMX_PINBASED_CTLS;
+        ia32_vmx_procbased_ctls = IA32_VMX_PROCBASED_CTLS;
+        ia32_vmx_exit_ctls = IA32_VMX_EXIT_CTLS;
+        ia32_vmx_entry_ctls = IA32_VMX_ENTRY_CTLS;
+    }
+
+    vthis_cpu->arch_flags.revision_id = basic.fields.revision_id;
+    vthis_cpu->arch_flags.ia32_vmx_pinbased_ctls = ia32_vmx_pinbased_ctls;
+    vthis_cpu->arch_flags.ia32_vmx_procbased_ctls = ia32_vmx_procbased_ctls;
+    vthis_cpu->arch_flags.ia32_vmx_exit_ctls = ia32_vmx_exit_ctls;
+    vthis_cpu->arch_flags.ia32_vmx_entry_ctls = ia32_vmx_entry_ctls;
 
     bool proc2_present = ((__rdmsrl(IA32_VMX_PROCBASED_CTLS) >> 63) & 1) != 0;
     vthis_cpu->arch_flags.support.fields.procbased_ctls2 = proc2_present;
@@ -531,33 +559,6 @@ int vper_cpu_data_init(struct vper_cpu *vthis_cpu, u32 vprocessor_id)
 
     vthis_cpu->arch_flags.lapic_period_fs = lapic_period_fs;
     vthis_cpu->arch_flags.lapic_frequency_hz = lapic_frequency_hz;
-
-    ia32_vmx_basic_t basic = {.val = __rdmsrl(IA32_VMX_BASIC)};
-    u32 ia32_vmx_pinbased_ctls;
-    u32 ia32_vmx_procbased_ctls;
-    u32 ia32_vmx_exit_ctls;
-    u32 ia32_vmx_entry_ctls;
-
-    if (basic.fields.defaults_to_one_clear != 0) {
-        
-        ia32_vmx_pinbased_ctls = IA32_VMX_TRUE_PINBASED_CTLS;
-        ia32_vmx_procbased_ctls = IA32_VMX_TRUE_PROCBASED_CTLS;
-        ia32_vmx_exit_ctls = IA32_VMX_TRUE_EXIT_CTLS;
-        ia32_vmx_entry_ctls = IA32_VMX_TRUE_ENTRY_CTLS;
-
-    } else {
-
-        ia32_vmx_pinbased_ctls = IA32_VMX_PINBASED_CTLS;
-        ia32_vmx_procbased_ctls = IA32_VMX_PROCBASED_CTLS;
-        ia32_vmx_exit_ctls = IA32_VMX_EXIT_CTLS;
-        ia32_vmx_entry_ctls = IA32_VMX_ENTRY_CTLS;
-    }
-
-    vthis_cpu->arch_flags.revision_id = basic.fields.revision_id;
-    vthis_cpu->arch_flags.ia32_vmx_pinbased_ctls = ia32_vmx_pinbased_ctls;
-    vthis_cpu->arch_flags.ia32_vmx_procbased_ctls = ia32_vmx_procbased_ctls;
-    vthis_cpu->arch_flags.ia32_vmx_exit_ctls = ia32_vmx_exit_ctls;
-    vthis_cpu->arch_flags.ia32_vmx_entry_ctls = ia32_vmx_entry_ctls;
 
     this_cpu->num_vtimers = VNUM_VTIMERS;
     this_cpu->vtimer_period_fs = vmx_preempt_period_fs;
@@ -918,6 +919,7 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
             .mce = vthis_cpu->feature_flags.fields.mce,
             .smxe = vthis_cpu->feature_flags.fields.smx,
             .osxsave = vthis_cpu->feature_flags.fields.xsave,
+            .pke = vthis_cpu->feature_flags.fields.pke,
             .uintr = vthis_cpu->feature_flags.fields.uintr,
             .fred = vthis_cpu->feature_flags.fields.fred
         }
@@ -992,6 +994,11 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
     /* traps */
     vsetup_traps(vthis_cpu, vcpu);
 
+    /* need to disable mpx in the supervisor */
+    if (vthis_cpu->feature_flags.fields.mpx != 0)
+        __wrmsrl(IA32_BNDCFGS, 0);
+
+    /* launch */
     vcpu->vsched_metadata.state = VRUNNING;
     vthis_cpu->current_vcpu = vcpu;
     

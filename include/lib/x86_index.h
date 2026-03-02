@@ -1996,6 +1996,19 @@ typedef union
 
 /* msr's */
 
+#define IA32_BNDCFGS 0xd90
+typedef union
+{
+    u64 val;
+    struct 
+    {
+        u64 enable : 1;
+        u64 bndpreserve : 1;
+        u64 reserved0 : 10;
+        u64 base_addr : 52;
+    } fields;
+} ia32_bndcfgs_t;
+
 #define IA32_XSS 0xda0
 
 #define IA32_MONITOR_FILTER_SIZE 0x06

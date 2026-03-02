@@ -9,7 +9,7 @@
 #include <subsys/twanvisor/vdbg/vdyn_assert.h>
 
 void __vsched_put(struct vcpu *vcpu, bool put_ctx, 
-                 struct interrupt_info *ctx)
+                  struct interrupt_info *ctx)
 {
     vcpu->vsched_metadata.state = VREADY;
     vcpu->vsched_metadata.rearm = false;
@@ -19,7 +19,9 @@ void __vsched_put(struct vcpu *vcpu, bool put_ctx,
     if (put_ctx)
         vsched_put_ctx(vcpu, ctx);
 
+#if CONFIG_TWANVISOR_VSCHED_MCQS
     __vsched_push(vcpu);
+#endif
 }
 
 void __vsched_put_paused(struct vcpu *vcpu, bool pv_spin, bool put_ctx,
@@ -33,7 +35,9 @@ void __vsched_put_paused(struct vcpu *vcpu, bool pv_spin, bool put_ctx,
     if (put_ctx)
         vsched_put_ctx(vcpu, ctx);
 
+#if CONFIG_TWANVISOR_VSCHED_MCQS
     __vsched_push_paused(vcpu);
+#endif
 }
 
 void vsched_put(struct vcpu *vcpu, bool put_ctx, 

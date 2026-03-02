@@ -218,7 +218,7 @@ void vfailure_recover(void)
 
         if (vcpu != current) {
 
-            vcpu_state_t state = vcpu->vsched_metadata.state;
+            u8 state = vcpu->vsched_metadata.state;
 
             /* VRUNNING and VTRANSITIONING state should recover itself by 
                checking the terminate flag, VINITIALIZING should naturally
@@ -326,7 +326,7 @@ int vteardown(u8 vid)
         vmcs_lock_isr_save(&vsched->lock, &vsched_node);
 
         vcpu->vsched_metadata.terminate = true;
-        vcpu_state_t state = vcpu->vsched_metadata.state;
+        u8 state = vcpu->vsched_metadata.state;
 
         switch (state) {
 

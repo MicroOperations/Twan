@@ -107,6 +107,25 @@ config TWANVISOR_VIPI_DRAIN_STRICT
     bool "Enable strict IPI draining"
     default y
 
+choice 
+
+    prompt "Twanvisor Scheduler"
+    default TWANVISOR_VSCHED_MCQS
+
+    config TWANVISOR_VSCHED_MCQS
+        bool "Mixed-Criticality Queued scheduler"
+
+    config TWANVISOR_VSCHED_MCFS
+        bool "Mixed-Criticality Frame scheduler"
+
+endchoice
+
+config TWANVISOR_VSCHED_NUM_FRAMES
+    depends on TWANVISOR_VSCHED_MCFS
+    int "Number of MCFS frames"
+    range 1 1024
+    default 512
+
 config TWANVISOR_VSCHED_NUM_CRITICALITIES
     int "Criticality level count for twanvisor guests"
     range 1 255

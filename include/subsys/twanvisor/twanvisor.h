@@ -166,7 +166,8 @@ typedef union
         u32 lass : 1;
         u32 lam : 1;
         u32 fred : 1;
-        u32 reserved0 : 15;
+        u32 mpx : 1;
+        u32 reserved0 : 14;
     } fields;
 } vper_cpu_feature_flags_t;
 

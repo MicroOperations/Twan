@@ -8,20 +8,6 @@
 #include <subsys/twanvisor/vportal/vcreate.h>
 #include <subsys/twanvisor/vdbg/vdyn_assert.h>
 
-/* 
-    vcalls follow sysv 
-    
-    vcall id - rax
-    arg1 - rdi
-    arg2 - rsi
-    arg3 - rdx
-    arg4 - rcx
-    arg5 - r8
-    arg6 - r9
-
-    return val - rax
-*/
-
 /* long VSUBSCRIBE_EXTERNAL_INTERRUPT_VECTOR(u8 vector) */
 static long vsubscribe_external_interrupt_vector(struct vregs *vregs)
 {
@@ -29,7 +15,7 @@ static long vsubscribe_external_interrupt_vector(struct vregs *vregs)
 
     long ret = 0;
 
-    u8 vector = vregs->regs.rdi & 0xff;
+    u8 vector = vcall_arg1_8(vregs);
 
     struct vcpu *current = vcurrent_vcpu();
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
@@ -63,7 +49,7 @@ static long vunsubscribe_external_interrupt_vector(struct vregs *vregs)
 
     long ret = 0;
 
-    u8 vector = vregs->regs.rdi & 0xff;
+    u8 vector = vcall_arg1_8(vregs);
 
     struct vcpu *current = vcurrent_vcpu();
     struct vper_cpu *vthis_cpu = vthis_cpu_data();
@@ -99,10 +85,10 @@ static long vipi(struct vregs *vregs)
     struct vcpu *vcpu = vcurrent_vcpu();
     u32 current_processor_id = vcpu->processor_id;
 
-    u32 target_processor_id = vregs->regs.rdi & 0xffffffff;
-    u32 delivery_mode = vregs->regs.rsi & 0xffffffff;
-    u8 vector = vregs->regs.rdx & 0xff;
-    bool nmi = vregs->regs.rcx & 0xffffffff;
+    u32 target_processor_id = vcall_arg1_32(vregs);
+    u32 delivery_mode = vcall_arg2_32(vregs);
+    u8 vector = vcall_arg3_8(vregs);
+    bool nmi = vcall_arg4_32(vregs);
 
     switch (delivery_mode) {
 
@@ -138,11 +124,11 @@ static long vipi_far(struct vregs *vregs)
 
     long ret = 0;
 
-    u8 vid = vregs->regs.rdi & 0xff;
-    u32 processor_id = vregs->regs.rsi & 0xffffffff;
-    u32 delivery_mode = vregs->regs.rdx & 0xffffffff;
-    u8 vector = vregs->regs.rcx & 0xff;
-    bool nmi = vregs->regs.r8 & 0xffffffff;
+    u8 vid = vcall_arg1_8(vregs);
+    u32 processor_id = vcall_arg2_32(vregs);
+    u32 delivery_mode = vcall_arg3_32(vregs);
+    u8 vector = vcall_arg4_8(vregs);
+    bool nmi = vcall_arg5_32(vregs);
 
     switch (delivery_mode) {
 
@@ -170,7 +156,7 @@ static long vtlb_shootdown(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
 
-    u8 vid = vregs->regs.rdi & 0xff;
+    u8 vid = vcall_arg1_8(vregs);
     return vemu_tlb_invalidate(vid);
 }
 
@@ -178,11 +164,11 @@ static long vtlb_shootdown(struct vregs *vregs)
                     bool nmi) */
 static long varm_timern(struct vregs *vregs)
 {
-    u8 vector = vregs->regs.rdi & 0xff;
-    u8 timer_n = vregs->regs.rsi & 0xff;
-    u32 ticks = vregs->regs.rdx & 0xffffffff;
-    bool periodic = vregs->regs.rcx & 0xffffffff;
-    bool nmi = vregs->regs.r8 & 0xffffffff;
+    u8 vector = vcall_arg1_8(vregs);
+    u8 timer_n = vcall_arg2_8(vregs);
+    u32 ticks = vcall_arg3_32(vregs);
+    bool periodic = vcall_arg4_32(vregs);
+    bool nmi = vcall_arg5_32(vregs);
     
     if (timer_n >= VNUM_VTIMERS || (nmi && vector != NMI)) {
 
@@ -245,7 +231,7 @@ static long varm_timern(struct vregs *vregs)
 /* long VDISARM_TIMERN(u8 timer_n) */
 static long vdisarm_timern(struct vregs *vregs)
 {
-    u8 timer_n = vregs->regs.rdi & 0xff;
+    u8 timer_n = vcall_arg1_8(vregs);
 
     if (timer_n >= VNUM_VTIMERS) {
 
@@ -308,9 +294,9 @@ static long valter_vcpu_timeslice(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
 
-    u8 vid = vregs->regs.rdi & 0xff;
-    u32 processor_id = vregs->regs.rsi & 0xffffffff;
-    u32 ticks = vregs->regs.rdx & 0xffffffff;
+    u8 vid = vcall_arg1_8(vregs);
+    u32 processor_id = vcall_arg2_32(vregs);
+    u32 ticks = vcall_arg3_32(vregs);
 
     struct vcpu *current = vcurrent_vcpu();
     if (!current->root)
@@ -324,9 +310,9 @@ static long valter_vcpu_criticality(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
 
-    u8 vid = vregs->regs.rdi & 0xff;
-    u32 processor_id = vregs->regs.rsi & 0xffffffff;
-    u8 criticality = vregs->regs.rdx & 0xff;
+    u8 vid = vcall_arg1_8(vregs);
+    u32 processor_id = vcall_arg2_32(vregs);
+    u8 criticality = vcall_arg3_8(vregs);
 
     struct vcpu *current = vcurrent_vcpu();
     if (!current->root)
@@ -342,7 +328,7 @@ static long vis_serviced(struct vregs *vregs)
 
     struct vcpu *current = vcurrent_vcpu();
 
-    u8 intl = vregs->regs.rdi & 0xff;
+    u8 intl = vcall_arg1_8(vregs);
 
     if (intl > INTL_MAX)
         return -EINVAL;
@@ -363,8 +349,8 @@ static long vis_pending(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
 
-    u8 vector = vregs->regs.rdi & 0xff;
-    bool nmi = vregs->regs.rsi & 0xffffffff;
+    u8 vector = vcall_arg1_8(vregs);
+    bool nmi = vcall_arg2_32(vregs);
 
     if (nmi && vector != NMI)
         return -EINVAL;
@@ -438,7 +424,7 @@ static long vread_vcpu_state(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
 
-    u32 processor_id = vregs->regs.rdi & 0xffffffff;
+    u32 processor_id = vcall_arg1_32(vregs);
     return vemu_read_vcpu_state_local(processor_id);
 }
 
@@ -447,8 +433,8 @@ static long vread_vcpu_state_far(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
 
-    u8 vid = vregs->regs.rdi & 0xff;
-    u32 processor_id = vregs->regs.rsi & 0xffffffff;
+    u8 vid = vcall_arg1_8(vregs);
+    u32 processor_id = vcall_arg2_32(vregs);
 
     return vemu_read_vcpu_state_far(vid, processor_id);
 }
@@ -460,10 +446,10 @@ static long vset_route(struct vregs *vregs)
 
     struct vcpu *vcpu = vcurrent_vcpu();
 
-    u8 target_vid = vregs->regs.rdi & 0xff;
-    u8 sender_vid = vregs->regs.rsi & 0xff;
-    u32 route_type = vregs->regs.rdx & 0xffffffff;
-    bool allow = vregs->regs.rcx & 0xffffffff;
+    u8 target_vid = vcall_arg1_8(vregs);
+    u8 sender_vid = vcall_arg2_8(vregs);
+    u32 route_type = vcall_arg3_32(vregs);
+    bool allow = vcall_arg4_32(vregs);
 
     if (!vcpu->root)
         return -EPERM;
@@ -482,10 +468,10 @@ static long vset_vcpu_subscription_perm(struct vregs *vregs)
 
     struct vcpu *vcpu = vcurrent_vcpu();
 
-    u8 vid = vregs->regs.rdi & 0xff;
-    u32 processor_id = vregs->regs.rsi & 0xffffffff;
-    u8 vector = vregs->regs.rdx & 0xff;
-    bool allow = vregs->regs.rcx & 0xffffffff;
+    u8 vid = vcall_arg1_8(vregs);
+    u32 processor_id = vcall_arg2_32(vregs);
+    u8 vector = vcall_arg3_8(vregs);
+    bool allow = vcall_arg4_32(vregs);
 
     if (!vcpu->root)
         return -EPERM;
@@ -505,9 +491,9 @@ static long vset_criticality_perm(struct vregs *vregs)
 
     struct vcpu *vcpu = vcurrent_vcpu();
 
-    u8 vid = vregs->regs.rdi & 0xff;
-    u32 phys_processor_id = vregs->regs.rsi & 0xffffffff;
-    vcriticality_perm_t perm = {.val = vregs->regs.rdx & 0xffffffff};
+    u8 vid = vcall_arg1_8(vregs);
+    u32 phys_processor_id = vcall_arg2_32(vregs);
+    vcriticality_perm_t perm = {.val = vcall_arg3_32(vregs)};
 
     if (!vcpu->root)
         return -EPERM;
@@ -525,7 +511,7 @@ static long vread_criticality_level(struct vregs *vregs)
 
     u8 vid = vcurrent_vcpu()->vid;
 
-    int phys_processor_id = vregs->regs.rdi & 0xffffffff;
+    int phys_processor_id = vcall_arg1_32(vregs);
 
     if (phys_processor_id < 0)
         phys_processor_id = vthis_vprocessor_id();
@@ -541,8 +527,8 @@ static long vwrite_criticality_level(struct vregs *vregs)
 
     u8 vid = vcurrent_vcpu()->vid;
 
-    int phys_processor_id = vregs->regs.rdi & 0xffffffff;
-    u8 criticality = vregs->regs.rsi & 0xff;
+    int phys_processor_id = vcall_arg1_32(vregs);
+    u8 criticality = vcall_arg2_8(vregs);
 
     if (phys_processor_id < 0)
         phys_processor_id = vthis_vprocessor_id();
@@ -565,7 +551,7 @@ static long vpv_spin_kick(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
 
-    u32 processor_id = vregs->regs.rdi & 0xffffffff;
+    u32 processor_id = vcall_arg1_32(vregs);
     return vemu_pv_spin_kick_local(processor_id);
 }
 
@@ -574,8 +560,8 @@ static long vpv_spin_kick_far(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
 
-    u8 vid = vregs->regs.rdi & 0xff;
-    u32 processor_id = vregs->regs.rsi & 0xffffffff;
+    u8 vid = vcall_arg1_8(vregs);
+    u32 processor_id = vcall_arg2_32(vregs);
 
     return vemu_pv_spin_kick_far(vid, processor_id);
 }
@@ -585,7 +571,7 @@ static long vkdbg(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
 
-    char *str = (void *)vregs->regs.rdi;
+    char *str = (void *)vcall_arg1_64(vregs);
 
     struct vcpu *vcpu = vcurrent_vcpu();
     if (!vcpu->root)
@@ -594,7 +580,7 @@ static long vkdbg(struct vregs *vregs)
     if (!str)
         return -EINVAL;
 
-    vdbg(str);
+    vdbgf("%s", str);
     return 0;
 }
 
@@ -607,7 +593,7 @@ static long vcreate_partition(struct vregs *vregs)
     if (!vcpu->root)
         return -EPERM;
 
-    struct vpartition *vpartition = (void *)vregs->regs.rdi;
+    struct vpartition *vpartition = (void *)vcall_arg1_64(vregs);
 
     int err = vpartition_precheck(vpartition);
     if (err < 0)
@@ -628,7 +614,7 @@ static long vdestroy_partition(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
 
-    u8 vid = vregs->regs.rdi & 0xff;
+    u8 vid = vcall_arg1_8(vregs);
 
     struct vcpu *vcpu = vcurrent_vcpu();
     if (!vcpu->root)
@@ -639,6 +625,60 @@ static long vdestroy_partition(struct vregs *vregs)
 
     return vteardown(vid);
 }
+
+#if CONFIG_TWANVISOR_VSCHED_MCFS
+
+/* long VFRAME_SET(u8 vid, u32 processor_id, u32 frame_id) */
+static long vframe_set(struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+
+    u8 vid = vcall_arg1_8(vregs);
+    u32 processor_id = vcall_arg2_32(vregs);
+    u32 frame_id = vcall_arg3_32(vregs);
+
+    struct vcpu *vcpu = vcurrent_vcpu();
+    if (!vcpu->root)
+        return -EPERM;
+
+    return vemu_vframe_set(vid, processor_id, frame_id);
+}
+
+/* long VFRAME_UNSET(int physical_processor_id, u32 frame_id) */
+static long vframe_unset(struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+
+    int phys_processor_id = vcall_arg1_32(vregs);
+    u32 frame_id = vcall_arg2_32(vregs);
+
+    if (phys_processor_id < 0)
+        phys_processor_id = vthis_vprocessor_id();
+
+    struct vcpu *vcpu = vcurrent_vcpu();
+    if (!vcpu->root)
+        return -EPERM;
+
+    return vemu_vframe_unset(phys_processor_id, frame_id);
+}
+
+#else
+
+/* long VFRAME_SET(u8 vid, u32 processor_id, u32 frame_id) */
+static long vframe_set(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    return -EINVAL;
+}
+
+/* long VFRAME_UNSET(int physical_processor_id, u32 frame_id) */
+static long vframe_unset(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    return -EINVAL;
+}
+
+#endif
 
 static vcall_func_t vcall_table[] = {
 
@@ -683,6 +723,9 @@ static vcall_func_t vcall_table[] = {
 
     [VCREATE_PARTITION] = vcreate_partition,
     [VDESTROY_PARTITION] = vdestroy_partition,
+
+    [VFRAME_SET] = vframe_set,
+    [VFRAME_UNSET] = vframe_unset,
 };
 
 void vcall_dispatcher(struct vregs *vregs)
@@ -697,7 +740,7 @@ void vcall_dispatcher(struct vregs *vregs)
 
     long ret;
 
-    u64 id = vregs->regs.rax;
+    u64 id = vcall_id(vregs);
     if (id >= ARRAY_LEN(vcall_table)) {
 
         vcurrent_vcpu_enable_preemption();
@@ -729,7 +772,7 @@ void vcall_dispatcher(struct vregs *vregs)
             break;
     }
 
-    vregs->regs.rax = ret;
+    vcall_set_retval(vregs, ret);
 }
 
 #endif

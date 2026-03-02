@@ -60,6 +60,9 @@ void vsetup_traps(struct vper_cpu *vthis_cpu, struct vcpu *vcpu)
     if (vthis_cpu->sec_flags.fields.sr_bios_done != 0)
         vtrap_msr(vcpu, IA32_SR_BIOS_DONE);
 
+    if (vthis_cpu->feature_flags.fields.mpx != 0)
+        vtrap_msr(vcpu, IA32_BNDCFGS);
+
     if (vthis_cpu->arch_flags.support.fields.x2apic != 0) {
         vtrap_msr(vcpu, IA32_X2APIC_ID);
         vtrap_msr(vcpu, IA32_X2APIC_VERSION);

@@ -176,4 +176,14 @@ inline long tv_vdestroy_partition(u8 vid)
     return tv_vcall(VDESTROY_PARTITION, vid, 0, 0, 0, 0, 0);
 }
 
+inline long tv_vframe_set(u8 vid, u32 processor_id, u32 frame_id)
+{
+    return tv_vcall(VFRAME_SET, vid, processor_id, frame_id, 0, 0, 0);
+}
+
+inline long tv_vframe_unset(int physical_processor_id, u32 frame_id)
+{
+    return tv_vcall(VFRAME_UNSET, physical_processor_id, frame_id, 0, 0, 0, 0);
+}
+
 #endif
