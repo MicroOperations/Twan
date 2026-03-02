@@ -48,25 +48,81 @@ void __vsched_push_paused(struct vcpu *vcpu)
     dq_pushback(&vsched->paused_queue, &vcpu->vsched_nodes[0]);
 }
 
-#endif
-
 bool __vsched_is_current_preemptible(struct vcpu *current)
 {
-    u8 criticality_level = __sched_mcs_read_criticality_level();
+    u8 criticality_level = __vsched_mcs_read_criticality_level_local();
     u8 criticality = current->vsched_metadata.criticality;
-
-#if CONFIG_TWANVISOR_VSCHED_MCQS
 
     u8 next_criticality;
     return __vsched_get_bucket(&next_criticality) && 
                 (criticality < criticality_level || 
                  next_criticality >= criticality_level);
+}
+
+struct vcpu *__vsched_pop(void)
+{
+    u8 criticality;
+    struct dq *dq = __vsched_get_bucket(&criticality);
+    if (!dq)
+        return NULL;
+
+    struct list_double *node = dq_popfront(dq);
+    return vsched_node_to_vcpu(node, criticality);
+}
+
+void __vsched_dequeue(struct vcpu *vcpu)
+{
+    struct vscheduler *vsched = vscheduler_of(vcpu);
+
+    u8 criticality = vcpu->vsched_metadata.criticality;
+
+    for (u32 i = 0; i <= criticality; i++) {
+
+        struct dq *dq = &vsched->queues[i];
+        struct list_double *node = &vcpu->vsched_nodes[i];
+
+        if (dq_is_queued(dq, node))
+            dq_dequeue(dq, node);
+    }
+}
+
+void __vsched_dequeue_paused(struct vcpu *vcpu)
+{
+    struct vscheduler *vsched = vscheduler_of(vcpu);
+    if (dq_is_queued(&vsched->paused_queue, &vcpu->vsched_nodes[0]))
+        dq_dequeue(&vsched->paused_queue, &vcpu->vsched_nodes[0]);   
+}
+
+void __vsched_unpause(struct vcpu *vcpu)
+{
+    __vsched_dequeue_paused(vcpu);
+    vcpu->vsched_metadata.state = VREADY;
+    __vsched_push(vcpu);
+}
+
+void __vsched_update_criticality(struct vcpu *vcpu, u8 criticality)
+{
+    if (vcpu->vsched_metadata.state == VREADY) {
+
+        __vsched_dequeue(vcpu);
+        vcpu->vsched_metadata.criticality = criticality;
+        __vsched_push(vcpu);
+
+    } else {
+        vcpu->vsched_metadata.criticality = criticality;
+    }
+}
 
 #endif
 
+
 #if CONFIG_TWANVISOR_VSCHED_MCFS
 
+bool __vsched_is_current_preemptible(struct vcpu *current)
+{
     struct vscheduler *vsched = vthis_vscheduler();
+    u8 criticality_level = __vsched_mcs_read_criticality_level_local();
+    u8 criticality = current->vsched_metadata.criticality;
     u32 clock = vsched->clock;
 
     for (u32 i = 0; i < (ARRAY_LEN(vsched->frames) - 1); i++) {
@@ -86,28 +142,12 @@ bool __vsched_is_current_preemptible(struct vcpu *current)
     }
 
     return false;
-
-#endif
 }
 
 struct vcpu *__vsched_pop(void)
 {
-#if CONFIG_TWANVISOR_VSCHED_MCQS
-
-    u8 criticality;
-    struct dq *dq = __vsched_get_bucket(&criticality);
-    if (!dq)
-        return NULL;
-
-    struct list_double *node = dq_popfront(dq);
-    return vsched_node_to_vcpu(node, criticality);
-
-#endif
-
-#if CONFIG_TWANVISOR_VSCHED_MCFS
-
     struct vscheduler *vsched = vthis_vscheduler();
-    u8 criticality_level = __sched_mcs_read_criticality_level();
+    u8 criticality_level = __vsched_mcs_read_criticality_level_local();
     u32 clock = vsched->clock;
 
     u32 first_idx = 0;
@@ -135,89 +175,34 @@ struct vcpu *__vsched_pop(void)
         vsched->clock = first_idx + 1;
 
     return first_vcpu;
-
-#endif
 }
 
 void __vsched_dequeue(struct vcpu *vcpu)
 {
     struct vscheduler *vsched = vscheduler_of(vcpu);
 
-#if CONFIG_TWANVISOR_VSCHED_MCQS
-
-    u8 criticality = vcpu->vsched_metadata.criticality;
-
-    for (u32 i = 0; i <= criticality; i++) {
-
-        struct dq *dq = &vsched->queues[i];
-        struct list_double *node = &vcpu->vsched_nodes[i];
-
-        if (dq_is_queued(dq, node))
-            dq_dequeue(dq, node);
-    }
-
-#endif
-
-#if CONFIG_TWANVISOR_VSCHED_MCFS
-
     for (u32 i = 0; i < ARRAY_LEN(vsched->frames); i++) {
 
         if (vsched->frames[i] == vcpu)
             vsched->frames[i] = NULL;
     }
-
-#endif
 }
 
 void __vsched_dequeue_paused(struct vcpu *vcpu)
 {
-#if CONFIG_TWANVISOR_VSCHED_MCQS
-
-    struct vscheduler *vsched = vscheduler_of(vcpu);
-    if (dq_is_queued(&vsched->paused_queue, &vcpu->vsched_nodes[0]))
-        dq_dequeue(&vsched->paused_queue, &vcpu->vsched_nodes[0]);   
-
-#endif
-
-#if CONFIG_TWANVISOR_VSCHED_MCFS
     __vsched_dequeue(vcpu);
-#endif
 }
 
 void __vsched_unpause(struct vcpu *vcpu)
 {
-#if CONFIG_TWANVISOR_VSCHED_MCQS
-
-    __vsched_dequeue_paused(vcpu);
     vcpu->vsched_metadata.state = VREADY;
-    __vsched_push(vcpu);
-
-#endif
-
-#if CONFIG_TWANVISOR_VSCHED_MCFS
-    vcpu->vsched_metadata.state = VREADY;
-#endif
 }
 
 void __vsched_update_criticality(struct vcpu *vcpu, u8 criticality)
 {
-#if CONFIG_TWANVISOR_VSCHED_MCQS
-
-    if (vcpu->vsched_metadata.state == VREADY) {
-
-        __vsched_dequeue(vcpu);
-        vcpu->vsched_metadata.criticality = criticality;
-        __vsched_push(vcpu);
-
-    } else {
-        vcpu->vsched_metadata.criticality = criticality;
-    }
-
-#endif 
-
-#if CONFIG_TWANVISOR_VSCHED_MCFS
     vcpu->vsched_metadata.criticality = criticality;
-#endif
 }
+
+#endif
 
 #endif

@@ -210,8 +210,6 @@ static __driver_init void pv_twanvisor_demo_init(void)
 #endif
         }
     }
-
-    kdbg("root vcpus are now apreemptive again!\n");
 }
 
 REGISTER_DRIVER(pv_twanvisor_demo, pv_twanvisor_demo_init);
