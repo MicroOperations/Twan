@@ -331,6 +331,7 @@ static void vexit_cpuid(struct vregs *vregs)
                     extended_features0_d.fields.pconfig = 0;
                     extended_features0_d.fields.hybrid = 0;
 
+                    ebx = extended_features0_b.val;
                     ecx = extended_features0_c.val;
                     edx = extended_features0_d.val;
                     break;
