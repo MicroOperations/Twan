@@ -33,5 +33,6 @@ guest created! vid: 1
 root vcpus are now preemptive!
 hello from guest
 guest terminated!
+root vcpus are now apreemptive again!
 ...
 ```

@@ -21,6 +21,15 @@ extern char pv_twanvisor_demo_guest_end[];
 #define ROOT_TIMESLICE_MS 10
 #define GUEST_TIMESLICE_MS 10
 
+#define ROOT_MCFS_FRAME 0
+#define GUEST_MCFS_FRAME 1
+
+#if CONFIG_TWANVISOR_VSCHED_MCFS
+
+STATIC_ASSERT(CONFIG_TWANVISOR_VSCHED_NUM_FRAMES >= 2);
+
+#endif
+
 static struct vcpu guest_vcpus[NUM_CPUS];
 
 static ept_pml4e_t pml4[512] __aligned(4096);
@@ -150,6 +159,13 @@ static __driver_init void pv_twanvisor_demo_init(void)
 
     kdbgf("guest created! vid: %d\n", vid);
 
+#if CONFIG_TWANVISOR_VSCHED_MCFS
+
+    for (u32 i = 0; i < guest.vcpu_count; i++)
+        tv_vframe_set(vid, i, GUEST_MCFS_FRAME);
+
+#endif
+
     u8 root_vid = twan()->flags.fields.vid;
 
     u32 num_cpus = num_cpus();
@@ -157,6 +173,10 @@ static __driver_init void pv_twanvisor_demo_init(void)
 
         struct per_cpu *cpu = cpu_data(i);
         if (cpu_enabled(cpu->flags)) {
+
+#if CONFIG_TWANVISOR_VSCHED_MCFS
+            tv_vframe_set(root_vid, i, ROOT_MCFS_FRAME);
+#endif
 
             u32 ticks = ms_to_ticks(ROOT_TIMESLICE_MS,
                                     cpu->vsched_timer_frequency_hz);
@@ -177,6 +197,21 @@ static __driver_init void pv_twanvisor_demo_init(void)
     err = tv_vdestroy_partition(vid);
     if (err < 0)
         kdbgf("failed to destroy partition %d\n", err);
+
+    for (u32 i = 0; i < num_cpus; i++) {
+
+        struct per_cpu *cpu = cpu_data(i);
+        if (cpu_enabled(cpu->flags)) {
+
+            tv_valter_vcpu_timeslice(root_vid, i, 0);
+
+#if CONFIG_TWANVISOR_VSCHED_MCFS
+            tv_vframe_unset(cpu->physical_processor_id, ROOT_MCFS_FRAME);
+#endif
+        }
+    }
+
+    kdbg("root vcpus are now apreemptive again!\n");
 }
 
 REGISTER_DRIVER(pv_twanvisor_demo, pv_twanvisor_demo_init);
