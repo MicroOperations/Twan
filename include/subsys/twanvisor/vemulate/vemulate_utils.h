@@ -610,7 +610,7 @@ int vemu_tlb_invalidate(u8 target_vid);
 int vemu_alter_vcpu(u8 vid, u32 processor_id, bool alter_ticks, u32 ticks, 
                     bool alter_criticality, u8 criticality);
 
-vcpu_state_t __vemu_read_vcpu_state(struct vcpu *vcpu);
+u8 __vemu_read_vcpu_state(struct vcpu *vcpu);
 int vemu_read_vcpu_state_local(u32 processor_id);
 int vemu_read_vcpu_state_far(u8 target_vid, u32 processor_id);
 

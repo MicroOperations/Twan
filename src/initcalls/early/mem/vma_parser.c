@@ -10,7 +10,7 @@
 #include <kernel/extern.h>
 #include <generated/autoconf.h>
 
-#define NUM_PDPTS (CONFIG_KERNEL_MAX_VMA_PARTITIONS / 512)
+#define NUM_PDPTS ((CONFIG_KERNEL_MAX_VMA_PARTITIONS + 511) / 512)
 STATIC_ASSERT(NUM_PDPTS > 0);
 
 #define MAX_VMA_PARTITIONS (NUM_PDPTS * 512)

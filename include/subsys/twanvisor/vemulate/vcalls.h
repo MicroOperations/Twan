@@ -9,7 +9,6 @@ typedef enum
     VIPI_DM_UNPAUSE
 } vipi_delivery_mode_t;
 
-
 #define VSUBSCRIBE_EXTERNAL_INTERRUPT_VECTOR 0
 #define VUNSUBSCRIBE_EXTERNAL_INTERRUPT_VECTOR 1
 
@@ -48,6 +47,9 @@ typedef enum
 
 #define VCREATE_PARTITION 25
 #define VDESTROY_PARTITION 26
+
+#define VFRAME_INSERT 27
+#define VFRAME_REMOVE 28
 
 typedef long (*vcall_func_t)(struct vregs *vregs);
 

@@ -29,6 +29,17 @@ struct dq *__vsched_get_bucket(u8 *criticality)
     return queue;
 }
 
+bool __vsched_is_current_preemptible(struct vcpu *current)
+{
+    u8 criticality_level = __sched_mcs_read_criticality_level();
+    u8 criticality = current->vsched_metadata.criticality;
+
+    u8 next_criticality;
+    return __vsched_get_bucket(&next_criticality) && 
+                (criticality < criticality_level || 
+                 next_criticality >= criticality_level);
+}
+
 void __vsched_push(struct vcpu *vcpu)
 {
     struct vscheduler *vsched = vscheduler_of(vcpu);

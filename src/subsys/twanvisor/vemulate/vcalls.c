@@ -594,7 +594,7 @@ static long vkdbg(struct vregs *vregs)
     if (!str)
         return -EINVAL;
 
-    vdbg(str);
+    vdbgf("%s", str);
     return 0;
 }
 
@@ -640,6 +640,31 @@ static long vdestroy_partition(struct vregs *vregs)
     return vteardown(vid);
 }
 
+/* long VFRAME_INSERT(u32 physical_processor_id, u32 frame_id, 
+                      u8 vid, u32 processor_id) */
+static long vframe_insert(struct vregs *vregs)
+{
+#if !CONFIG_TWANVISOR_VSCHED_MCFS
+    return -EINVAL;
+#else
+
+    return 0;
+
+#endif
+}
+
+/* long VFRAME_REMOVE(u32 physical_processor_id, u32 frame_id) */
+static long vframe_remove(struct vregs *vregs)
+{
+#if !CONFIG_TWANVISOR_VSCHED_MCFS
+    return -EINVAL;
+#else
+
+    return 0;
+
+#endif
+}
+
 static vcall_func_t vcall_table[] = {
 
     [VSUBSCRIBE_EXTERNAL_INTERRUPT_VECTOR] = 
@@ -683,6 +708,9 @@ static vcall_func_t vcall_table[] = {
 
     [VCREATE_PARTITION] = vcreate_partition,
     [VDESTROY_PARTITION] = vdestroy_partition,
+
+    [VFRAME_INSERT] = vframe_insert,
+    [VFRAME_REMOVE] = vframe_remove,
 };
 
 void vcall_dispatcher(struct vregs *vregs)

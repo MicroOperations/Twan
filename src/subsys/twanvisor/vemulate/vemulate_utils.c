@@ -334,7 +334,7 @@ int vemu_tlb_invalidate(u8 target_vid)
 
         vmcs_lock_isr_save(&vsched->lock, &vsched_node);
 
-        vcpu_state_t state = vcpu->vsched_metadata.state;
+        u8 state = vcpu->vsched_metadata.state;
 
         bool was_pending = vcpu->vsched_metadata.tlb_flush_pending;
         vcpu->vsched_metadata.tlb_flush_pending = true;
@@ -432,13 +432,13 @@ int vemu_alter_vcpu(u8 vid, u32 processor_id, bool alter_ticks, u32 ticks,
     return 0;
 }
 
-vcpu_state_t __vemu_read_vcpu_state(struct vcpu *vcpu)
+u8 __vemu_read_vcpu_state(struct vcpu *vcpu)
 {
     struct vscheduler *vsched = vscheduler_of(vcpu);
     struct mcsnode node = INITIALIZE_MCSNODE();
 
     vmcs_lock_isr_save(&vsched->lock, &node);
-    vcpu_state_t state = vcpu->vsched_metadata.state;
+    u8 state = vcpu->vsched_metadata.state;
     vmcs_unlock_isr_restore(&vsched->lock, &node);
 
     return state;
@@ -458,7 +458,7 @@ int vemu_read_vcpu_state_local(u32 processor_id)
         return -EFAULT;
 
     struct vcpu *vcpu = &vpartition->vcpus[processor_id];
-    vcpu_state_t state = __vemu_read_vcpu_state(vcpu);
+    u8 state = __vemu_read_vcpu_state(vcpu);
 
     vpartition_put(vid, &node);
     return state;
@@ -483,7 +483,7 @@ int vemu_read_vcpu_state_far(u8 target_vid, u32 processor_id)
     }
 
     struct vcpu *vcpu = &vpartition->vcpus[processor_id];
-    vcpu_state_t state = __vemu_read_vcpu_state(vcpu);
+    u8 state = __vemu_read_vcpu_state(vcpu);
 
     vpartition_put(target_vid, &node);
     return state;
