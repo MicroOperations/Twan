@@ -64,10 +64,10 @@ void vsched_enter_ctx(struct vcpu *vcpu, struct interrupt_info *ctx)
 
     vcpu->vsched_metadata.state = VTRANSITIONING;
 
-    vsched_set_ctx(vcpu, ctx);
-
     vcpu->vsched_metadata.current_time_slice_ticks = 
         vcpu->vsched_metadata.time_slice_ticks;
+
+    vsched_set_ctx(vcpu, ctx);
 }
 
 #endif
