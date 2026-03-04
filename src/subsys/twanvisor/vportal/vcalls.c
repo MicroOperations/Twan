@@ -82,9 +82,6 @@ static long vipi(struct vregs *vregs)
 
     long ret = 0;
 
-    struct vcpu *vcpu = vcurrent_vcpu();
-    u32 current_processor_id = vcpu->processor_id;
-
     u32 target_processor_id = vcall_arg1_32(vregs);
     u32 delivery_mode = vcall_arg2_32(vregs);
     u8 vector = vcall_arg3_8(vregs);
@@ -98,9 +95,11 @@ static long vipi(struct vregs *vregs)
                                                        vector, nmi);
             break;
 
+#if !CONFIG_TWANVISOR_VSCHED_STRICT
+
         case VIPI_DM_UNPAUSE:
 
-            if (current_processor_id == target_processor_id) {
+            if (vcurrent_vcpu()->processor_id == target_processor_id) {
                 ret = -EINVAL;
                 break;
             }
@@ -108,6 +107,8 @@ static long vipi(struct vregs *vregs)
             ret = vemu_unpause_vcpu_local(target_processor_id, true, vector, 
                                           nmi);
             break;
+
+#endif
 
         default:
             ret = -EINVAL;
@@ -138,11 +139,15 @@ static long vipi_far(struct vregs *vregs)
                                                      nmi);
             break;
 
+#if !CONFIG_TWANVISOR_VSCHED_STRICT
+
         case VIPI_DM_UNPAUSE:
 
             ret = vemu_unpause_vcpu_far(vid, processor_id, true, vector, nmi);
             break;
         
+#endif
+
         default:
             ret = -EINVAL;
             break;
@@ -401,6 +406,24 @@ static long veoi(__unused struct vregs *vregs)
     return 0;
 }
 
+#if CONFIG_TWANVISOR_VSCHED_STRICT
+
+/* long VYIELD(void) */
+static long vyield(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    return -EINVAL;
+}
+
+/* long VPAUSE(void) */
+static long vpause(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    return -EINVAL;
+}
+
+#else
+
 /* long VYIELD(void) */
 static long vyield(__unused struct vregs *vregs)
 {
@@ -418,6 +441,8 @@ static long vpause(__unused struct vregs *vregs)
 
     return 0;
 }
+
+#endif
 
 /* long VREAD_VCPU_STATE(u32 processor_id) */
 static long vread_vcpu_state(struct vregs *vregs)
@@ -537,6 +562,31 @@ static long vwrite_criticality_level(struct vregs *vregs)
                                         criticality);
 }
 
+#if CONFIG_TWANVISOR_VSCHED_STRICT
+
+/* long VPV_SPIN_PAUSE(void) */
+static long vpv_spin_pause(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    return -EINVAL;
+}
+
+/* long VPV_SPIN_KICK(u32 processor_id) */
+static long vpv_spin_kick(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    return -EINVAL;
+}
+
+/* long VPV_SPIN_KICK_FAR(u8 vid, u32 processor_id) */
+static long vpv_spin_kick_far(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    return -EINVAL;
+}
+
+#else
+
 /* long VPV_SPIN_PAUSE(void) */
 static long vpv_spin_pause(__unused struct vregs *vregs)
 {
@@ -565,6 +615,8 @@ static long vpv_spin_kick_far(struct vregs *vregs)
 
     return vemu_pv_spin_kick_far(vid, processor_id);
 }
+
+#endif
 
 /* long VKDBG(const char *str) */
 static long vkdbg(struct vregs *vregs)

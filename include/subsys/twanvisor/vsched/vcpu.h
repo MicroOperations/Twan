@@ -234,6 +234,17 @@ struct vcpu
     u8 vboot_state;
 };
 
+#if CONFIG_TWANVISOR_VSCHED_STRICT
+
+#define vis_vboot_state_valid(state) ((state) == VBOOT_READY)
+
+#else
+
+#define vis_vboot_state_valid(state) \
+    ((state) == VBOOT_READY || (state) == VBOOT_PAUSED)
+
+#endif
+
 #define vqueue_to_vprocessor_id(vqueue_id) (vqueue_id) 
 #define vprocessor_to_vqueue_id(vprocessor_id) (vprocessor_id) 
 

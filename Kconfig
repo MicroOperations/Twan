@@ -101,15 +101,15 @@ config SUBSYS_TIMEOUT
 
 if SUBSYS_TWANVISOR
 
-    config TWANVISOR_STRICT_SCHEDULE
+    config TWANVISOR_VSCHED_STRICT
         bool "Twanvisor strict scheduling"
         default n
         ---help---
             Disable the ability for vcpus to yield or be paused, this config
-            will also disallow the creation of vcpus which start in a paused
+            will also disallow the creation of vcpus which boot in a paused
             state
 
-    if !TWANVISOR_STRICT_SCHEDULE
+    if !TWANVISOR_VSCHED_STRICT
 
         config TWANVISOR_PV_LOCKS
             bool "Paravirt locks"
@@ -146,7 +146,7 @@ if SUBSYS_TWANVISOR
                 Enable strict IPI draining in Twanvisor to mitigate IPI based
                 covert channels
 
-    endif # !TWANVISOR_STRICT_SCHEDULE
+    endif # !TWANVISOR_VSCHED_STRICT
 
     choice 
 
