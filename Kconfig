@@ -3,49 +3,67 @@ mainmenu "Twan Configuration"
 # Hardware
 
 config NUM_CPUS
-    int "Maximum cpu count"
+    int "Num CPUs"
     range 1 1024
     default 32
+    ---help---
+        Maximum CPU count
 
 config NUM_IOAPICS
-    int "IOAPIC count"
+    int "Num IOAPICs"
     range 1 15
     default 1
+    ---help---
+        Maximum IOAPIC count
 
 # Kernel
 
 config KERNEL_SCHED_AGING
-    bool "Enable kernel task aging"
+    bool "Kernel sched aging"
     default n
+    ---help---
+        Enable kernel task aging
 
 config KERNEL_SCHED_GLOBAL_QUEUE
-    bool "Enable global kernel scheduling queue across all cores"
+    bool "Kernel sched global queue"
     default n
+    ---help---
+        Enable global kernel scheduling queue across all cores
 
 config KERNEL_SCHED_TASK_STACK_SIZE
-    int
+    int "Kernel sched task stack size"
     range 2048 4294967295
     default 2048
+    ---help---
+        Stack size for dynamically created kernel tasks
 
 config KERNEL_SCHED_NUM_CRITICALITIES
-    int "Criticality level count for kernel tasks"
+    int "Kernel sched num criticalities"
     range 1 255
     default 5
+    ---help---
+        Criticality level count for kernel tasks
 
 config KERNEL_SCHED_TIME_SLICE_MS
-    int "Kernel task time slice in milliseconds"
+    int "Kernel sched timeslice ms"
     range 1 4294967295
     default 10
+    ---help---
+        Kernel task time slice in milliseconds
 
 config KERNEL_MAX_HEAP_SIZE
-    int "Maximum kernel heap size"
+    int "Kernel maximum heap size"
     range 0 1073741824
     default 1073741824
+    ---help---
+        Maximum amount of memory reserved for kernel heap
 
 config KERNEL_MAX_VMA_PARTITIONS
-    int "Maximum kernel vma partitions"
+    int "Kernel maximum VMA paritions"
     range 2 261632
     default 512
+    ---help---
+        Maximum number of kernel VMA partitions
 
 # Subsys
 
@@ -83,118 +101,147 @@ config SUBSYS_TIMEOUT
 
 if SUBSYS_TWANVISOR
 
-config TWANVISOR_PV_LOCKS
-    bool "Enable kernel paravirtualised locking"
-    default y
+    config TWANVISOR_VSCHED_STRICT
+        bool "Twanvisor strict scheduling"
+        default n
+        ---help---
+            Disable the ability for vcpus to yield or be paused, this config
+            will also disallow the creation of vcpus which boot in a paused
+            state
 
-config TWANVISOR_PV_LOCK_THRESHOLD
-    depends on TWANVISOR_PV_LOCKS
-    int "Number of iterations before making a vcall under lock contention"
-    range 0 4294967295
-    default 32768
+    if !TWANVISOR_VSCHED_STRICT
 
-config TWANVISOR_PV_IPIS
-    bool "Enable kernel paravirtualised ipis"
-    default y
+        config TWANVISOR_PV_LOCKS
+            bool "Paravirt locks"
+            default y
+            ---help---
+                Enable kernel paravirtualised locking
 
-config TWANVISOR_PV_IPI_THRESHOLD
-    depends on TWANVISOR_PV_IPIS
-    int "Number of iterations before making a vcall during ipi's"
-    range 0 4294967295
-    default 32768
+        config TWANVISOR_PV_LOCK_THRESHOLD
+            depends on TWANVISOR_PV_LOCKS
+            int "Paravirt lock threshold"
+            range 0 4294967295
+            default 32768
+            ---help---
+                Number of iterations before making a vcall under lock contention
 
-config TWANVISOR_VIPI_DRAIN_STRICT
-    bool "Enable strict IPI draining"
-    default y
+        config TWANVISOR_PV_IPIS
+            bool "Paravirt IPIs"
+            default y
+            ---help---
+                Enable kernel paravirtualised IPIs
 
-choice 
+        config TWANVISOR_PV_IPI_THRESHOLD
+            depends on TWANVISOR_PV_IPIS
+            int "Paravirt IPI threshold"
+            range 0 4294967295
+            default 32768
+            ---help---
+                Number of iterations before making a vcall during IPIs
 
-    prompt "Twanvisor Scheduler"
-    default TWANVISOR_VSCHED_MCQS
+        config TWANVISOR_VIPI_DRAIN_STRICT
+            bool "Twanvisor strict VIPI draining"
+            default y
+            ---help---
+                Enable strict IPI draining in Twanvisor to mitigate IPI based
+                covert channels
 
-    config TWANVISOR_VSCHED_MCQS
-        bool "Mixed-Criticality Queued scheduler"
+    endif # !TWANVISOR_VSCHED_STRICT
 
-    config TWANVISOR_VSCHED_MCFS
-        bool "Mixed-Criticality Frame scheduler"
+    choice 
 
-endchoice
+        prompt "Twanvisor Scheduler"
+        default TWANVISOR_VSCHED_MCQS
 
-config TWANVISOR_VSCHED_NUM_FRAMES
-    depends on TWANVISOR_VSCHED_MCFS
-    int "Number of MCFS frames"
-    range 1 1024
-    default 512
+        config TWANVISOR_VSCHED_MCQS
+            bool "Mixed-Criticality Queued scheduler"
 
-config TWANVISOR_VSCHED_NUM_CRITICALITIES
-    int "Criticality level count for twanvisor guests"
-    range 1 255
-    default 5
+        config TWANVISOR_VSCHED_MCFS
+            bool "Mixed-Criticality Frame scheduler"
 
-config TWANVISOR_NUM_VTIMERS
-    int "Virtual timer count"
-    range 3 255
-    default 3
+    endchoice
 
-config VDBG_PANIC_ON_BUG
-    bool "Vpanic when VBUG checks flag a bug"
-    default n
+    config TWANVISOR_VSCHED_NUM_FRAMES
+        depends on TWANVISOR_VSCHED_MCFS
+        int "Twanvisor num frames"
+        range 1 1024
+        default 512
+        ---help---
+            Max number of MCFS frames used by Twanvisor
 
-config VDBG_VDYNAMIC_ASSERT
-    bool "Enable twanvisor dynamic assertations"
-    default y
+    config TWANVISOR_VSCHED_NUM_CRITICALITIES
+        int "Twanvisor num criticalities"
+        range 1 255
+        default 5
+        ---help---
+            Criticality level count for twanvisor guests
 
-config MITIGATION_SPECTRE_RSB
-    bool "Enable Spectre-RSB mitigations"
-    default y
+    config TWANVISOR_NUM_VTIMERS
+        int "Twanvisor num vtimers"
+        range 3 255
+        default 3
+        ---help---
+            Number of virtual timers Twanvisor exposes to guests
 
-config MITIGATION_INTRAMODE_BTI
-    bool "Enable mitigations for chaining Branch History Injection to Branch Target Injection"
-    default y
+    config VDBG_PANIC_ON_BUG
+        bool "Vpanic when VBUG checks flag a bug"
+        default n
 
-config MITIGATION_BHI
-    bool "Enable mitigations for Branch History Injection"
-    default y
+    config VDBG_VDYNAMIC_ASSERT
+        bool "Enable twanvisor dynamic assertations"
+        default y
 
-config MITIGATION_BTI
-    bool "Enable mitigations for Branch Target Injection"
-    default y
+    config MITIGATION_SPECTRE_RSB
+        bool "Enable Spectre-RSB mitigations"
+        default y
 
-config MITIGATION_MDS
-    bool "Enable mitigations for Microarchitectural Data Sampling"
-    default y
+    config MITIGATION_INTRAMODE_BTI
+        bool "Enable mitigations for chaining Branch History Injection to Branch Target Injection"
+        default y
 
-config MITIGATION_L1TF
-    bool "Enable mitigations for L1 Terminal Fault"
-    default y
+    config MITIGATION_BHI
+        bool "Enable mitigations for Branch History Injection"
+        default y
 
-config MITIGATION_RETBLEED_S
-    bool "Enable mitigations for retbleed in supervisor modes"
-    default y
+    config MITIGATION_BTI
+        bool "Enable mitigations for Branch Target Injection"
+        default y
 
-config MITIGATION_RETBLEED_U
-    bool "Enable mitigations for retbleed in user modes"
-    default y
+    config MITIGATION_MDS
+        bool "Enable mitigations for Microarchitectural Data Sampling"
+        default y
 
-config DISABLE_SSTLF
-    bool "Disable speculative store to load forwarding"
-    default y
+    config MITIGATION_L1TF
+        bool "Enable mitigations for L1 Terminal Fault"
+        default y
 
-config DISABLE_SSB
-    bool "Disable speculative store bypass"
-    default y
+    config MITIGATION_RETBLEED_S
+        bool "Enable mitigations for retbleed in supervisor modes"
+        default y
 
-config DISABLE_DDP_U
-    bool "Disable data dependant prefetchers in user modes"
-    default n
+    config MITIGATION_RETBLEED_U
+        bool "Enable mitigations for retbleed in user modes"
+        default y
 
-config DISABLE_BRANCH_PREDICTION_S
-    bool "Disable branch prediction in supervisor modes"
-    default n
+    config DISABLE_SSTLF
+        bool "Disable speculative store to load forwarding"
+        default y
 
-config DISABLE_BRANCH_PREDICTION_U
-    bool "Disable branch prediction in user modes"
-    default n
+    config DISABLE_SSB
+        bool "Disable speculative store bypass"
+        default y
+
+    config DISABLE_DDP_U
+        bool "Disable data dependant prefetchers in user modes"
+        default n
+
+    config DISABLE_BRANCH_PREDICTION_S
+        bool "Disable branch prediction in supervisor modes"
+        default n
+
+    config DISABLE_BRANCH_PREDICTION_U
+        bool "Disable branch prediction in user modes"
+        default n
 
 endif # SUBSYS_TWANVISOR
 

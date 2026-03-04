@@ -7,7 +7,7 @@ A lightweight separation kernel designed specifically for adaptability, real-tim
 Twan is intended to serve as foundational infrastructure for building specialized systems rather than as a complete end-user environment. It is designed to be adapted and extended according to specific deployment requirements. It consists of two distinct components:
 
 - **Twanvisor**: A hypervisor that leverages hardware assisted virtualisation to isolate partitions. Guests are paravirtualised and use API's provided by Twanvisor.
-- **TwanRTOS**: Root partition operating system that initializes Twanvisor, manages resources, and controls partition policies.
+- **TwanRTOS**: Trusted root partition operating system that acts as the system orchestrator. It initializes Twanvisor, controls partition policies, and serves as the central manager for hardware and system resources.
 
 > **Note**: Twan is still in early stages of development.
 

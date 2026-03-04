@@ -50,7 +50,7 @@ int vcpu_precheck(struct vcpu *vcpu)
     if (vcpu->preemption_count > 0)
         return -EINVAL;
 
-    if (vcpu->vboot_state != VBOOT_READY && vcpu->vboot_state != VBOOT_PAUSED)
+    if (!vis_vboot_state_valid(vcpu->vboot_state))
         return -EINVAL;
 
     if ((vcpu->arch.io_bitmap_a_phys & 0xfff) != 0)

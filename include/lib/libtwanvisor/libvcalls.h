@@ -1,7 +1,7 @@
 #ifndef _LIBVCALLS_H_
 #define _LIBVCALLS_H_
 
-#include <subsys/twanvisor/vemulate/vcalls.h>
+#include <subsys/twanvisor/vportal/vcalls.h>
 #include <subsys/twanvisor/vsched/vpartition.h>
 
 inline long tv_vcall(u64 id, u64 arg1, u64 arg2, u64 arg3, u64 arg4, u64 arg5,

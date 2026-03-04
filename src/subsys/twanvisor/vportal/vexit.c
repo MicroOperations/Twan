@@ -3,8 +3,8 @@
 
 #include <subsys/twanvisor/vportal/vexit.h>
 #include <subsys/twanvisor/vportal/venter.h>
+#include <subsys/twanvisor/vportal/vcalls.h>
 #include <subsys/twanvisor/vportal/vrecovery.h>
-#include <subsys/twanvisor/vemulate/vcalls.h>
 #include <subsys/twanvisor/vemulate/vemulate_utils.h>
 #include <subsys/twanvisor/vemulate/vinfo.h>
 #include <subsys/twanvisor/visr/vshield.h>
