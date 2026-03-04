@@ -5,12 +5,6 @@
 #include <subsys/twanvisor/vsched/vsched_mcs.h>
 #include <subsys/twanvisor/twanvisor.h>
 
-void __vsched_idle_kick_set(struct vcpu *vcpu)
-{
-    struct vscheduler *vsched = vscheduler_of(vcpu);
-    atomic32_set(&vsched->kick, VSCHED_IDLE_KICK_SET);
-}
-
 #if CONFIG_TWANVISOR_VSCHED_MCQS
 
 struct dq *__vsched_get_bucket(u8 *criticality)
@@ -45,7 +39,7 @@ void __vsched_push(struct vcpu *vcpu)
     for (u32 i = 0; i <= criticality; i++)
         dq_pushback(&vsched->queues[i], &vcpu->vsched_nodes[i]);
 
-    __vsched_idle_kick_set(vcpu);
+    atomic32_set(&vsched->kick, VSCHED_IDLE_KICK_SET);
 }
 
 void __vsched_push_paused(struct vcpu *vcpu)
@@ -201,8 +195,10 @@ void __vsched_dequeue_paused(struct vcpu *vcpu)
 
 void __vsched_unpause(struct vcpu *vcpu)
 {
+    struct vscheduler *vsched = vscheduler_of(vcpu);
+
     vcpu->vsched_metadata.state = VREADY;
-    __vsched_idle_kick_set(vcpu);
+    atomic32_set(&vsched->kick, VSCHED_IDLE_KICK_SET);
 }
 
 void __vsched_update_criticality(struct vcpu *vcpu, u8 criticality)

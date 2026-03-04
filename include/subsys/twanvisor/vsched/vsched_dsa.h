@@ -31,8 +31,6 @@ struct vscheduler
 
 STATIC_ASSERT(CONFIG_TWANVISOR_VSCHED_MCQS + CONFIG_TWANVISOR_VSCHED_MCFS == 1);
 
-void __vsched_idle_kick_set(struct vcpu *vcpu);
-
 #if CONFIG_TWANVISOR_VSCHED_MCQS
 
 struct dq *__vsched_get_bucket(u8 *criticality);

@@ -772,7 +772,7 @@ int vemu_vframe_set(u8 vid, u32 processor_id, u32 frame_id)
 
         vsched->frames[frame_id] = vcpu;
         if (state == VREADY)
-            __vsched_idle_kick_set(vcpu);
+            atomic32_set(&vsched->kick, VSCHED_IDLE_KICK_SET);
 
         ret = 0;
     }
