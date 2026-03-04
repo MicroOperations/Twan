@@ -3,11 +3,7 @@
 
 #include <subsys/twanvisor/varch.h>
 
-typedef enum
-{
-    VIPI_DM_EXTERNAL,
-    VIPI_DM_UNPAUSE
-} vipi_delivery_mode_t;
+/* vcalls */
 
 #define VSUBSCRIBE_EXTERNAL_INTERRUPT_VECTOR 0
 #define VUNSUBSCRIBE_EXTERNAL_INTERRUPT_VECTOR 1
@@ -50,6 +46,11 @@ typedef enum
 
 #define VFRAME_SET 27
 #define VFRAME_UNSET 28
+
+/* vipi ops */
+
+#define VIPI_DM_EXTERNAL 0
+#define VIPI_DM_UNPAUSE 1
 
 /* 
     vcalls follow sysv 
