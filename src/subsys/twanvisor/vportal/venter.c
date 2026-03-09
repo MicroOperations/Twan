@@ -234,8 +234,11 @@ void __venter(void)
         struct mcsnode dispatch_node = INITIALIZE_MCSNODE();
         vmcs_lock_isr_save(&vthis_cpu->dispatch_lock, &dispatch_node);
 
-        if (bmp256_test(subscriptions, external_vector))
+        if (bmp256_test(subscriptions, external_vector) && 
+            !dq_is_queued(dq, node)) {
+                
             dq_pushback(dq, node);
+        }
 
         vmcs_unlock_isr_restore(&vthis_cpu->dispatch_lock, &dispatch_node);
     }

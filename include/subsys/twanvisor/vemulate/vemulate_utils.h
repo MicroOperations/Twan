@@ -200,7 +200,7 @@ inline bool vinject_db(interrupt_type_t int_type, bool deliver_len, u32 len)
                             false, 0, deliver_len, len);
 }
 
-inline int vget_guest_mode(void)
+inline vop_mode_t vget_guest_mode(void)
 {
     cr0_t cr0 = {.val = vmread(VMCS_GUEST_CR0)};
     if (cr0.fields.pe == 0)
@@ -224,7 +224,7 @@ inline int vget_guest_mode(void)
 
 inline void vadvance_guest_rip(void)
 {
-    int mode = vget_guest_mode();
+    vop_mode_t mode = vget_guest_mode();
 
     u64 rip = vmread(VMCS_GUEST_RIP) + 
               vmread(VMCS_RO_VMEXIT_INSTRUCTION_LENGTH);
@@ -458,7 +458,7 @@ inline void vqueue_advance_guest(void)
     current->voperation_queue.pending.fields.should_advance = 1;
 }
 
-inline bool vis_guest_cpl0(int *mode)
+inline bool vis_guest_cpl0(vop_mode_t *mode)
 {
     cr0_t cr0 = {.val = vmread(VMCS_GUEST_CR0)};
     if (cr0.fields.pe == 0) {

@@ -782,7 +782,7 @@ static vcall_func_t vcall_table[] = {
 
 void vcall_dispatcher(struct vregs *vregs)
 {
-    int mode;
+    vop_mode_t mode;
     if (!vis_guest_cpl0(&mode)) {
 
         vcurrent_vcpu_enable_preemption();
@@ -806,23 +806,8 @@ void vcall_dispatcher(struct vregs *vregs)
         ret = INDIRECT_BRANCH_SAFE(func(vregs));
     }
 
-    switch (mode) {
-
-        /* treating ret as 32 bit in 16 bit modes due to LCPs allowing access
-           to eax */
-
-        case VOP_16_BIT:
-        case VOP_32_BIT:
-            ret &= 0xffffffff;
-            break;
-
-        case VOP_64_BIT:
-            break;
-
-        default:
-            VDYNAMIC_ASSERT(false);
-            break;
-    }
+    if (mode != VOP_64_BIT)
+        ret &= 0xffffffff;
 
     vcall_set_retval(vregs, ret);
 }
