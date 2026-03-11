@@ -443,6 +443,7 @@ void vcpu_entry(void)
             .mce = vthis_cpu->feature_flags.fields.mce,
             .smxe = vthis_cpu->feature_flags.fields.smx,
             .osxsave = vthis_cpu->feature_flags.fields.xsave,
+            .pke = vthis_cpu->feature_flags.fields.pke,
             .uintr = vthis_cpu->feature_flags.fields.uintr,
             .fred = vthis_cpu->feature_flags.fields.fred
         }
