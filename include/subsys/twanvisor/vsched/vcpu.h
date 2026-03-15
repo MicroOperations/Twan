@@ -136,7 +136,6 @@ typedef union
     struct 
     {
         u32 in_intl : 16;
-        u32 in_nmi : 1;
         u32 nmi_pending : 1;
         u32 gp0_pending : 1;
         u32 ud_pending : 1;
@@ -146,7 +145,7 @@ typedef union
         u32 int_window_exit : 1;
         u32 nmi_window_exit : 1;
         u32 int_type : 3;
-        u32 reserved0 : 1;
+        u32 reserved0 : 2;
     } fields;
 } vinterrupt_delivery_data_t;
 

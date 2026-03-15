@@ -194,7 +194,6 @@ void __vemu_inject_external_interrupt(struct vcpu *vcpu, u8 vector, bool nmi)
     vinterrupt_delivery_data_t data = vcpu->visr_pending.delivery;
 
     bool nmi_pending = data.fields.nmi_pending != 0;
-    bool nmi_window_exiting = data.fields.nmi_window_exit != 0;
     bool int_window_exiting = data.fields.int_window_exit != 0;
 
     struct bmp256 *pending_interrupts = 
@@ -218,8 +217,7 @@ void __vemu_inject_external_interrupt(struct vcpu *vcpu, u8 vector, bool nmi)
 
             if (nmi) {
 
-                if (data.fields.in_nmi == 0 || !nmi_window_exiting)
-                    vipi_async(vprocessor_id);
+                vipi_async(vprocessor_id);
 
             } else if (!int_window_exiting) {
 

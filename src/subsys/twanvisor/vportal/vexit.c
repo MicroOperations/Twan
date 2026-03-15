@@ -243,14 +243,6 @@ static void vexit_ext_intr(__unused struct vregs *vregs)
     vcurrent_vcpu_enable_preemption();
 }
 
-static void vexit_nmi_window(__unused struct vregs *vregs)
-{
-    vcurrent_vcpu_enable_preemption();
-
-    struct vcpu *current = vcurrent_vcpu();
-    vout_nmi(current);
-}
-
 static void vexit_cpuid(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
@@ -259,7 +251,7 @@ static void vexit_cpuid(struct vregs *vregs)
     u32 ebx = vregs->regs.rbx & 0xffffffff;
     u32 ecx = vregs->regs.rcx & 0xffffffff;
     u32 edx = vregs->regs.rdx & 0xffffffff;
-    
+
     u32 leaf = eax;
     u32 subleaf = ecx;
 
@@ -713,7 +705,7 @@ static vexit_func_t vexit_table[] = {
     [EXIT_REASON_INIT] = vexit_failure_recover,
     [EXIT_REASON_SIPI] = vexit_failure_recover,
     [EXIT_REASON_INTR_WINDOW] = vexit_nop,
-    [EXIT_REASON_NMI_WINDOW] = vexit_nmi_window,
+    [EXIT_REASON_NMI_WINDOW] = vexit_nop,
     [EXIT_REASON_TASK_SWITCH] = vexit_gp0,
     [EXIT_REASON_CPUID] = vexit_cpuid,
     [EXIT_REASON_GETSEC] = vexit_ud,
