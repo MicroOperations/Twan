@@ -3,12 +3,11 @@
 
 #include <compiler.h>
 
-#if !VERSION_C23
-
-    typedef int bool;
+#ifndef __bool_true_false_are_defined
+    typedef _Bool bool;
     #define true 1
     #define false 0
-    
+    #define __bool_true_false_are_defined 1
 #endif
 
 #if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L

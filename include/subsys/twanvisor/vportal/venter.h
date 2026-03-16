@@ -5,10 +5,11 @@
 
 typedef enum 
 {
-    VINJECT_EXCEPTION,
-    VINJECT_NMI,
-    VINJECT_WAITING,
     VINJECT_NONE,
+    VINJECTED_EXCEPTION,
+    VINJECTED_NMI,
+    VNMI_WINDOW_EXITING,
+    VINT_WINDOW_EXITING,
 } venter_inject_state_t;
 
 void __venter(void);

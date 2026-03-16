@@ -97,13 +97,13 @@ void __venter(void)
 
         vinject_gp(0);
         current->visr_pending.delivery.fields.gp0_pending = 0;
-        state = VINJECT_EXCEPTION;
+        state = VINJECTED_EXCEPTION;
 
     } else if (ud_pending) {
 
         vinject_ud();
         current->visr_pending.delivery.fields.ud_pending = 0;
-        state = VINJECT_EXCEPTION;
+        state = VINJECTED_EXCEPTION;
 
     } else if (db_pending) {
 
@@ -130,20 +130,20 @@ void __venter(void)
         }
 
         current->visr_pending.delivery.fields.db_pending = 0;
-        state = VINJECT_EXCEPTION;
+        state = VINJECTED_EXCEPTION;
 
     } else if (ac0_pending) {
 
         vinject_ac(0);
         current->visr_pending.delivery.fields.ac0_pending = 0;
-        state = VINJECT_EXCEPTION;
+        state = VINJECTED_EXCEPTION;
     } 
     
     if (nmi_pending) {
 
-        if (vis_nmis_blocked() || state == VINJECT_EXCEPTION) {
+        if (vis_nmis_blocked() || state == VINJECTED_EXCEPTION) {
 
-            vset_nmi_window_exiting(true);
+            state = VNMI_WINDOW_EXITING;
 
         } else {
 
@@ -151,9 +151,8 @@ void __venter(void)
 
             current->visr_pending.delivery.fields.nmi_pending = 0;
             external_vector = NMI;
+            state = VINJECTED_NMI;
         }
-
-        state = VINJECT_NMI;
     } 
 
     if (pending_vector >= 0) {
@@ -161,20 +160,16 @@ void __venter(void)
         int pending_intl = vector_to_intl(pending_vector);
         if (pending_intl > serviced_intl && pending_intl >= current_intl) {
 
-            if (vis_in_nmi() || state == VINJECT_NMI) {
+            if (vis_in_nmi() || state == VINJECTED_NMI) {
 
-                vset_nmi_window_exiting(true);
-                vset_int_window_exiting(false);
-                state = VINJECT_WAITING;
+                state = VNMI_WINDOW_EXITING;
 
             } else if (vis_external_interrupts_blocked() || 
-                       state == VINJECT_EXCEPTION) {
+                       state == VINJECTED_EXCEPTION) {
 
-                vset_nmi_window_exiting(false);
-                vset_int_window_exiting(true);
-                state = VINJECT_WAITING;
+                state = VINT_WINDOW_EXITING;
                 
-            } else {
+            } else if (state == VINJECT_NONE) {
 
                 vinject_interrupt_external(pending_vector, false);
 
@@ -182,7 +177,6 @@ void __venter(void)
                 bmp256_unset(pending, pending_vector);
                 current->visr_pending.delivery.fields.in_intl |= mask;
                 external_vector = pending_vector;
-                state = VINJECT_NONE;
             }
         }
     }
@@ -191,10 +185,8 @@ void __venter(void)
 
     /* when we are no longer using interrupt windows, we can disable them */
 
-    if (state == VINJECT_NONE) {
-        vset_nmi_window_exiting(false);
-        vset_int_window_exiting(false);
-    }
+    vset_nmi_window_exiting(state == VNMI_WINDOW_EXITING);
+    vset_int_window_exiting(state == VINT_WINDOW_EXITING);
 
     /* requeue the vcpu if it is subscribed to receive events from the vector */
     if (external_vector != -1) {
