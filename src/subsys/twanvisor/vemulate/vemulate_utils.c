@@ -194,44 +194,37 @@ void __vemu_inject_external_interrupt(struct vcpu *vcpu, u8 vector, bool nmi)
     vinterrupt_delivery_data_t data = vcpu->visr_pending.delivery;
 
     bool nmi_pending = data.fields.nmi_pending != 0;
+    bool nmi_window_exiting = data.fields.nmi_window_exit != 0;
     bool int_window_exiting = data.fields.int_window_exit != 0;
 
-    struct bmp256 *pending_interrupts = 
-        &vcpu->visr_pending.pending_external_interrupts;
+    /* not even worth deqeuing from its dispatcher once setting it as 
+       pending here, due to overhead from contending for the dispatcher
+       lock */
 
-    bool can_inject = nmi ? !nmi_pending : 
-                            !bmp256_test(pending_interrupts, vector);
+    __vemu_set_interrupt_pending(vcpu, vector, nmi);
+    
+    /* check if we should force a vmexit for the interrupt to be injected if 
+       the vcpu is running */
 
-    if (can_inject) {
+    if (vcpu->vsched_metadata.state == VRUNNING) {
 
-        /* not even worth deqeuing from its dispatcher once setting it as 
-           pending here, due to overhead from contending for the dispatcher
-           lock */
+        if (nmi) {
 
-        __vemu_set_interrupt_pending(vcpu, vector, nmi);
-
-        /* check if we should force a vmexit for the interrupt to be injected if 
-           the vcpu is running */
-
-        if (vcpu->vsched_metadata.state == VRUNNING) {
-
-            if (nmi) {
-
+            if (!nmi_pending && !nmi_window_exiting)
                 vipi_async(vprocessor_id);
 
-            } else if (!int_window_exiting) {
+        } else if (!int_window_exiting) {
 
-                u32 in_intl = data.fields.in_intl;
-                int current_intl = data.fields.intl;
+            u32 in_intl = data.fields.in_intl;
+            int current_intl = data.fields.intl;
 
-                int serviced_intl = fls32(in_intl);
-                int intl = vector_to_intl(vector);
+            int serviced_intl = fls32(in_intl);
+            int intl = vector_to_intl(vector);
 
-                if (intl > serviced_intl &&  intl >= current_intl)
-                    vipi_async(vprocessor_id);
-            }
-        } 
-    }
+            if (intl > serviced_intl &&  intl >= current_intl)
+                vipi_async(vprocessor_id);
+        }
+    } 
 
     vmcs_unlock_isr_restore(&vcpu->visr_pending.lock, &pending_node);
     vmcs_unlock_isr_restore(&vsched->lock, &vsched_node);

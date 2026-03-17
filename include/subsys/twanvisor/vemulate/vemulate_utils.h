@@ -550,38 +550,6 @@ inline void vset_intl(struct vcpu *vcpu, intl_t intl)
     vmcs_unlock_isr_restore(&vcpu->visr_pending.lock, &node);
 }
 
-inline void vset_nmi_window_exiting(bool on)
-{
-    struct vcpu *current = vcurrent_vcpu();
-
-    if (current->visr_pending.delivery.fields.nmi_window_exit == on)
-        return;
-
-    vmx_procbased_ctls_t proc = {
-        .val = vmread(VMCS_CTRL_PROCBASED_CTLS)
-    };
-
-    proc.fields.nmi_window_exiting = on;
-    __vmwrite(VMCS_CTRL_PROCBASED_CTLS, proc.val);
-    current->visr_pending.delivery.fields.nmi_window_exit = on;
-}
-
-inline void vset_int_window_exiting(bool on)
-{
-    struct vcpu *current = vcurrent_vcpu();
-
-    if (current->visr_pending.delivery.fields.int_window_exit == on)
-        return;
-
-    vmx_procbased_ctls_t proc = {
-        .val = vmread(VMCS_CTRL_PROCBASED_CTLS)
-    };
-   
-    proc.fields.interrupt_window_exiting = on;
-    __vmwrite(VMCS_CTRL_PROCBASED_CTLS, proc.val);
-    current->visr_pending.delivery.fields.int_window_exit = on;
-}
-
 inline bool vis_in_nmi(void)
 {
     guest_interruptibility_state_t state = {

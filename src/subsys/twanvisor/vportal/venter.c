@@ -86,6 +86,9 @@ void __venter(void)
     bool ac0_pending = data.fields.ac0_pending != 0;
     bool nmi_pending = data.fields.nmi_pending != 0;
 
+    bool nmi_window_exiting = data.fields.nmi_window_exit != 0;
+    bool int_window_exiting = data.fields.int_window_exit != 0;
+
     struct bmp256 *pending = &current->visr_pending.pending_external_interrupts;
     int current_intl = current->visr_pending.delivery.fields.intl;
     int serviced_intl = fls32(current->visr_pending.delivery.fields.in_intl);
@@ -182,10 +185,29 @@ void __venter(void)
         }
     }
 
-    vmcs_unlock_isr_restore(&current->visr_pending.lock, &pending_node);
+    bool new_nmi_window_exiting = state == VNMI_WINDOW_EXITING;
+    bool new_int_window_exiting = state == VINT_WINDOW_EXITING;
 
-    vset_nmi_window_exiting(state == VNMI_WINDOW_EXITING);
-    vset_int_window_exiting(state == VINT_WINDOW_EXITING);
+    if (new_nmi_window_exiting != nmi_window_exiting ||
+        new_int_window_exiting != int_window_exiting) {
+
+        vmx_procbased_ctls_t proc = {
+            .val = vmread(VMCS_CTRL_PROCBASED_CTLS)
+        };
+
+        proc.fields.nmi_window_exiting = new_nmi_window_exiting;
+        proc.fields.interrupt_window_exiting = new_int_window_exiting;
+        
+        __vmwrite(VMCS_CTRL_PROCBASED_CTLS, proc.val);
+
+        current->visr_pending.delivery.fields.nmi_window_exit = 
+            new_nmi_window_exiting;
+        
+        current->visr_pending.delivery.fields.int_window_exit = 
+            new_int_window_exiting;
+    }
+
+    vmcs_unlock_isr_restore(&current->visr_pending.lock, &pending_node);
 
     /* requeue the vcpu if it is subscribed to receive events from the vector */
     if (external_vector != -1) {
