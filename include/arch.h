@@ -65,7 +65,7 @@
     
 .endm
 
-/* stack must be 16 byte aligned before calling, this will ;eave the stack in a 
+/* stack must be 16 byte aligned before calling, this will leave the stack in a 
    misaligned state */
 .macro PUSH_REGS
 
