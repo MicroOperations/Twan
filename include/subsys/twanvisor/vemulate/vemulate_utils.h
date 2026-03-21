@@ -26,6 +26,64 @@ typedef enum
 #define MSR_WRITE_LOW 2048
 #define MSR_WRITE_HIGH 3072
 
+u64 vlapic_read(u32 offset);
+void vlapic_write(u32 offset, u64 val);
+
+void vtrap_msr_write(struct vcpu *vcpu, u32 msr);
+void vtrap_msr_read(struct vcpu *vcpu, u32 msr);
+void vtrap_msr(struct vcpu *vcpu, u32 msr);
+
+void __vemu_set_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi);
+int vemu_set_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi);
+
+bool vemu_is_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi);
+
+int __vemu_unpause_vcpu(struct vcpu *vcpu, bool inject, u8 vector, bool nmi);
+int vemu_unpause_vcpu_local(u32 processor_id, bool inject, u8 vector, bool nmi);
+
+int vemu_unpause_vcpu_far(u8 target_vid, u32 processor_id, bool inject, 
+                          u8 vector, bool nmi);
+
+void __vemu_inject_external_interrupt(struct vcpu *vcpu, u8 vector, bool nmi);
+int vemu_inject_external_interrupt_local(u32 processor_id, u8 vector, bool nmi);
+
+int vemu_inject_external_interrupt_far(u8 target_vid, u32 processor_id, 
+                                       u32 vector, bool nmi);
+                                       
+int vemu_tlb_invalidate(u8 target_vid);
+
+int vemu_alter_vcpu(u8 vid, u32 processor_id, bool alter_ticks, u32 ticks, 
+                    bool alter_criticality, u8 criticality);
+
+u8 __vemu_read_vcpu_state(struct vcpu *vcpu);
+int vemu_read_vcpu_state_local(u32 processor_id);
+int vemu_read_vcpu_state_far(u8 target_vid, u32 processor_id);
+
+int vemu_set_route(u8 target_vid, u8 sender_vid, vroute_type_t route_type, 
+                   bool allow);
+
+int vemu_set_vcpu_subscription_perms(u8 vid, u32 processor_id, u8 vector,
+                                     bool allow);
+
+int vemu_set_criticality_perm(u8 vid, u32 physical_processor_id, 
+                              vcriticality_perm_t perm); 
+
+int vemu_read_criticality_level(u8 requester_vid, u32 physical_processor_id);
+
+int vemu_write_criticality_level(u8 requester_vid, u32 physical_processor_id, 
+                                 u8 criticality_level);   
+                                 
+void __vemu_pv_spin_kick(struct vcpu *vcpu);
+int vemu_pv_spin_kick_local(u32 processor_id);
+int vemu_pv_spin_kick_far(u8 target_vid, u32 processor_id);
+
+#if CONFIG_TWANVISOR_VSCHED_MCFS
+
+int vemu_vframe_set(u8 vid, u32 processor_id, u32 frame_id);
+int vemu_vframe_unset(u32 physical_processor_id, u32 frame_id);
+
+#endif
+
 inline void vtrap_io(struct vcpu *vcpu, u16 port)
 {
     if (port < 0x8000) 
@@ -175,31 +233,6 @@ inline bool vinject_interrupt(u8 vector, interrupt_type_t type,
     return true;
 }
 
-inline bool vinject_gp(u64 errcode)
-{
-    return vinject_interrupt(GENERAL_PROTECTION_FAULT, 
-                            INTERRUPT_TYPE_HARDWARE_EXCEPTION, true, errcode,
-                            false, 0);
-}
-
-inline bool vinject_ud(void)
-{
-    return vinject_interrupt(INVALID_OPCODE, INTERRUPT_TYPE_HARDWARE_EXCEPTION,
-                            false, 0, false, 0);
-}
-
-inline bool vinject_ac(u64 errcode)
-{
-    return vinject_interrupt(ALIGNMENT_CHECK, INTERRUPT_TYPE_HARDWARE_EXCEPTION,
-                            true, errcode, false, 0);
-}
-
-inline bool vinject_db(interrupt_type_t int_type, bool deliver_len, u32 len)
-{
-    return vinject_interrupt(DEBUG_EXCEPTION, int_type,
-                            false, 0, deliver_len, len);
-}
-
 inline vop_mode_t vget_guest_mode(void)
 {
     cr0_t cr0 = {.val = vmread(VMCS_GUEST_CR0)};
@@ -287,9 +320,6 @@ inline cr4_t vadjust_cr4(cr4_t cr4)
 
     return cr4;
 }
-
-u64 vlapic_read(u32 offset);
-void vlapic_write(u32 offset, u64 val);
 
 inline void vset_lapic_oneshot(u8 vector, u64 ticks, lapic_dcr_config_t dcr)
 {
@@ -502,52 +532,111 @@ inline bool vis_guest_cpl0(vop_mode_t *mode)
     return true;
 }
 
-inline void vqueue_inject_gp0(void)
+inline void vqueue_idt_vectoring_info(vectored_events_info_t info)
 {
     struct vcpu *current = vcurrent_vcpu();
-    
-    struct mcsnode node = INITIALIZE_MCSNODE();
-    vmcs_lock_isr_save(&current->visr_pending.lock, &node);
-    current->visr_pending.delivery.fields.gp0_pending = 1;
-    vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
+
+    interrupt_type_t int_type = info.fields.vectored_event_type;
+    u8 vector = info.fields.vector;
+
+    switch (int_type) {
+
+        case INTERRUPT_TYPE_EXTERNAL:
+            vemu_set_interrupt_pending(current, vector, vector == NMI);
+            break;
+
+	    case INTERRUPT_TYPE_NMI:
+            vemu_set_interrupt_pending(current, NMI, true);
+            break;
+
+	    case INTERRUPT_TYPE_HARDWARE_EXCEPTION:
+	    case INTERRUPT_TYPE_SOFTWARE_INT:
+	    case INTERRUPT_TYPE_PRIV_SOFTWARE_EXCEPTION:
+	    case INTERRUPT_TYPE_SOFTWARE_EXCEPTION:
+	    case INTERRUPT_TYPE_OTHER_EVENT:
+
+            VDYNAMIC_ASSERT(current->voperation_queue.
+                                pending.fields.idt_vectoring == 0);
+
+            current->voperation_queue.pending.fields.idt_vectoring = 1;
+            current->voperation_queue.idt_vectoring_info = info;
+            break;
+
+        default:
+            VDYNAMIC_ASSERT(false);
+            break;
+    }
+}
+
+inline void vqueue_synthetic_errcode(u64 errcode)
+{
+    struct vcpu *current = vcurrent_vcpu();
+    current->voperation_queue.pending.fields.use_synth_errcode = 1;
+    current->voperation_queue.synth_errcode = errcode;
+}
+
+inline void vqueue_inject_gp0(void)
+{
+    vectored_events_info_t info = {
+        .fields = {
+            .vectored_event_type = INTERRUPT_TYPE_HARDWARE_EXCEPTION,
+            .vector = GENERAL_PROTECTION_FAULT
+        }
+    };
+
+    vqueue_idt_vectoring_info(info);
+    vqueue_synthetic_errcode(0);
 }
 
 inline void vqueue_inject_ud(void)
 {
-    struct vcpu *current = vcurrent_vcpu();
-    
-    struct mcsnode node = INITIALIZE_MCSNODE();
-    vmcs_lock_isr_save(&current->visr_pending.lock, &node);
-    current->visr_pending.delivery.fields.ud_pending = 1;
-    vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
+    vectored_events_info_t info = {
+        .fields = {
+            .vectored_event_type = INTERRUPT_TYPE_HARDWARE_EXCEPTION,
+            .vector = INVALID_OPCODE
+        }
+    };
+
+    vqueue_idt_vectoring_info(info);
 }
 
 inline void vqueue_inject_db(interrupt_type_t int_type)
 {
-    struct vcpu *current = vcurrent_vcpu();
-    
-    struct mcsnode node = INITIALIZE_MCSNODE();
-    vmcs_lock_isr_save(&current->visr_pending.lock, &node);
+    vectored_events_info_t info = {
+        .fields = {
+            .vectored_event_type = int_type,
+            .vector = DEBUG_EXCEPTION
+        }
+    };
 
-    current->visr_pending.delivery.fields.db_pending = 1;
-    current->visr_pending.delivery.fields.int_type = int_type;
-
-    vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
+    vqueue_idt_vectoring_info(info);
 }
 
 inline void vqueue_inject_ac0(void)
 {
+    vectored_events_info_t info = {
+        .fields = {
+            .vectored_event_type = INTERRUPT_TYPE_HARDWARE_EXCEPTION,
+            .vector = ALIGNMENT_CHECK
+        }
+    };
+
+    vqueue_idt_vectoring_info(info);
+    vqueue_synthetic_errcode(0);
+}
+
+inline void vqueue_vmwrite_cr0(cr0_t cr0)
+{
     struct vcpu *current = vcurrent_vcpu();
-    
-    struct mcsnode node = INITIALIZE_MCSNODE();
-    vmcs_lock_isr_save(&current->visr_pending.lock, &node);
-    current->visr_pending.delivery.fields.ac0_pending = 1;
-    vmcs_unlock_isr_restore(&current->visr_pending.lock, &node);
+
+    current->voperation_queue.pending.fields.vmwrite_cr0 = 1;
+    current->voperation_queue.cr0 = cr0;    
 }
 
 inline void vqueue_vmwrite_cr4(cr4_t cr4)
 {
     struct vcpu *current = vcurrent_vcpu();
+
     current->voperation_queue.pending.fields.vmwrite_cr4 = 1;
     current->voperation_queue.cr4 = cr4;    
 }
@@ -594,60 +683,5 @@ inline bool vis_external_interrupts_blocked(void)
 
     return state.fields.sti_blocking != 0 || state.fields.mov_ss_blocking != 0;
 }
-
-void vtrap_msr_write(struct vcpu *vcpu, u32 msr);
-void vtrap_msr_read(struct vcpu *vcpu, u32 msr);
-void vtrap_msr(struct vcpu *vcpu, u32 msr);
-
-void __vemu_set_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi);
-int vemu_set_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi);
-
-bool vemu_is_interrupt_pending(struct vcpu *vcpu, u8 vector, bool nmi);
-
-int __vemu_unpause_vcpu(struct vcpu *vcpu, bool inject, u8 vector, bool nmi);
-int vemu_unpause_vcpu_local(u32 processor_id, bool inject, u8 vector, bool nmi);
-
-int vemu_unpause_vcpu_far(u8 target_vid, u32 processor_id, bool inject, 
-                          u8 vector, bool nmi);
-
-void __vemu_inject_external_interrupt(struct vcpu *vcpu, u8 vector, bool nmi);
-int vemu_inject_external_interrupt_local(u32 processor_id, u8 vector, bool nmi);
-
-int vemu_inject_external_interrupt_far(u8 target_vid, u32 processor_id, 
-                                       u32 vector, bool nmi);
-                                       
-int vemu_tlb_invalidate(u8 target_vid);
-
-int vemu_alter_vcpu(u8 vid, u32 processor_id, bool alter_ticks, u32 ticks, 
-                    bool alter_criticality, u8 criticality);
-
-u8 __vemu_read_vcpu_state(struct vcpu *vcpu);
-int vemu_read_vcpu_state_local(u32 processor_id);
-int vemu_read_vcpu_state_far(u8 target_vid, u32 processor_id);
-
-int vemu_set_route(u8 target_vid, u8 sender_vid, vroute_type_t route_type, 
-                   bool allow);
-
-int vemu_set_vcpu_subscription_perms(u8 vid, u32 processor_id, u8 vector,
-                                     bool allow);
-
-int vemu_set_criticality_perm(u8 vid, u32 physical_processor_id, 
-                              vcriticality_perm_t perm); 
-
-int vemu_read_criticality_level(u8 requester_vid, u32 physical_processor_id);
-
-int vemu_write_criticality_level(u8 requester_vid, u32 physical_processor_id, 
-                                 u8 criticality_level);   
-                                 
-void __vemu_pv_spin_kick(struct vcpu *vcpu);
-int vemu_pv_spin_kick_local(u32 processor_id);
-int vemu_pv_spin_kick_far(u8 target_vid, u32 processor_id);
-
-#if CONFIG_TWANVISOR_VSCHED_MCFS
-
-int vemu_vframe_set(u8 vid, u32 processor_id, u32 frame_id);
-int vemu_vframe_unset(u32 physical_processor_id, u32 frame_id);
-
-#endif
 
 #endif

@@ -445,6 +445,15 @@ void vcpu_entry(void)
         }
     };
 
+    cr0_t cr0_mask = {
+        .fields = {
+            .cd = 1,
+            .nw = 1,
+        }
+    };
+
+    cr0_t cr0_shadow = {0};
+
     cr4_t cr4_mask = {
         .fields = {
             .vmxe = 1,
@@ -463,6 +472,9 @@ void vcpu_entry(void)
         }
     };
     
+    __vmwrite(VMCS_CTRL_CR0_GUEST_HOST_MASK, cr0_mask.val);
+    __vmwrite(VMCS_CTRL_CR0_READ_SHADOW, cr0_shadow.val);
+
     __vmwrite(VMCS_CTRL_CR4_GUEST_HOST_MASK, cr4_mask.val);
     __vmwrite(VMCS_CTRL_CR4_READ_SHADOW, cr4_shadow.val);
 

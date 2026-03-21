@@ -183,13 +183,19 @@ static void vexit_exception(__unused struct vregs *vregs)
         .val = vmread32(VMCS_RO_VMEXIT_INTERRUPT_INFO)
     };
 
+    vectored_events_info_t idt_vectoring_info = {
+        .val = vmread32(VMCS_RO_IDT_VECTORING_INFO_FIELD)
+    };
+
+    VDYNAMIC_ASSERT(info.fields.valid != 0);
+
     if (info.fields.nmi_unblocking != 0) {
 
         guest_interruptibility_state_t state = {
             .val = vmread32(VMCS_GUEST_INTERRUPTIBILITY_STATE)
         };
 
-        state.fields.nmi_blocking = 0;
+        state.fields.nmi_blocking = 1;
         __vmwrite(VMCS_GUEST_INTERRUPTIBILITY_STATE, state.val);
     }
 
@@ -216,6 +222,9 @@ static void vexit_exception(__unused struct vregs *vregs)
     }
     
     vcurrent_vcpu_enable_preemption();
+
+    if (idt_vectoring_info.fields.valid != 0)
+        vqueue_idt_vectoring_info(idt_vectoring_info);    
 }
 
 static void vexit_ext_intr(__unused struct vregs *vregs)
@@ -224,23 +233,29 @@ static void vexit_ext_intr(__unused struct vregs *vregs)
         .val = vmread32(VMCS_RO_VMEXIT_INTERRUPT_INFO)
     };
 
+    vectored_events_info_t idt_vectoring_info = {
+        .val = vmread32(VMCS_RO_IDT_VECTORING_INFO_FIELD)
+    };
+
+    VDYNAMIC_ASSERT(info.fields.valid != 0);
+    VDYNAMIC_ASSERT(info.fields.vectored_event_type == INTERRUPT_TYPE_EXTERNAL);
+
     if (info.fields.nmi_unblocking != 0) {
 
         guest_interruptibility_state_t state = {
             .val = vmread32(VMCS_GUEST_INTERRUPTIBILITY_STATE)
         };
 
-        if (state.fields.nmi_blocking != 0) {
-            state.fields.nmi_blocking = 0;
-            __vmwrite(VMCS_GUEST_INTERRUPTIBILITY_STATE, state.val);
-        }
+        state.fields.nmi_blocking = 1;
+        __vmwrite(VMCS_GUEST_INTERRUPTIBILITY_STATE, state.val);
     }
-    
-    VDYNAMIC_ASSERT(info.fields.vectored_event_type == INTERRUPT_TYPE_EXTERNAL);
     
     vexit_ext_dispatcher(info.fields.vector);
     
     vcurrent_vcpu_enable_preemption();
+
+    if (idt_vectoring_info.fields.valid != 0)
+        vqueue_idt_vectoring_info(idt_vectoring_info);
 }
 
 static void vexit_cpuid(struct vregs *vregs)
@@ -413,9 +428,26 @@ static void vexit_cr_access(struct vregs *vregs)
 
     struct vcpu *current = vcurrent_vcpu();
 
-    u32 cr = qual.fields.cr;
+    u64 val = vgpr_val(vregs, qual.fields.gpr);
+    int valid = 1;
 
+    u32 cr = qual.fields.cr;
     switch (cr) {
+
+        case 0:
+          
+            cr0_t cr0 = {.val = val};
+
+            valid &= cr0.fields.cd == 0;
+            valid &= cr0.fields.nw == 0;
+
+            if (valid == 0) {
+                vqueue_inject_gp0();
+                return;
+            }
+
+            vqueue_vmwrite_cr0(cr0);
+            break;
 
         case 4:
 
@@ -423,12 +455,11 @@ static void vexit_cr_access(struct vregs *vregs)
                guest, guest should use cpuid to enumerate support for nested
                virtualisation anyway */
 
-            cr4_t cr4 = {.val = vgpr_val(vregs, qual.fields.gpr)};
+            cr4_t cr4 = {.val = val};
             cr4.fields.vmxe = 1;
 
             vper_cpu_feature_flags_t features = vthis_cpu_data()->feature_flags;
 
-            int valid = 1;
             valid &= cr4.fields.mce == 0;
             valid &= features.fields.umip != 0 || cr4.fields.umip == 0;
             valid &= features.fields.la57 != 0 || cr4.fields.la57 == 0;
@@ -461,20 +492,21 @@ static void vexit_cr_access(struct vregs *vregs)
 
         case 8:
 
-            cr8_t val = {.val = vgpr_val(vregs, qual.fields.gpr)};
+            cr8_t cr8 = {.val = val};
 
-            if (val.fields.reserved0 != 0) {
+            if (cr8.fields.reserved0 != 0) {
                 vqueue_inject_gp0();
                 return;
             }
 
-            vregs->regs.cr8 = val.val;
-            intl_t intl = {.val = val.val};
+            vregs->regs.cr8 = cr8.val;
+            intl_t intl = {.val = cr8.val};
 
             vset_intl(current, intl);
             break;
 
         default:
+            VDYNAMIC_ASSERT(false);
             break;
     }
 

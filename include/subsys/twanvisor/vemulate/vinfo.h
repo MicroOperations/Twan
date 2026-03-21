@@ -300,7 +300,9 @@ typedef union
         u32 wbinvd_nop : 1;
         u32 invd_nop : 1;
         u32 cache_topology_valid : 1;
-        u32 reserved0 : 23;
+        u32 cd_gp : 1;
+        u32 nw_gp : 1;
+        u32 reserved0 : 21;
     } fields;
 } vcpuid_emulation_features0_b_t;
 

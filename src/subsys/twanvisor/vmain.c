@@ -914,6 +914,15 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
     cr3_t guest_cr3 = cr3;
     cr4_t guest_cr4 = cr4;
 
+    cr0_t cr0_mask = {
+        .fields = {
+            .cd = 1,
+            .nw = 1,
+        }
+    };
+
+    cr0_t cr0_shadow = {0};
+
     cr4_t cr4_mask = {
         .fields = {
             .vmxe = 1,
@@ -931,6 +940,9 @@ void __do_virtualise_core(u32 vprocessor_id, u64 rip, u64 rsp, rflags_t rflags)
             .vmxe = 1
         }
     };
+
+    __vmwrite(VMCS_CTRL_CR0_GUEST_HOST_MASK, cr0_mask.val);
+    __vmwrite(VMCS_CTRL_CR0_READ_SHADOW, cr0_shadow.val);
 
     __vmwrite(VMCS_CTRL_CR4_GUEST_HOST_MASK, cr4_mask.val);
     __vmwrite(VMCS_CTRL_CR4_READ_SHADOW, cr4_shadow.val);

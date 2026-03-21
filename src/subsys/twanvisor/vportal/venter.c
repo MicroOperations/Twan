@@ -54,11 +54,25 @@ void __venter(void)
 
     /* carry out all pending operations */
 
+    bool idt_vectoring = 
+        current->voperation_queue.pending.fields.idt_vectoring != 0;
+
+    vectored_events_info_t idt_vectoring_info = 
+        current->voperation_queue.idt_vectoring_info;
+
+    bool use_synthetic_errcode = 
+        current->voperation_queue.pending.fields.use_synth_errcode != 0;
+
+    u64 synthetic_errcode = current->voperation_queue.synth_errcode;
+
     if (invvpid)
         invvpid_single(vpid.fields.vpid);
 
     if (reearm)
         vsched_arm_timer(ticks);
+
+    if (current->voperation_queue.pending.fields.vmwrite_cr0 != 0)
+        __vmwrite(VMCS_GUEST_CR0, current->voperation_queue.cr0.val);
 
     if (current->voperation_queue.pending.fields.vmwrite_cr4 != 0)
         __vmwrite(VMCS_GUEST_CR4, current->voperation_queue.cr4.val);
@@ -77,13 +91,6 @@ void __venter(void)
 
     vinterrupt_delivery_data_t data = current->visr_pending.delivery;
 
-    VDYNAMIC_ASSERT((data.fields.gp0_pending + data.fields.ud_pending +
-                     data.fields.db_pending + data.fields.ac0_pending) <= 1);
-
-    bool gp0_pending = data.fields.gp0_pending != 0;
-    bool ud_pending = data.fields.ud_pending != 0;
-    bool db_pending = data.fields.db_pending != 0;
-    bool ac0_pending = data.fields.ac0_pending != 0;
     bool nmi_pending = data.fields.nmi_pending != 0;
 
     bool nmi_window_exiting = data.fields.nmi_window_exit != 0;
@@ -96,52 +103,30 @@ void __venter(void)
 
     venter_inject_state_t state = VINJECT_NONE;
 
-    if (gp0_pending) {
+    if (idt_vectoring) {
 
-        vinject_gp(0);
-        current->visr_pending.delivery.fields.gp0_pending = 0;
-        state = VINJECTED_EXCEPTION;
+        interrupt_type_t int_type = 
+            idt_vectoring_info.fields.vectored_event_type;
 
-    } else if (ud_pending) {
+        u8 vector = idt_vectoring_info.fields.vector;
+        bool errcode_valid = idt_vectoring_info.fields.errcode_delivered != 0;
 
-        vinject_ud();
-        current->visr_pending.delivery.fields.ud_pending = 0;
-        state = VINJECTED_EXCEPTION;
+        u64 errcode = errcode_valid ? vmread(VMCS_RO_IDT_VECTORING_ERROR_CODE) :
+                      use_synthetic_errcode ? synthetic_errcode : 0;
 
-    } else if (db_pending) {
+        bool len_valid = int_type == INTERRUPT_TYPE_SOFTWARE_INT ||
+                         int_type == INTERRUPT_TYPE_PRIV_SOFTWARE_EXCEPTION ||
+                         int_type == INTERRUPT_TYPE_SOFTWARE_EXCEPTION;
 
-        u32 int_type = data.fields.int_type;
+        u32 len = len_valid ? vmread(VMCS_RO_VMEXIT_INSTRUCTION_LENGTH) : 0;
 
-        switch (int_type) {
-        
-            case INTERRUPT_TYPE_HARDWARE_EXCEPTION:
+        vinject_interrupt(vector, int_type, 
+                          errcode_valid || use_synthetic_errcode, errcode,
+                          len_valid, len);
 
-                vinject_db(int_type, false, 0);
-                break;
-
-            case INTERRUPT_TYPE_SOFTWARE_INT:
-            case INTERRUPT_TYPE_PRIVILEGED_SOFTWARE_EXCEPTION:
-            case INTERRUPT_TYPE_SOFTWARE_EXCEPTION:
-
-                u32 len = vmread(VMCS_RO_VMEXIT_INSTRUCTION_LENGTH);
-                vinject_db(int_type, true, len);
-                break;
-
-            default:
-                VDYNAMIC_ASSERT(false);
-                break;
-        }
-
-        current->visr_pending.delivery.fields.db_pending = 0;
-        state = VINJECTED_EXCEPTION;
-
-    } else if (ac0_pending) {
-
-        vinject_ac(0);
-        current->visr_pending.delivery.fields.ac0_pending = 0;
         state = VINJECTED_EXCEPTION;
     } 
-    
+
     if (nmi_pending) {
 
         if (vis_nmis_blocked() || state == VINJECTED_EXCEPTION) {

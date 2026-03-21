@@ -149,15 +149,11 @@ typedef union
     {
         u32 in_intl : 16;
         u32 nmi_pending : 1;
-        u32 gp0_pending : 1;
-        u32 ud_pending : 1;
-        u32 db_pending : 1;
-        u32 ac0_pending : 1;
         u32 intl : 4;
         u32 int_window_exit : 1;
         u32 nmi_window_exit : 1;
         u32 int_type : 3;
-        u32 reserved0 : 2;
+        u32 reserved0 : 6;
     } fields;
 } vinterrupt_delivery_data_t;
 
@@ -167,8 +163,11 @@ typedef union
     struct 
     {
         u8 vmwrite_cr4 : 1;
+        u8 vmwrite_cr0 : 1;
         u8 should_advance : 1;
-        u8 reserved0 : 6;
+        u8 idt_vectoring : 1;
+        u8 use_synth_errcode : 1;
+        u8 reserved0 : 3;
     } fields;
 } voperations_pending_t;
 
@@ -243,7 +242,10 @@ struct vcpu
     struct 
     {
         voperations_pending_t pending;
+        cr0_t cr0;
         cr4_t cr4;
+        vectored_events_info_t idt_vectoring_info;
+        u64 synth_errcode;
     } voperation_queue;
 
     struct vlaunch_regs vlaunch;

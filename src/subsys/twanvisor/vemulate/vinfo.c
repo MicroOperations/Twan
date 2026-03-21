@@ -152,7 +152,9 @@ void vinfo_emulation_features(struct vregs *vregs)
                     .wbinvd_nop = support.fields.wbinvd_exiting,
                     .invd_nop = 1,
                     
-                    .cache_topology_valid = current->root
+                    .cache_topology_valid = current->root,
+                    .cd_gp = 1,
+                    .nw_gp = 1
                 }
             };
 
