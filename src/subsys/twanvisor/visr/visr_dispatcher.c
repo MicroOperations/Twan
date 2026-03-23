@@ -66,6 +66,7 @@ void vpanic_exception(struct interrupt_info *stack_trace)
     vdbgf("[CR4]: 0x%lx\n", __read_cr4().val);
 
     vdead_global();
+    UNREACHABLE();
 }
 
 void vdispatch_interrupt(u8 vector)
@@ -124,8 +125,10 @@ void __visr_dispatcher(struct interrupt_info *stack_trace)
         
         case VIPI_VECTOR:
 
-            if (vthis_cpu->vipi_data.dead)
+            if (vthis_cpu->vipi_data.dead) {
                 vdead_local();
+                UNREACHABLE();
+            }
 
             if (vthis_cpu->vipi_data.is_self_ipi) {
 
@@ -219,8 +222,10 @@ void vexit_ext_dispatcher(u8 vector)
 
         case VIPI_VECTOR:
 
-            if (vthis_cpu->vipi_data.dead)
+            if (vthis_cpu->vipi_data.dead) {
                 vdead_local();
+                UNREACHABLE();
+            }
 
             break;
 

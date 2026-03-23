@@ -8,12 +8,14 @@
 #define vpanicf_local(fmt, ...) do {                                        \
     vdbgf("[VPANIC ON CPU %u] " fmt, vthis_vprocessor_id(), ##__VA_ARGS__); \
     vdead_local();                                                          \
+    UNREACHABLE();                                                          \
 } while (0)
 
 #define vpanicf_global(fmt, ...) do {                                       \
     vdbgf("[GLOBAL VPANIC, LOGGED BY CPU %u] " fmt, vthis_vprocessor_id(),  \
           ##__VA_ARGS__);                                                   \
     vdead_global();                                                         \
+    UNREACHABLE();                                                          \
 } while (0)
 
 #if CONFIG_VDBG_PANIC_ON_BUG

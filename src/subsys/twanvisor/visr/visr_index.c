@@ -183,8 +183,10 @@ void vhandle_buggy_lapic_isr(void)
 
                 case VIPI_VECTOR:
 
-                    if (vthis_cpu->vipi_data.dead)
+                    if (vthis_cpu->vipi_data.dead) {
                         vdead_local();
+                        UNREACHABLE();
+                    }
 
                     break;
 
@@ -233,6 +235,7 @@ void vdead_local(void)
 {
     disable_interrupts();
     halt_loop();
+    UNREACHABLE();
 }
 
 void vdead_global(void)
@@ -251,6 +254,7 @@ void vdead_global(void)
     }
 
     vdead_local();
+    UNREACHABLE();
 }
 
 #endif

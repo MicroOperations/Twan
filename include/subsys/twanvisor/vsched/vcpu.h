@@ -278,4 +278,12 @@ struct vcpu
 #define delta_node_to_vtimer(ptr) \
     container_of((ptr), struct vtimer, node)
 
+bool vcurrent_vcpu_is_preemption_enabled(void);
+
+void vcurrent_vcpu_disable_preemption(void);
+void vcurrent_vcpu_enable_preemption_no_yield(void);
+
+bool vtry_answer_yield_request(void);
+void vcurrent_vcpu_enable_preemption(void);
+
 #endif

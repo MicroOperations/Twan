@@ -161,6 +161,7 @@ static void vexit_failure_recover(__unused struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
     vfailure_recover();
+    UNREACHABLE();
 }
 
 static void vexit_gp0(__unused struct vregs *vregs)
@@ -763,15 +764,18 @@ void vexit_dispatcher(struct vregs *vregs)
     vmexit_reason_t reason = {.val = vmread(VMCS_RO_EXIT_REASON)};
     u32 basic_reason = reason.fields.basic_reason;
 
-    if (reason.fields.vmentry_failure != 0)
-        vfailure_recover();
+    if (reason.fields.vmentry_failure != 0 || 
+        VBUG_ON(basic_reason >= ARRAY_LEN(vexit_table))) {
 
-    if (VBUG_ON(basic_reason >= ARRAY_LEN(vexit_table)))
         vfailure_recover();
+        UNREACHABLE();
+    }
 
     vexit_func_t func = vexit_table[basic_reason];
-    if (VBUG_ON(!func))
+    if (VBUG_ON(!func)) {
         vfailure_recover();
+        UNREACHABLE();
+    }
 
     /* up to the vexit handler to enable preemption when possible, this should
        be done as soon as it no longer needs to touch vmcs fields */
@@ -799,6 +803,7 @@ void vexit_dispatcher(struct vregs *vregs)
     if (current->vsched_metadata.terminate) {
         vcurrent_vcpu_enable_preemption();
         vtransitioning_recover();
+        UNREACHABLE();
     }
 
     /* can safely be interrupted from here on */

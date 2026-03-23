@@ -19,8 +19,10 @@ void __venter(void)
     struct vcpu *current = vcurrent_vcpu();
     if (current->flags.fields.preempted != 0) {
 
-        if (!__vmptrld(current->arch.vmcs_phys))
+        if (!__vmptrld(current->arch.vmcs_phys)) {
             vfailure_recover();
+            UNREACHABLE();
+        }
 
         current->flags.fields.preempted = 0;
     }
@@ -36,6 +38,7 @@ void __venter(void)
     if (current->vsched_metadata.terminate) {
         vmcs_unlock_isr_restore(&vsched->lock, &vsched_node);
         vtransitioning_recover();
+        UNREACHABLE();
     }
 
     current->vsched_metadata.state = VRUNNING;

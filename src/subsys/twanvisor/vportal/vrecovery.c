@@ -175,6 +175,7 @@ void vfinalize_teardown_ipi(u64 vid)
 void vfinalize_teardown(u8 vid)
 {
     vemulate_self_ipi(vfinalize_teardown_ipi, vid);
+    UNREACHABLE();
 }
 
 void vfailure_recover(void)
@@ -185,8 +186,10 @@ void vfailure_recover(void)
     disable_interrupts();
 
     if (current->root) {
-        vpanicf_global("root failure\n");
-        vpanicf_global("root processor id: %u\n", current->processor_id);
+        vpanicf_global("root failure - processor id: %u\n", 
+                        current->processor_id);
+
+        UNREACHABLE();
     }
 
     /* ensure stale timer interrupts dont corrupt the next vcpus timeslice,
@@ -278,6 +281,8 @@ void vfailure_recover(void)
         vfinalize_teardown(vid);
     else
         vsched_recover();
+
+    UNREACHABLE();
 }
 
 void vfailure_recover_running(void)
@@ -302,6 +307,7 @@ void vfailure_recover_running(void)
 #endif
 
     vfailure_recover();
+    UNREACHABLE();
 }
 
 int vteardown(u8 vid)
@@ -413,6 +419,7 @@ void vtransitioning_recover_ipi(__unused u64 arg)
 void vtransitioning_recover(void)
 {
     vemulate_self_ipi(vtransitioning_recover_ipi, 0);
+    UNREACHABLE();
 }
 
 #endif

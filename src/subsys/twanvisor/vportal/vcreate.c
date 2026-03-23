@@ -349,8 +349,10 @@ void vcpu_entry(void)
         }
     };
 
-    if (!__vmclear(vmcs_phys) || !__vmptrld(vmcs_phys))
+    if (!__vmclear(vmcs_phys) || !__vmptrld(vmcs_phys)) {
         vfailure_recover();
+        UNREACHABLE();
+    }
 
     __vmwrite(VMCS_CTRL_EXCEPTION_BITMAP, exception_bmp.val);
 

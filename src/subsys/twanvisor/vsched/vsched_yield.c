@@ -60,6 +60,7 @@ void vsched_recover_ipi(__unused u64 unused1)
 void vsched_recover(void)
 {
     vemulate_self_ipi(vsched_recover_ipi, 0);
+    UNREACHABLE();
 }
 
 void vsched_idle_yield_ipi(__unused u64 unused0)
